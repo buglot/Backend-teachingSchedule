@@ -128,7 +128,6 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `teachingSchedule`.`SubjectsRegister` (
   `id` INT NOT NULL,
-  `SubjectsRegistercol` VARCHAR(45) NULL,
   `SubjectsOpen_id` INT NOT NULL,
   `SubjectsOpen_Subjects_id` VARCHAR(10) NOT NULL,
   `User_id` INT NOT NULL,
@@ -203,9 +202,9 @@ CREATE TABLE IF NOT EXISTS `teachingSchedule`.`File` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `date` DATETIME NOT NULL,
   `filename` VARCHAR(100) NOT NULL,
-  `link` VARCHAR(1024) NULL,
-  `type` VARCHAR(45) NULL,
-  `years` INT NULL,
+  `link` VARCHAR(1024) NOT NULL,
+  `type` VARCHAR(45) NOT NULL,
+  `years` INT NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
