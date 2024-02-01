@@ -34,3 +34,6 @@ docker run -d --name mysqltestcase -p 6000:3306 ptii2x/teachingschedule-mysql-ta
 - 2.`basetableandsomedata.sql` some data
 - 3.`basetableandTestcase.sql` testcase 
 เลือกอันใดอันหนึ่ง
+
+## only table on mysql workbench
+`basetable.mwb` 
