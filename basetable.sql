@@ -56,8 +56,9 @@ ENGINE = InnoDB;
 -- Table `teachingSchedule`.`Subjects`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `teachingSchedule`.`Subjects` (
-  `id` VARCHAR(10) NOT NULL,
-  `name` VARCHAR(45) NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `idsubject` VARCHAR(10) NULL,
+  `name` VARCHAR(255) NOT NULL,
   `credit` INT NOT NULL,
   `practice_t` INT NULL,
   `lecture_t` INT NULL,

@@ -199,6 +199,7 @@ DROP TABLE IF EXISTS `subjects`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `subjects` (
   `id` varchar(10) NOT NULL,
+  `idsubject` VARCHAR(10) NULL,
   `name` varchar(45) NOT NULL,
   `credit` int NOT NULL,
   `practice_t` int DEFAULT NULL,

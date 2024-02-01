@@ -199,6 +199,7 @@ DROP TABLE IF EXISTS `subjects`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `subjects` (
   `id` varchar(10) NOT NULL,
+  `idsubject` VARCHAR(10) NULL,
   `name` varchar(45) NOT NULL,
   `credit` int NOT NULL,
   `practice_t` int DEFAULT NULL,
@@ -218,7 +219,7 @@ CREATE TABLE `subjects` (
 
 LOCK TABLES `subjects` WRITE;
 /*!40000 ALTER TABLE `subjects` DISABLE KEYS */;
-INSERT INTO `subjects` VALUES ('1','test',3,NULL,3,'66',1,NULL),('2','testsubject',1,1,3,'65',3,NULL);
+INSERT INTO `subjects` VALUES (1,'01101101','test',3,NULL,3,'66',1,NULL),(2,'03456764','testsubject',1,1,3,'65',3,NULL);
 /*!40000 ALTER TABLE `subjects` ENABLE KEYS */;
 UNLOCK TABLES;
 
