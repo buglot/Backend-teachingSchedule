@@ -8,17 +8,17 @@
 
  > testcase มีข้อมูลหมดพอ testcase มั้ง วิชา วิชาลงทะเบียน มี email สถานะ มีการลงทะเบียนวิชา
  
-- 1. database mysql `docker in commend line` testcase 
+- 1.database mysql `docker in commend line` testcase 
 ```cmd
     docker pull ptii2x/teachingschedule-mysql-tastcase
 ```
 
-- 2. database mysql `docker in commend line` some data
+- 2.database mysql `docker in commend line` some data
 ```cmd
     docker pull ptii2x/teachingschedule-mysql-tastcase
 ```
 
-- 3. database mysql `docker in commend line` only table
+- 3.database mysql `docker in commend line` only table
 ```cmd
     docker pull ptii2x/teachingschedule-mysql-tastcase
 ```
@@ -30,7 +30,7 @@ docker run -d --name mysqltestcase -p 6000:3306 ptii2x/teachingschedule-mysql-ta
 
 ## หรือ เอาไฟล์ import เองไม่ใช้ docker
 มีสามไฟล์
-- 1. `basetable.sql` only table
-- 2. `basetableandsomedata.sql` some data
-- 3. `basetableandTestcase.sql` testcase 
+- 1.`basetable.sql` only table
+- 2.`basetableandsomedata.sql` some data
+- 3.`basetableandTestcase.sql` testcase 
 เลือกอันใดอันหนึ่ง
