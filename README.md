@@ -1,6 +1,11 @@
 ## backend web with epress + mysql
 #### mysql แบบง่ายเข้า docker
-##### เลือก1อัน
+##### เลือก1อัน 
+โดยต่างที่ว่า
+ > only table มีแต่ table ไม่มีข้อมูล
+ > somedata มีแค่ ประเภท (บรรยาย ปฏิบัติ) สถานะ(ผ่าน ไม่ผ่าน รอ) role(อจ ฝ่ายการศึกษา แอดมิน) เป็นต้น
+ > testcase มีข้อมูลหมดพอ testcase มั้ง วิชา วิชาลงทะเบียน มี email สถานะ มีการลงทะเบียนวิชา
+ 
 - 1. database mysql `docker` testcase 
 ```cmd
     docker pull ptii2x/teachingschedule-mysql-tastcase
