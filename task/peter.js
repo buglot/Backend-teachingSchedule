@@ -21,7 +21,7 @@ router.get('/login', (req, res) => {
 
 //เขียนเลย
 
-
+router.get('')
 
 
 
