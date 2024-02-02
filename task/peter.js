@@ -21,7 +21,33 @@ router.get('/login', (req, res) => {
 
 //เขียนเลย
 
-router.get('')
+router.post('/admin/System' ,(req,res) =>{
+    const {systemstatus,S_date,E_date,S_time,E_time} =  req.body;
+    if(systemstatus){
+      if(S_date && E_date && S_time && E_time){
+        db.query("inset into timesystem (status,S_date,E_date,S_time,E_time) values(?,?,?,?,?)",[systemstatus,S_date,E_date,S_time,E_time],(err,results)=>{
+          if(err){
+            res.status(404).json({msgerror:"Database Error :"+err})
+            return;
+          }else{
+            res.status(200).json({msg:"System is "+systemstatus+" วันเริ่ม"+S_date+" เวลา"+S_time+" วันสุดท้าย"+E_date+ " เวลา"+ E_time})
+            return;
+          }
+        })
+      }else{
+        db.query("inset into timesystem (status) values(?)",[systemstatus],(err,results)=>{
+          if(err){
+            res.status(404).json({msgerror:"Database Error :"+err})
+            return;
+          }else{
+            res.status(200).json({msg:"System is "+systemstatus})
+            return;
+          }
+        })
+      }
+    }
+    res.status(404).json({msgerror:"you not set system status"})
+})
 
 
 
