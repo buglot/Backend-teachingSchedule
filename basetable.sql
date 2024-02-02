@@ -178,11 +178,13 @@ ENGINE = InnoDB;
 -- Table `teachingSchedule`.`TimeSystem`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `teachingSchedule`.`TimeSystem` (
-  `statue` VARCHAR(4) NOT NULL,
-  `S_date` VARCHAR(45) NULL,
-  `E_date` VARCHAR(45) NULL,
-  `S_time` VARCHAR(45) NULL,
-  `E_time` VARCHAR(45) NULL)
+  `status` INT NOT NULL,
+  `S_date` DATE NULL,
+  `E_date` DATE NULL,
+  `S_time` TIME NULL,
+  `E_time` TIME NULL,
+  `id` INT NOT NULL,
+  PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
 

@@ -298,11 +298,13 @@ DROP TABLE IF EXISTS `timesystem`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `timesystem` (
-  `statue` varchar(4) NOT NULL,
-  `S_date` varchar(45) DEFAULT NULL,
-  `E_date` varchar(45) DEFAULT NULL,
-  `S_time` varchar(45) DEFAULT NULL,
-  `E_time` varchar(45) DEFAULT NULL
+  `status` INT NOT NULL,
+  `S_date` DATE DEFAULT NULL,
+  `E_date` DATE DEFAULT NULL,
+  `S_time` TIME DEFAULT NULL,
+  `E_time` TIME DEFAULT NULL,
+  `id` INT NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -312,6 +314,7 @@ CREATE TABLE `timesystem` (
 
 LOCK TABLES `timesystem` WRITE;
 /*!40000 ALTER TABLE `timesystem` DISABLE KEYS */;
+INSERT INTO `timesystem` (`id`,`status`) VALUES (1,0);
 /*!40000 ALTER TABLE `timesystem` ENABLE KEYS */;
 UNLOCK TABLES;
 
