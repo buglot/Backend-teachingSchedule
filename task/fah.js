@@ -158,7 +158,7 @@ JOIN DAY ON subjectsregister.day_id = day.id
 JOIN STATUS ON subjectsregister.status_id = status.id
 JOIN category ON subjectsregister.category_id = category.id
 WHERE
-  STATUS.id = ? `;
+  user.id = ? `;
 
   db.query(sql, [parseInt(idUser)], (err, results) => {
     if (err) {
