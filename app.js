@@ -22,6 +22,6 @@ app.listen(port, () => {
   console.log()
   console.log(chalk.bgRed(` Server is running on` + chalk.bgGreen(` port ${port} `) + "\n"));
   console.log("=======================================\n")
-  console.log('  api on web: ', chalk.bgBlue(' http://localhost:4133/ \n'))
+  console.log('  api on web: ', chalk.bgBlue(` http://localhost:${port}/ \n`))
   console.log("=======================================\n")
 });
