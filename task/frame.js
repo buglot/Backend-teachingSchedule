@@ -37,7 +37,7 @@ router.get('/user',(req,res)=>{
     }
   });
 
-  router.post('/user',(req,res)=>{
+  router.post('/user1',(req,res)=>{
     const email = req.body.email
     const name = req.body.name
     const role_id = req.body.id
@@ -52,6 +52,8 @@ router.get('/user',(req,res)=>{
     })
   })
 });
+
+//
 
 
 
