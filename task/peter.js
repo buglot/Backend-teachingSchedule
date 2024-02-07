@@ -23,7 +23,7 @@ router.get('/login', (req, res) => {
 
 router.post('/admin/System' ,(req,res) =>{
     const {systemstatus,S_date,E_date,S_time,E_time} =  req.body;
-    if(systemstatus){
+    if(systemstatus || systemstatus===0){
       if(S_date && E_date && S_time && E_time){
         db.query("update timesystem set status=?,S_date=?,E_date=?,S_time=?,E_time=? where id=1",[systemstatus,S_date,E_date,S_time,E_time],(err,results)=>{
           if(err){
@@ -39,7 +39,7 @@ router.post('/admin/System' ,(req,res) =>{
           if (err) {
             res.status(404).json({ msgerror: "Database Error: " + err });
           } else {
-            res.status(200).json({ msg: "System is " + systemstatus });
+            res.status(200).json({ msg: "System is " + systemstatus?"เปิด":"ปิด"});
           }
         });
         return;
@@ -48,6 +48,16 @@ router.post('/admin/System' ,(req,res) =>{
     res.status(404).json({msgerror:"you not set system status"})
 })
 
-
+router.get("/admin/SystemGet",(req,res)=>{
+  db.query("select * from timesystem",(err,results)=>{
+    if(err){
+      res.status(500).json({msgerror:"Database Error:"+err})
+      console.log("Status :",500,"Error","api/admin/SystemGet")
+      return;
+    }else{
+      res.status(200).json(results);
+    }
+  })
+})
 
 module.exports = router;
