@@ -72,7 +72,44 @@ router.get('/opensubject',(req,res)=>{
   })
 });
 
+//บันทึกไฟล์ลงสักที่ ทำข้อมูลลง database table ไฟล์ เก็บ id เวลา ชื่อไฟล์ ที่อยู่ไฟล์ ชนิต
 
+router.post('/savefiledate',(req,res)=>{
+  const date = res.body
+  const filename = res.body
+  const link = res.body
+  const type = res.body
+  const years = res.body
+  const sql ='INSERT INTO user (date,filename,link,type,years) VALUES (?,?,?,?,?)'
+  db.query(sql,[date,filename,link,type,years],(err,result)=>{
+    if (err) {
+      return res.status(400).send("เกิดข้อผิดพลาดในการเพิ่มข้อมูล");
+    } else {
+      return res.status(200).send("ค่าถูกเพิ่มเข้าสู่ฐานข้อมูล");
+        
+    }
+  })
+
+});
+
+//  ดึงข้อมูลจาก database table ไฟล์ แสดง เวลา  ชื่อไฟล์   ที่อยู่ไฟล์สำหรับกดดาวน์โหลด
+// ข้อมูลยังไม่ชัดเจน
+router.get('/file',(req,res)=>{
+  const sql ='select * from file'
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error executing SELECT statement:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
+
+    if (results.length > 0) {
+      res.json({ message: results });
+    } else {
+      res.status(401).json({ error: 'Invalid credentials' });
+    }
+  })
+});
 
 
 module.exports = router;
