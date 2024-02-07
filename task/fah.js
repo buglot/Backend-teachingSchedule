@@ -94,4 +94,84 @@ router.get('/edu/subjectReg', (req, res) => {
   });
 });
 
+// schedule ( ทุกรายวิชาที่ลงทะเบียนแล้ว)
+router.get('/teacher/schedule',(req, res)=>{
+  
+  const sql = `
+    SELECT 
+      subjectsregister.id AS id,
+      //รหัสวิชา 
+      user.name AS NAME, 
+      subjects.name AS SUBJECT, 
+      subjectsregister.st, 
+      subjectsregister.et,
+      day.name AS DAY , 
+      subjectsregister.sec, 
+      status.name AS status, 
+      subjectsregister.N_people, 
+      subjectsregister.branch, 
+      category.name 
+    FROM 
+      subjectsregister 
+      JOIN USER ON subjectsregister.user_id = user.id 
+      JOIN subjects ON subjectsregister.SubjectsOpen_id = subjects.id
+      JOIN day ON subjectsregister.day_id = day.id 
+      JOIN status ON subjectsregister.status_id = STATUS.id 
+      JOIN category ON subjectsregister.category_id = category.id`;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error executing SELECT statement:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
+    res.json(results);
+  })
+});
+
+// read schedule single user (อาจารย์ คนเดียว ทุกรายวิชาที่ลงทะเบียน)
+router.get('/teacher/schedule/single/:id', (req, res) => {
+  const idUser = req.params.id;
+  if (!idUser || isNaN(idUser)) {
+    return res.status(400).json({ error: 'Invalid ID parameter' });
+  }
+  const sql = `
+  SELECT
+  subjectsregister.id AS id,
+  subjects.idsubject AS idSubject,
+  subjects.name AS SUBJECT,
+  subjects.credit ,
+  category.name AS category ,
+  user.name AS NAME,
+  subjectsregister.sec,
+  status.name AS STATUS,
+  subjectsregister.N_people,
+  subjectsregister.branch,
+  day.name AS DAY,
+  subjectsregister.st,
+  subjectsregister.et
+FROM
+  subjectsregister
+JOIN USER ON subjectsregister.user_id = user.id
+JOIN subjects ON subjectsregister.SubjectsOpen_id = subjects.id
+JOIN DAY ON subjectsregister.day_id = day.id
+JOIN STATUS ON subjectsregister.status_id = status.id
+JOIN category ON subjectsregister.category_id = category.id
+WHERE
+  STATUS.id = ? `;
+
+  db.query(sql, [parseInt(idUser)], (err, results) => {
+    if (err) {
+      console.error('Error executing SELECT statement:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'schedule not found' });
+    }
+    res.json(results);
+  });
+});
+
 module.exports = router;
