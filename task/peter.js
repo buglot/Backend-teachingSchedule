@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const multer = require('multer');
+const path = require('path');
 //ตัวอย่าง
 const reportLog=({req,codestatus,descpition,url})=>{
   console.log(req,"Status :",codestatus,descpition,url)
