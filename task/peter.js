@@ -16,13 +16,14 @@ router.post('/admin/System' ,(req,res) =>{
           if(err){
             res.status(500).json({msgerror:"Database Error :"+err})
             reportLog("post",404,"Error","/api/admin/System")
-            return;
+            
           }else{
             res.status(200).json({msg:"System is "+systemstatus+" วันเริ่ม"+S_date+" เวลา"+S_time+" วันสุดท้าย"+E_date+ " เวลา"+ E_time})
             reportLog("post",200,"OK","/api/admin/System")
-            return;
+         
           }
         })
+        return;
       }else{
         db.query("update timesystem set status=? where id=1", [systemstatus], (err, results) => {
           if (err) {
