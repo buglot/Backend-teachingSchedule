@@ -39,19 +39,16 @@ router.get('/admin/user', (req, res) => {
 });
 
 // READ single user from db (database email ชื่อนามสกุล  role รายบุคคล)
-router.get('/admin/user/single/:id', (req, res) => {
-  const idUser = req.params.id;
-  if (!idUser || isNaN(idUser)) {
-    return res.status(400).json({ error: 'Invalid ID parameter' });
-  }
-  const sql = 'SELECT user.name AS name, user.email AS mail, role.name AS role FROM user JOIN role ON user.role_id = role.id WHERE user.id = ?';
-  db.query(sql, [parseInt(idUser)], (err, results) => {
+router.get('/admin/user/single/:email', (req, res) => {
+  const email = req.params.email;
+
+  const sql = 'SELECT role.id, user.name AS name, user.email AS mail, role.name AS role FROM user JOIN role ON user.role_id = role.id WHERE user.email = ?';
+  db.query(sql, [email], (err, results) => {
     if (err) {
       console.error('Error executing SELECT statement:', err);
       res.status(500).json({ error: 'Internal Server Error' });
       return;
     }
-
     if (results.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -104,7 +101,7 @@ router.get('/edu/subjectReg', (req, res) => {
 FROM
   subjectsregister
 JOIN USER ON subjectsregister.user_id = user.id
-JOIN subjects ON subjectsregister.SubjectsOpen_id = subjects.id
+JOIN subjects ON subjectsregister.Subjects_id = subjects.id
 JOIN DAY ON subjectsregister.day_id = day.id
 JOIN STATUS ON subjectsregister.status_id = status.id
 JOIN category ON subjectsregister.category_id = category.id
@@ -143,7 +140,7 @@ router.get('/teacher/schedule',(req, res)=>{
 FROM 
   subjectsregister 
   JOIN USER ON subjectsregister.user_id = user.id 
-  JOIN subjects ON subjectsregister.SubjectsOpen_id = subjects.id
+  JOIN subjects ON subjectsregister.Subjects_id = subjects.id
   JOIN day ON subjectsregister.day_id = day.id 
   JOIN category ON subjectsregister.category_id = category.id`;
 
@@ -178,7 +175,7 @@ router.get('/teacher/schedule_single/:id', (req, res) => {
 FROM 
   subjectsregister 
   JOIN USER ON subjectsregister.user_id = user.id 
-  JOIN subjects ON subjectsregister.SubjectsOpen_id = subjects.id
+  JOIN subjects ON subjectsregister.Subjects_id = subjects.id
   JOIN day ON subjectsregister.day_id = day.id 
   JOIN category ON subjectsregister.category_id = category.id
 WHERE
@@ -222,13 +219,13 @@ router.get('/teacher/schedule_single/:condition', (req, res) => {
 FROM 
   subjectsregister 
   JOIN USER ON subjectsregister.user_id = user.id 
-  JOIN subjects ON subjectsregister.SubjectsOpen_id = subjects.id
+  JOIN subjects ON subjectsregister.Subjects_id = subjects.id
   JOIN day ON subjectsregister.day_id = day.id 
   JOIN category ON subjectsregister.category_id = category.id
 WHERE
-    user.id = ? || `;
+    user.id = ? || subject.name = ? || user.name = ? || category.name = ? || branch = ?`;
 
-  db.query(sql, [parseInt(condition)], (err, results) => {
+  db.query(sql, [condition], (err, results) => {
     if (err) {
       console.error('Error executing SELECT statement:', err);
       res.status(500).json({ error: 'Internal Server Error' });
@@ -260,8 +257,8 @@ router.get('/teacher/subjectsregister/:id', (req, res) => {
     status.name AS status
 FROM
     subjectsregister
-JOIN USER ON subjectsregister.user_id = user.id
-JOIN subjects ON subjectsregister.SubjectsOpen_id = subjects.id
+JOIN USER ON subjectsregister.User_id = user.id
+JOIN subjects ON subjectsregister.Subjects_id = subjects.id
 JOIN DAY ON subjectsregister.day_id = day.id
 JOIN STATUS ON subjectsregister.status_id =STATUS.id
 JOIN category ON subjectsregister.category_id = category.id
