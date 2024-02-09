@@ -3,6 +3,8 @@ const router = express.Router();
 const db = require('../db');
 const multer = require('multer');
 const path = require('path');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 //ตัวอย่าง
 const reportLog=({req,codestatus,descpition,url})=>{
   console.log(req,"Status :",codestatus,descpition,url)
@@ -16,6 +18,25 @@ const storage = multer.diskStorage({
     cb(null, fileName); // Concatenate name, year, and original filename
   }
 });
+
+
+passport.use(new GoogleStrategy({
+  clientID: "203314193027-hlk7l9b9oq486spq5uhcbcjm4ddchkff.apps.googleusercontent.com",
+  clientSecret: "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",
+  callbackURL: "/api/auth/google/callback"
+},
+function(accessToken, refreshToken, profile, done) {
+  done(null, profile);
+}));
+
+router.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+router.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  function(req, res) {
+    res.json(req.user);
+  });
 
 const upload = multer({ storage: storage });
 router.post("/uploadfile",upload.single('file'),(req,res)=>{
