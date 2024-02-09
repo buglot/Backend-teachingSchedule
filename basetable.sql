@@ -65,27 +65,12 @@ CREATE TABLE IF NOT EXISTS `teachingSchedule`.`Subjects` (
   `years` VARCHAR(45) NULL,
   `subject_category_id` INT NOT NULL,
   `term` INT NULL,
+  `IsOpen` TINYINT NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_Subjects_subject_category1_idx` (`subject_category_id` ASC) VISIBLE,
   CONSTRAINT `fk_Subjects_subject_category1`
     FOREIGN KEY (`subject_category_id`)
     REFERENCES `teachingSchedule`.`subject_category` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `teachingSchedule`.`SubjectsOpen`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `teachingSchedule`.`SubjectsOpen` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `Subjects_id` VARCHAR(10) NOT NULL,
-  PRIMARY KEY (`id`, `Subjects_id`),
-  INDEX `fk_SubjectsOpen_Subjects1_idx` (`Subjects_id` ASC) VISIBLE,
-  CONSTRAINT `fk_SubjectsOpen_Subjects1`
-    FOREIGN KEY (`Subjects_id`)
-    REFERENCES `teachingSchedule`.`Subjects` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -129,8 +114,6 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `teachingSchedule`.`SubjectsRegister` (
   `id` INT NOT NULL,
-  `SubjectsOpen_id` INT NOT NULL,
-  `SubjectsOpen_Subjects_id` VARCHAR(10) NOT NULL,
   `User_id` INT NOT NULL,
   `st` TIME NULL,
   `et` TIME NULL,
@@ -140,17 +123,13 @@ CREATE TABLE IF NOT EXISTS `teachingSchedule`.`SubjectsRegister` (
   `N_people` INT NOT NULL,
   `branch` JSON NOT NULL,
   `category_id` INT NOT NULL,
-  PRIMARY KEY (`id`, `SubjectsOpen_id`, `SubjectsOpen_Subjects_id`),
-  INDEX `fk_SubjectsRegister_SubjectsOpen1_idx` (`SubjectsOpen_id` ASC, `SubjectsOpen_Subjects_id` ASC) VISIBLE,
+  `Subjects_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
   INDEX `fk_SubjectsRegister_User1_idx` (`User_id` ASC) VISIBLE,
   INDEX `fk_SubjectsRegister_day1_idx` (`day_id` ASC) VISIBLE,
   INDEX `fk_SubjectsRegister_status1_idx` (`status_id` ASC) VISIBLE,
   INDEX `fk_SubjectsRegister_category1_idx` (`category_id` ASC) VISIBLE,
-  CONSTRAINT `fk_SubjectsRegister_SubjectsOpen1`
-    FOREIGN KEY (`SubjectsOpen_id` , `SubjectsOpen_Subjects_id`)
-    REFERENCES `teachingSchedule`.`SubjectsOpen` (`id` , `Subjects_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+  INDEX `fk_SubjectsRegister_Subjects1_idx` (`Subjects_id` ASC) VISIBLE,
   CONSTRAINT `fk_SubjectsRegister_User1`
     FOREIGN KEY (`User_id`)
     REFERENCES `teachingSchedule`.`User` (`id`)
@@ -169,6 +148,11 @@ CREATE TABLE IF NOT EXISTS `teachingSchedule`.`SubjectsRegister` (
   CONSTRAINT `fk_SubjectsRegister_category1`
     FOREIGN KEY (`category_id`)
     REFERENCES `teachingSchedule`.`category` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_SubjectsRegister_Subjects1`
+    FOREIGN KEY (`Subjects_id`)
+    REFERENCES `teachingSchedule`.`Subjects` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
