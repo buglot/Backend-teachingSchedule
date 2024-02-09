@@ -8,7 +8,12 @@ const session = require('express-session');
 const passport = require('passport');
 const app = express();
 const port = 4133;
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000", // ระบุโดเมนของ React application
+    credentials: true, // อนุญาตให้ส่งคุกกี้ร่วมกับ request
+  })
+);
 app.use(session({ secret: 'secret', resave: false, saveUninitialized: true }));
 passport.serializeUser(function(user, done) {
   done(null, user);
