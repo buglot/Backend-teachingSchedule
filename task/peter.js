@@ -7,6 +7,20 @@ const path = require('path');
 const reportLog=({req,codestatus,descpition,url})=>{
   console.log(req,"Status :",codestatus,descpition,url)
 }
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'files'); // Save files to the 'files' directory
+  },
+  filename: function (req, file, cb) {
+    const fileName = `${req.body.name}_${req.body.year}_${Date.now()}_${file.originalname}`;
+    cb(null, fileName); // Concatenate name, year, and original filename
+  }
+});
+
+const upload = multer({ storage: storage });
+router.post("/uploadfile",upload.single('file'),(req,res)=>{
+  res.status(200).json({msg:"บันทึกไฟล์ สำเร็จ"})
+});
 
 router.post('/admin/System' ,(req,res) =>{
     const {systemstatus,S_date,E_date,S_time,E_time} =  req.body;
