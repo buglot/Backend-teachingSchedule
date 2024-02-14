@@ -18,6 +18,9 @@ app.use((req, res, next) => {
 app.use('/api', peterRoutes);
 app.use('/api', frameRoutes);
 app.use('/api', fahRoutes);
+app.get("/",(req,res)=>{
+  res.send("what?")
+})
 app.listen(port, () => {
   console.log()
   console.log(chalk.bgRed(` Server is running on` + chalk.bgGreen(` port ${port} `) + "\n"));
