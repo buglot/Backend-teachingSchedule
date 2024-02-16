@@ -5,7 +5,7 @@ FROM mysql:latest
 ENV MYSQL_ROOT_PASSWORD 123123123
 
 # Copy the SQL files into the container
-COPY ./basetable.sql /docker-entrypoint-initdb.d/
+COPY ./basetableandTestcase.sql /docker-entrypoint-initdb.d/
 
 # Expose MySQL port
 EXPOSE 3306

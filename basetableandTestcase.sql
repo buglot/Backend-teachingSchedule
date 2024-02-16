@@ -1,10 +1,10 @@
 CREATE DATABASE  IF NOT EXISTS `teachingschedule` /*!40100 DEFAULT CHARACTER SET utf8mb3 */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `teachingschedule`;
--- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.34, for Win64 (x86_64)
 --
--- Host: localhost    Database: teachingschedule
+-- Host: 127.0.0.1    Database: teachingSchedule
 -- ------------------------------------------------------
--- Server version	8.0.36
+-- Server version	8.2.0
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -101,9 +101,9 @@ CREATE TABLE `file` (
   `id` int NOT NULL AUTO_INCREMENT,
   `date` datetime NOT NULL,
   `filename` varchar(100) NOT NULL,
-  `link` varchar(1024) DEFAULT NULL,
-  `type` varchar(45) DEFAULT NULL,
-  `years` int DEFAULT NULL,
+  `link` varchar(1024) NOT NULL,
+  `type` varchar(45) NOT NULL,
+  `years` int NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -198,19 +198,20 @@ DROP TABLE IF EXISTS `subjects`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `subjects` (
-  `id` varchar(10) NOT NULL,
-  `idsubject` VARCHAR(10) NULL,
-  `name` varchar(45) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `idsubject` varchar(10) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
   `credit` int NOT NULL,
   `practice_t` int DEFAULT NULL,
   `lecture_t` int DEFAULT NULL,
   `years` varchar(45) DEFAULT NULL,
   `subject_category_id` int NOT NULL,
   `term` int DEFAULT NULL,
+  `IsOpen` tinyint NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_Subjects_subject_category1_idx` (`subject_category_id`),
   CONSTRAINT `fk_Subjects_subject_category1` FOREIGN KEY (`subject_category_id`) REFERENCES `subject_category` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -219,47 +220,19 @@ CREATE TABLE `subjects` (
 
 LOCK TABLES `subjects` WRITE;
 /*!40000 ALTER TABLE `subjects` DISABLE KEYS */;
-INSERT INTO `subjects` VALUES (1,'01101101','test',3,NULL,3,'66',1,NULL),(2,'03456764','testsubject',1,1,3,'65',3,NULL);
+INSERT INTO `subjects` VALUES (1,'01101101','test',3,NULL,3,'66',1,NULL,1),(2,'03456764','testsubject',1,1,3,'65',3,NULL,1);
 /*!40000 ALTER TABLE `subjects` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `subjectsopen`
+-- Table structure for table `subjectsRegister`
 --
 
-DROP TABLE IF EXISTS `subjectsopen`;
+DROP TABLE IF EXISTS `subjectsRegister`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `subjectsopen` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `Subjects_id` varchar(10) NOT NULL,
-  PRIMARY KEY (`id`,`Subjects_id`),
-  KEY `fk_SubjectsOpen_Subjects1_idx` (`Subjects_id`),
-  CONSTRAINT `fk_SubjectsOpen_Subjects1` FOREIGN KEY (`Subjects_id`) REFERENCES `subjects` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `subjectsopen`
---
-
-LOCK TABLES `subjectsopen` WRITE;
-/*!40000 ALTER TABLE `subjectsopen` DISABLE KEYS */;
-INSERT INTO `subjectsopen` VALUES (1,'1'),(2,'2');
-/*!40000 ALTER TABLE `subjectsopen` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `subjectsregister`
---
-
-DROP TABLE IF EXISTS `subjectsregister`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `subjectsregister` (
+CREATE TABLE `subjectsRegister` (
   `id` int NOT NULL,
-  `SubjectsOpen_id` int NOT NULL,
-  `SubjectsOpen_Subjects_id` varchar(10) NOT NULL,
   `User_id` int NOT NULL,
   `st` time DEFAULT NULL,
   `et` time DEFAULT NULL,
@@ -269,56 +242,57 @@ CREATE TABLE `subjectsregister` (
   `N_people` int NOT NULL,
   `branch` json NOT NULL,
   `category_id` int NOT NULL,
-  PRIMARY KEY (`id`,`SubjectsOpen_id`,`SubjectsOpen_Subjects_id`),
-  KEY `fk_SubjectsRegister_SubjectsOpen1_idx` (`SubjectsOpen_id`,`SubjectsOpen_Subjects_id`),
+  `Subjects_id` int NOT NULL,
+  PRIMARY KEY (`id`),
   KEY `fk_SubjectsRegister_User1_idx` (`User_id`),
   KEY `fk_SubjectsRegister_day1_idx` (`day_id`),
   KEY `fk_SubjectsRegister_status1_idx` (`status_id`),
   KEY `fk_SubjectsRegister_category1_idx` (`category_id`),
+  KEY `fk_SubjectsRegister_Subjects1_idx` (`Subjects_id`),
   CONSTRAINT `fk_SubjectsRegister_category1` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`),
   CONSTRAINT `fk_SubjectsRegister_day1` FOREIGN KEY (`day_id`) REFERENCES `day` (`id`),
   CONSTRAINT `fk_SubjectsRegister_status1` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`),
-  CONSTRAINT `fk_SubjectsRegister_SubjectsOpen1` FOREIGN KEY (`SubjectsOpen_id`, `SubjectsOpen_Subjects_id`) REFERENCES `subjectsopen` (`id`, `Subjects_id`),
+  CONSTRAINT `fk_SubjectsRegister_Subjects1` FOREIGN KEY (`Subjects_id`) REFERENCES `subjects` (`id`),
   CONSTRAINT `fk_SubjectsRegister_User1` FOREIGN KEY (`User_id`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `subjectsregister`
+-- Dumping data for table `subjectsRegister`
 --
 
-LOCK TABLES `subjectsregister` WRITE;
-/*!40000 ALTER TABLE `subjectsregister` DISABLE KEYS */;
-INSERT INTO `subjectsregister` VALUES (1,1,'1',1,'08:00:00','11:00:00',1,NULL,2,40,'{\"t12\": [1, 2, 3]}',1),(2,1,'1',1,'13:00:00','16:00:00',1,NULL,2,50,'{\"t12\": [3, 4, 5, 6]}',1),(3,2,'2',1,'16:30:00','19:30:00',3,NULL,2,190,'{\"t12\": [1, 2]}',2);
-/*!40000 ALTER TABLE `subjectsregister` ENABLE KEYS */;
+LOCK TABLES `subjectsRegister` WRITE;
+/*!40000 ALTER TABLE `subjectsRegister` DISABLE KEYS */;
+INSERT INTO `subjectsRegister` VALUES (1,1,'10:00:00','12:00:00',2,NULL,2,130,'{\"t12\": [1, 2, 3]}',3,2),(2,3,'10:00:00','12:00:00',1,NULL,2,13,'{\"t12\": [1, 2, 3]}',3,1);
+/*!40000 ALTER TABLE `subjectsRegister` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `timesystem`
+-- Table structure for table `timeSystem`
 --
 
-DROP TABLE IF EXISTS `timesystem`;
+DROP TABLE IF EXISTS `timeSystem`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `timesystem` (
-  `status` INT NOT NULL,
-  `S_date` DATE DEFAULT NULL,
-  `E_date` DATE DEFAULT NULL,
-  `S_time` TIME DEFAULT NULL,
-  `E_time` TIME DEFAULT NULL,
-   `id` INT NOT NULL,
+CREATE TABLE `timeSystem` (
+  `status` int NOT NULL,
+  `S_date` date DEFAULT NULL,
+  `E_date` date DEFAULT NULL,
+  `S_time` time DEFAULT NULL,
+  `E_time` time DEFAULT NULL,
+  `id` int NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `timesystem`
+-- Dumping data for table `timeSystem`
 --
 
-LOCK TABLES `timesystem` WRITE;
-/*!40000 ALTER TABLE `timesystem` DISABLE KEYS */;
-INSERT INTO `timesystem` (`id`,`status`) VALUES (1,0);
-/*!40000 ALTER TABLE `timesystem` ENABLE KEYS */;
+LOCK TABLES `timeSystem` WRITE;
+/*!40000 ALTER TABLE `timeSystem` DISABLE KEYS */;
+INSERT INTO `timeSystem` VALUES (0,NULL,NULL,NULL,NULL,1);
+/*!40000 ALTER TABLE `timeSystem` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -334,6 +308,7 @@ CREATE TABLE `user` (
   `name` varchar(45) DEFAULT NULL,
   `role_id` int NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `email_UNIQUE` (`email`),
   KEY `fk_User_role_idx` (`role_id`),
   CONSTRAINT `fk_User_role` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3;
@@ -358,4 +333,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-02-01 20:12:13
+-- Dump completed on 2024-02-09 15:10:15
