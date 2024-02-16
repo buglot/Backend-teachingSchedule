@@ -63,11 +63,11 @@ router.get("/education/noneRegisterSubject", (req, res) => {
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-   
+
     cb(null, 'files'); // Save files to the 'files' directory
   },
   filename: function (req, file, cb) {
-    
+
     const fileName = `${Date.now()}_${file.originalname}`;
     cb(null, fileName); // Concatenate name, year, and original filename
   }
@@ -115,10 +115,10 @@ function education_import(data) {
 }
 
 router.post("/uploadfile", upload.single('file'), (req, res) => {
-  const y=req.body.year;
+  const y = req.body.year;
   const uploadedFile = req.file;
   const filePath = uploadedFile.path;
-  
+
   readfiles(path.join(filePath)).then((rows) => {
     const list = []; // Create an empty array to store the dictionaries
 
@@ -126,10 +126,10 @@ router.post("/uploadfile", upload.single('file'), (req, res) => {
     const nameColumnIndex = rows[0].indexOf("ชื่อวิชา");
     const creditColumnIndex = rows[0].indexOf("หน่วยกิต");
     const subject_categoryColumnIndex = rows[0].indexOf("หมวด");
-    
+
     for (let i = 1; i < rows.length; i++) {
       const data = { // Create a dictionary for each row
-        idsubject: rows[i][idsubjectColumnIndex].length === 8?rows[i][idsubjectColumnIndex]:"0"+rows[i][idsubjectColumnIndex],
+        idsubject: rows[i][idsubjectColumnIndex].length === 8 ? rows[i][idsubjectColumnIndex] : "0" + rows[i][idsubjectColumnIndex],
         name: rows[i][nameColumnIndex],
         credit: rows[i][creditColumnIndex].split("(")[0],
         practice_t: rows[i][creditColumnIndex].split("(")[1].split("-")[1],
@@ -147,21 +147,39 @@ router.post("/uploadfile", upload.single('file'), (req, res) => {
           console.log('File is deleted.');
         }
       });
-      db.query("select distinct years from subjects",(err,results)=>{
-        if(err){
+      db.query("select distinct years from subjects", (err, results) => {
+        if (err) {
           console.log('None file to before.');
-        }else{
+        } else {
           console.log(results)
-          results.map((v,i)=>{
-            fs.unlink("files/"+"course_"+v.years+".xlsx", (err) => {
+          results.map((v, i) => {
+            fs.unlink("files/" + "course_" + v.years + ".xlsx", (err) => {
               if (err) {
                 console.error(err);
               } else {
                 console.log('File is deleted.');
               }
             });
-            const workbook = new exceljs.Workbook();
+            db.query("select idsubject,name,credit,practice_t,lecture_t,subject_category_id from subjects where years=?", [v.years], (err, results) => {
+              if (err) {
+                console.error("Cant get database");
+              } else {
+                const workbook = new exceljs.Workbook();
+                const worksheet = workbook.addWorksheet('Sheet1');
+                fields = ["รหัสวิชา", "ชื่อวิชา", "หน่วยกิต", "หมวด"]
+                fields.forEach((field, index) => {
+                  worksheet.getCell(1, index + 1).value = field;
+                });
+                for (let i = 0; i < results.length; i++) {
 
+                  worksheet.getCell(i + 2, 1).value = results[i].idsubject;
+                  worksheet.getCell(i + 2, 2).value = results[i].name;
+                  worksheet.getCell(i + 2, 3).value = ""+results[i].credit + "(" + results[i].lecture_t + "-" + results[i].practice_t ? results[i].practice_t : 0 + "-0)";
+                  worksheet.getCell(i + 2, 4).value = results[i].subject_category_id === 1 ? "วิชาเฉพาะ" : results[i].subject_category_id === 2 ? "วิชาเฉพาะเลือก" : "วิชาเสรี";
+                }
+                workbook.xlsx.writeFile("files/" + "course_" + v.years + ".xlsx").then((data)=>console.log("save "+"files/" + "course_" + v.years + ".xlsx"));
+              }
+            })
           });
         }
       });

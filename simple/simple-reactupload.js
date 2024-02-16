@@ -11,9 +11,8 @@ function App() {
 
   const handleUpload = async () => {
     const formData = new FormData();
-    formData.append('file', file);  // ชื่อต้องตรงกับที่ระบุใน upload.single('file')
-    formData.append('name', "xxx");  // ตรงกับ req.body.name ใน Express
-    formData.append('year', "65");   // ตรงกับ req.body.year ใน Express
+    formData.append('file', file);  // ชื่อต้องตรงกับที่ระบุใน upload.single('file') // ตรงกับ req.body.name ใน Express
+    formData.append('year', 65);   // ตรงกับ req.body.year ใน Express
 
     try {
       const response = await axios.post('http://localhost:4133/api/uploadfile', formData, {
@@ -27,10 +26,10 @@ function App() {
         }
       });
       alert('Upload successful');
-      console.log(response);
+      console.log(response.data.msg);
     } catch (error) {
-      console.error('Error uploading file:', error);
-      alert('Upload failed');
+      console.error('Error uploading file:', error.response);
+      alert(" Error uploading file");
     }
   };
 
