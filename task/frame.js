@@ -114,9 +114,9 @@ router.get('/file',(req,res)=>{
 // เปลี่ยนแปลงค่า database table วิชาที่ลงทะเบียน  เปลี่ยนแปลง เวลา และ สถานนะ รอประมวลผล
 router.post('/ubdatesubjectsRegister',(req,res)=>{
   const {id} = req.body; 
-  const st = req.body;
-  const et = req.body;
-  const status_id = req.body; 
+  const {st} = req.body;
+  const {et} = req.body;
+  const {status_id} = req.body; 
   const sql = 'UPDATE subjectsRegister SET (st,et,status_id) VALUES (?,?,?) where id=?'
   db.query(sql, [st, et, status_id, id], (err, result) => { 
     if (err) {
@@ -129,8 +129,9 @@ router.post('/ubdatesubjectsRegister',(req,res)=>{
 
 //ตรวจสอบจาก database table วิชาที่ลงทะเบียน คัดกรอง สถานะผ่าน และ เวลาของคนที่แก้ไข
 
-router.get('/statusRegistered',(req,res)=>{
-  const sql = 'SELECT st,et,day_id,day.name,status_id,status.name,category_id from subjectsRegister,day,status,user where subjectsRegister.User_id = user.id and day.id = day_id and status_id = status.id'
+router.get('/statusRegisteredpro1',(req,res)=>{
+const {userid} = req.body;
+  const sql = 'SELECT st,et,day_id,day.name,status_id,status.name,category_id from subjectsRegister,day,status,user where user.id = ${userid}  and subjectsRegister.User_id = user.id and day.id = day_id and status_id = status.id'
   db.query(sql, (err, results) => {
     if (err) {
       console.error('Error executing SELECT statement:', err);
@@ -139,7 +140,7 @@ router.get('/statusRegistered',(req,res)=>{
     }
 
     if (results.length > 0) {
-      db.query('SELECT st,et,day_id,day.name,status_id,status.id,category_id from  subjectsRegister,day,status,user where status_id = 3 and category_id = 1 and subjectsRegister.User_id' ,(err,re)=>{
+      db.query('SELECT subjectsRegister.st,subjectsRegister.et,subjectsRegister.day_id,day.name AS day_name,user.name AS user_name,status.name AS status_name,subjectsRegister.category_id FROM  subjectsRegister INNER JOIN day ON subjectsRegister.day_id = day.id INNER JOIN status ON subjectsRegister.status_id = status.id INNER JOIN user ON subjectsRegister.User_id = user.id WHERE subjectsRegister.status_id = 3 AND subjectsRegister.category_id = 1 and ;' ,(err,re)=>{
         //สำหรับเช็ควิชาที่ไม่ผ่าน
         res.json({ message: results,m:re });
       })
@@ -149,6 +150,26 @@ router.get('/statusRegistered',(req,res)=>{
     }
   })
 });
+//ตรวจสอบจาก database table วิชาที่ลงทะเบียน คัดกรอง สถานะผ่าน และ เวลาของคนที่แก้ไข ฉบับรอทดสอบ
+router.get('/statusRegistered', (req, res) => {
+  const { userid } = req.body;
+  const sql = `SELECT GROUP_CONCAT(subjectsRegister.st) AS st_values,subjectsRegister.et,subjectsRegister.day_id,day.name AS day_name,user.name AS user_name,status.name AS status_name,subjectsRegister.category_id FROM subjectsRegister INNER JOIN day ON subjectsRegister.day_id = day.id INNER JOIN status ON subjectsRegister.status_id = status.id INNER JOIN user ON subjectsRegister.User_id = user.id WHERE subjectsRegister.status_id = 3 AND subjectsRegister.category_id = 1 AND (subjectsRegister.st,subjectsRegister.et,subjectsRegister.day_id) IN (SELECT st,et,day_id FROM subjectsRegister WHERE User_id = ${userid}) GROUP BY subjectsRegister.et, subjectsRegister.day_id,day.name,user.name,status.name,subjectsRegister.category_id`;
+               
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error executing SELECT statement:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
+
+    if (results.length > 0) {
+      res.json({ message: results });
+    } else {
+      res.status(401).json({ error: 'No data found for the provided user ID' });
+    }
+  });
+});
+
 
 
 
