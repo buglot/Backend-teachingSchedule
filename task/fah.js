@@ -136,13 +136,15 @@ router.get('/teacher/schedule',(req, res)=>{
   subjectsregister.branch,
   day.name AS DAY , 
   subjectsregister.st, 
-  subjectsregister.et
+  subjectsregister.et,
+  status.name AS status
 FROM 
   subjectsregister 
   JOIN USER ON subjectsregister.user_id = user.id 
   JOIN subjects ON subjectsregister.Subjects_id = subjects.id
   JOIN day ON subjectsregister.day_id = day.id 
-  JOIN category ON subjectsregister.category_id = category.id`;
+  JOIN category ON subjectsregister.category_id = category.id
+  JOIN status ON subjectsregister.status_id = status.id`;
 
   db.query(sql, (err, results) => {
     if (err) {
@@ -171,13 +173,15 @@ router.get('/teacher/schedule_single/:id', (req, res) => {
   subjectsregister.branch,
   day.name AS DAY , 
   subjectsregister.st, 
-  subjectsregister.et
+  subjectsregister.et,
+  status.name AS status
 FROM 
   subjectsregister 
   JOIN USER ON subjectsregister.user_id = user.id 
   JOIN subjects ON subjectsregister.Subjects_id = subjects.id
   JOIN day ON subjectsregister.day_id = day.id 
   JOIN category ON subjectsregister.category_id = category.id
+  JOIN status ON subjectsregister.status_id = status.id
 WHERE
     user.id = ?`;
 
