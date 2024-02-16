@@ -84,14 +84,21 @@ function education_import(data) {
     const errors = []; // Array to store encountered errors
 
     data.forEach((value, index) => {
-      const query = "INSERT INTO subjects (`idsubject`, `name`, `credit`, `practice_t`, `lecture_t`, `years`, `subject_category_id`, `term`, `IsOpen`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-      const values = [value.idsubject, value.name, value.credit, value.practice_t, value.lecture_t, value.years, value.subject_category_id, value.term ? value.term : null, 0];
+      db.query("SELECT * FROM subjects where idsubject =? and years=?", [value.idsubject, value.years], (err, results) => {
+        if (results.length === 0) {
+          const query = "INSERT INTO subjects (`idsubject`, `name`, `credit`, `practice_t`, `lecture_t`,`m_t`, `years`, `subject_category_id`, `term`, `IsOpen`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+          const values = [value.idsubject, value.name, value.credit, value.practice_t, value.lecture_t, value.mt, value.years, value.subject_category_id, value.term ? value.term : null, 0];
 
-      db.query(query, values, (err, results) => {
-        if (err) {
-          errors.push({ index, errorMessage: err.message, value });
+          db.query(query, values, (err, results) => {
+            if (err) {
+              errors.push({ index, errorMessage: err.message, value });
+            }
+          });
+        }else{
+          errors.push({ index, errorMessage: "วิชานี้ถูกลงทะเบีบนแล้ว", value });
         }
-      });
+      })
+
     });
 
     // Wait for all queries to finish and handle errors
@@ -126,7 +133,6 @@ router.post("/uploadfile", upload.single('file'), (req, res) => {
     const nameColumnIndex = rows[0].indexOf("ชื่อวิชา");
     const creditColumnIndex = rows[0].indexOf("หน่วยกิต");
     const subject_categoryColumnIndex = rows[0].indexOf("หมวด");
-
     for (let i = 1; i < rows.length; i++) {
       const data = { // Create a dictionary for each row
         idsubject: rows[i][idsubjectColumnIndex].length === 8 ? rows[i][idsubjectColumnIndex] : "0" + rows[i][idsubjectColumnIndex],
@@ -134,8 +140,9 @@ router.post("/uploadfile", upload.single('file'), (req, res) => {
         credit: rows[i][creditColumnIndex].split("(")[0],
         practice_t: rows[i][creditColumnIndex].split("(")[1].split("-")[1],
         lecture_t: rows[i][creditColumnIndex].split("(")[1].split("-")[0],
+        mt: rows[i][creditColumnIndex].split("(")[1].split("-")[2].replace(")", ""),
         years: y,
-        subject_category_id: assignSubjectCategoryId(rows[i][nameColumnIndex]) // Call a function to assign category ID
+        subject_category_id: assignSubjectCategoryId(rows[i][subject_categoryColumnIndex]) // Call a function to assign category ID
       };
       list.push(data); // Add the dictionary to the list
     }
@@ -151,7 +158,6 @@ router.post("/uploadfile", upload.single('file'), (req, res) => {
         if (err) {
           console.log('None file to before.');
         } else {
-          console.log(results)
           results.map((v, i) => {
             fs.unlink("files/" + "course_" + v.years + ".xlsx", (err) => {
               if (err) {
@@ -160,7 +166,7 @@ router.post("/uploadfile", upload.single('file'), (req, res) => {
                 console.log('File is deleted.');
               }
             });
-            db.query("select idsubject,name,credit,practice_t,lecture_t,subject_category_id from subjects where years=?", [v.years], (err, results) => {
+            db.query("select idsubject,name,credit,practice_t,lecture_t,m_t,subject_category_id from subjects where years=?", [v.years], (err, results) => {
               if (err) {
                 console.error("Cant get database");
               } else {
@@ -174,10 +180,10 @@ router.post("/uploadfile", upload.single('file'), (req, res) => {
 
                   worksheet.getCell(i + 2, 1).value = results[i].idsubject;
                   worksheet.getCell(i + 2, 2).value = results[i].name;
-                  worksheet.getCell(i + 2, 3).value = ""+results[i].credit + "(" + results[i].lecture_t + "-" + results[i].practice_t ? results[i].practice_t : 0 + "-0)";
+                  worksheet.getCell(i + 2, 3).value = `${results[i].credit}(${results[i].lecture_t}-${results[i].practice_t ? results[i].practice_t : 0}-${results[i].m_t})`;
                   worksheet.getCell(i + 2, 4).value = results[i].subject_category_id === 1 ? "วิชาเฉพาะ" : results[i].subject_category_id === 2 ? "วิชาเฉพาะเลือก" : "วิชาเสรี";
                 }
-                workbook.xlsx.writeFile("files/" + "course_" + v.years + ".xlsx").then((data)=>console.log("save "+"files/" + "course_" + v.years + ".xlsx"));
+                workbook.xlsx.writeFile("files/" + "course_" + v.years + ".xlsx").then((data) => console.log("save " + "files/" + "course_" + v.years + ".xlsx"));
               }
             })
           });

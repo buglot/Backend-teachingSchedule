@@ -1,8 +1,8 @@
 CREATE DATABASE  IF NOT EXISTS `teachingschedule` /*!40100 DEFAULT CHARACTER SET utf8mb3 */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `teachingschedule`;
--- MySQL dump 10.13  Distrib 8.0.34, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: teachingSchedule
+-- Host: 127.0.0.1    Database: teachingschedule
 -- ------------------------------------------------------
 -- Server version	8.2.0
 
@@ -203,6 +203,7 @@ CREATE TABLE `subjects` (
   `name` varchar(255) NOT NULL,
   `credit` int NOT NULL,
   `practice_t` int DEFAULT NULL,
+  `m_t` int DEFAULT NULL,
   `lecture_t` int DEFAULT NULL,
   `years` varchar(45) DEFAULT NULL,
   `subject_category_id` int NOT NULL,
@@ -211,7 +212,7 @@ CREATE TABLE `subjects` (
   PRIMARY KEY (`id`),
   KEY `fk_Subjects_subject_category1_idx` (`subject_category_id`),
   CONSTRAINT `fk_Subjects_subject_category1` FOREIGN KEY (`subject_category_id`) REFERENCES `subject_category` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -220,7 +221,7 @@ CREATE TABLE `subjects` (
 
 LOCK TABLES `subjects` WRITE;
 /*!40000 ALTER TABLE `subjects` DISABLE KEYS */;
-INSERT INTO `subjects` VALUES (1,'01101101','test',3,NULL,3,'66',1,NULL,1),(2,'03456764','testsubject',1,1,3,'65',3,NULL,1);
+INSERT INTO `subjects` VALUES (1,'01101101','test',3,NULL,NULL,3,'66',1,NULL,1),(2,'03456764','testsubject',1,1,NULL,3,'65',3,NULL,1),(3,'03603213','Algorithm Design and Analysis',3,NULL,NULL,3,'60',1,NULL,1),(4,'03603341','Software Engineering',4,1,NULL,3,'60',3,NULL,1),(5,'01387101','The Art of Living with Others',3,NULL,NULL,3,'64',1,NULL,0),(6,'03603428','Internet of Things',3,NULL,NULL,3,'60',1,NULL,0);
 /*!40000 ALTER TABLE `subjects` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -232,7 +233,7 @@ DROP TABLE IF EXISTS `subjectsRegister`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `subjectsRegister` (
-  `id` int NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
   `User_id` int NOT NULL,
   `st` time DEFAULT NULL,
   `et` time DEFAULT NULL,
@@ -254,7 +255,7 @@ CREATE TABLE `subjectsRegister` (
   CONSTRAINT `fk_SubjectsRegister_status1` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`),
   CONSTRAINT `fk_SubjectsRegister_Subjects1` FOREIGN KEY (`Subjects_id`) REFERENCES `subjects` (`id`),
   CONSTRAINT `fk_SubjectsRegister_User1` FOREIGN KEY (`User_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -333,4 +334,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-02-09 15:10:15
+-- Dump completed on 2024-02-16 19:47:13

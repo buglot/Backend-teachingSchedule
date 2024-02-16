@@ -25,9 +25,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `teachingSchedule`.`User`
+-- Table `teachingSchedule`.`user`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `teachingSchedule`.`User` (
+CREATE TABLE IF NOT EXISTS `teachingSchedule`.`user` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `email` VARCHAR(45) NULL,
   `name` VARCHAR(45) NULL,
@@ -53,14 +53,15 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `teachingSchedule`.`Subjects`
+-- Table `teachingSchedule`.`subjects`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `teachingSchedule`.`Subjects` (
+CREATE TABLE IF NOT EXISTS `teachingSchedule`.`subjects` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `idsubject` VARCHAR(10) NULL,
+  `idsubject` VARCHAR(10) NOT NULL,
   `name` VARCHAR(255) NOT NULL,
   `credit` INT NOT NULL,
   `practice_t` INT NULL,
+  `m_t` INT NULL,
   `lecture_t` INT NULL,
   `years` VARCHAR(45) NULL,
   `subject_category_id` INT NOT NULL,
@@ -110,10 +111,10 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `teachingSchedule`.`SubjectsRegister`
+-- Table `teachingSchedule`.`subjectsRegister`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `teachingSchedule`.`SubjectsRegister` (
-  `id` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `teachingSchedule`.`subjectsRegister` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `User_id` INT NOT NULL,
   `st` TIME NULL,
   `et` TIME NULL,
@@ -132,7 +133,7 @@ CREATE TABLE IF NOT EXISTS `teachingSchedule`.`SubjectsRegister` (
   INDEX `fk_SubjectsRegister_Subjects1_idx` (`Subjects_id` ASC) VISIBLE,
   CONSTRAINT `fk_SubjectsRegister_User1`
     FOREIGN KEY (`User_id`)
-    REFERENCES `teachingSchedule`.`User` (`id`)
+    REFERENCES `teachingSchedule`.`user` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_SubjectsRegister_day1`
@@ -152,16 +153,16 @@ CREATE TABLE IF NOT EXISTS `teachingSchedule`.`SubjectsRegister` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_SubjectsRegister_Subjects1`
     FOREIGN KEY (`Subjects_id`)
-    REFERENCES `teachingSchedule`.`Subjects` (`id`)
+    REFERENCES `teachingSchedule`.`subjects` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `teachingSchedule`.`TimeSystem`
+-- Table `teachingSchedule`.`timeSystem`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `teachingSchedule`.`TimeSystem` (
+CREATE TABLE IF NOT EXISTS `teachingSchedule`.`timeSystem` (
   `status` INT NOT NULL,
   `S_date` DATE NULL,
   `E_date` DATE NULL,
@@ -173,9 +174,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `teachingSchedule`.`AuToDetect`
+-- Table `teachingSchedule`.`autodetect`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `teachingSchedule`.`AuToDetect` (
+CREATE TABLE IF NOT EXISTS `teachingSchedule`.`autodetect` (
   `date` DATETIME NOT NULL,
   `latesedDate` DATETIME NULL,
   PRIMARY KEY (`date`))
@@ -183,9 +184,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `teachingSchedule`.`File`
+-- Table `teachingSchedule`.`file`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `teachingSchedule`.`File` (
+CREATE TABLE IF NOT EXISTS `teachingSchedule`.`file` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `date` DATETIME NOT NULL,
   `filename` VARCHAR(100) NOT NULL,
