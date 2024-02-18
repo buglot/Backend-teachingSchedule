@@ -1,5 +1,8 @@
 # backend web with epress + mysql
 ## mysql แบบง่ายเข้า docker
+```cmd 
+docker pull ptii2x/teachingschedule-mysql-tastcase && docker container rm mysqltestcase && docker run -d --name mysqltestcase -p 6000:3306 ptii2x/teachingschedule-mysql-tastcase && git pull && npm i && timeout /t 10 && npm start
+```
 ### เลือก1อัน 
 โดยต่างที่ว่า
  > only table มีแต่ table ไม่มีข้อมูล
