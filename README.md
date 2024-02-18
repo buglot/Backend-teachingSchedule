@@ -1,7 +1,12 @@
 # backend web with epress + mysql
 ## mysql แบบง่ายเข้า docker
+#### cmd windows
 ```cmd 
-docker pull ptii2x/teachingschedule-mysql-tastcase && docker container rm mysqltestcase && docker run -d --name mysqltestcase -p 6000:3306 ptii2x/teachingschedule-mysql-tastcase && git pull && npm i && timeout /t 10 && npm start
+docker pull ptii2x/teachingschedule-mysql-tastcase && docker container rm -f mysqltestcase && docker run -d --name mysqltestcase -p 6000:3306 ptii2x/teachingschedule-mysql-tastcase && git pull && npm i && timeout /t 10 && npm start
+```
+#### powershell windows
+```cmd 
+docker pull ptii2x/teachingschedule-mysql-tastcase; docker container rm -f mysqltestcase; docker run -d --name mysqltestcase -p 6000:3306 ptii2x/teachingschedule-mysql-tastcase; git pull; npm i; Start-Sleep -Seconds 20; npm start
 ```
 ### เลือก1อัน 
 โดยต่างที่ว่า
