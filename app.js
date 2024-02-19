@@ -19,6 +19,10 @@ app.use((req, res, next) => {
 app.use('/api', peterRoutes);
 app.use('/api', frameRoutes);
 app.use('/api', fahRoutes);
+app.get('/download/:file',(req,res)=>{
+  const {file} = req.params;
+  res.sendFile(path.join(__dirname, 'public/files/'+file));
+})
 app.get("/",(req,res)=>{
   res.sendFile(path.join(__dirname, '/index.html'));
 })

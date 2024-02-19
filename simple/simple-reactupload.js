@@ -15,7 +15,7 @@ function App() {
     formData.append('year', 65);   // ตรงกับ req.body.year ใน Express
 
     try {
-      const response = await axios.post('http://localhost:4133/api/uploadfile', formData, {
+      const response = await axios.post('http://localhost:4133/api/education/Course/uploadfile', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
@@ -25,11 +25,26 @@ function App() {
           setProgress(percent);
         }
       });
-      alert('Upload successful');
-      console.log(response.data.msg);
+      if(response.data.warning){
+        alert(response.data.warning.warnmsg)
+        response.data.warning.data.map((v,i)=>{
+          alert(`${v.Message}${v.value.name} ${v.value.years}`);
+        })
+        
+      }else{
+        alert(response.data.msg);
+      }
+      
+      
     } catch (error) {
-      console.error('Error uploading file:', error.response);
-      alert(" Error uploading file");
+      console.log(error)
+      alert(error.response.data.msgerror);
+      if(error.response.data.warning){
+        alert(error.response.data.warning.warnmsg)
+        error.response.data.warning.data.map((v,i)=>{
+          alert(`${v.Message}${v.value.name} ${v.value.years}`);
+        })
+      }
     }
   };
 
