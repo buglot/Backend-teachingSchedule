@@ -1,13 +1,14 @@
 # backend web with epress + mysql
-## mysql แบบง่ายเข้า docker
+## easy run one command
 #### cmd windows
 ```cmd 
 docker pull ptii2x/teachingschedule-mysql-tastcase && docker container rm -f mysqltestcase && docker run -d --name mysqltestcase -p 6000:3306 ptii2x/teachingschedule-mysql-tastcase && git pull && npm i && timeout /t 10 && npm start
 ```
 #### powershell windows
-```cmd 
+```powershell 
 docker pull ptii2x/teachingschedule-mysql-tastcase; docker container rm -f mysqltestcase; docker run -d --name mysqltestcase -p 6000:3306 ptii2x/teachingschedule-mysql-tastcase; git pull; npm i; Start-Sleep -Seconds 20; npm start
 ```
+## mysql แบบง่ายเข้า docker
 ### เลือก1อัน 
 โดยต่างที่ว่า
  > only table มีแต่ table ไม่มีข้อมูล
