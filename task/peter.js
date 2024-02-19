@@ -174,7 +174,7 @@ function assignSubjectCategoryId(name) {
     return null;
   }
 }
-function checkfile(){
+function checkfile() {
   db.query("select * from file f where not exists (select distinct years from subjects where f.years = years)", (err, results) => {
     console.log(results)
     if (results.length !== 0) {
@@ -189,12 +189,12 @@ function checkfile(){
             }
           })
         })
-    })
+      })
 
     }
   })
 }
-function upDatefile(){
+function upDatefile() {
   db.query("select distinct years from subjects", (err, results) => {
     if (err) {
       console.log('None file to before.');
@@ -246,21 +246,57 @@ function upDatefile(){
     }
   });
 }
-router.post("/education/Course/add",(req,res)=>{
-  const {year,name,idsubject,credit,subject_category} =req.body;
+router.post("/education/Course/add", (req, res) => {
+  const { year, name, idsubject, credit, subject_category_id } = req.body;
   const data = { // Create a dictionary for each row
     idsubject: idsubject.length === 8 ? idsubject : "0" + idsubject,
     name: name,
     credit: credit,
-    practice_t:0,
+    practice_t: 0,
     lecture_t: 0,
     mt: 0,
     years: year,
-    subject_category_id: assignSubjectCategoryId(0) // Call a function to assign category ID
+    subject_category_id: subject_category_id// Call a function to assign category ID
   };
   education_import(data).then((data) => {
     upDatefile();
     checkfile();
   })
+})
+
+router.post("/education/subjectOpen", (req, res) => {
+  const { subjects } = req.body;
+  if (!subjects) {
+    res.status(500).json({ msgerror: `Error ${subjects} json subject` });
+    return;
+  }
+
+  if (subjects.length === 0) {
+    res.status(500).json({ msgerror: "คุณไม่ได้เลือกวิชาที่จะไปเปิดสอน" });
+    return;
+  }
+  let warn = []
+  const updatePromises = subjects.map(subject => {
+    return new Promise((resolve, reject) => {
+      db.query("UPDATE subjects SET IsOpen = '1' WHERE id = ?", [subject.id], (err, results) => {
+        if (results.changedRows === 0) {
+          warn.push(subject.id)
+        }
+        
+        
+        resolve(results);
+      });
+    });
+  });
+
+  Promise.all(updatePromises)
+    .then((results) => {
+      res.status(200).json({ msg: "เปิดวิชาสำเร็จ",warning:warn});
+    })
+    .catch(err => {
+      res.status(500).json({ msgerror: "ไม่สามารถอัปเดต databases" });
+    });
+
+
 })
 module.exports = router;
