@@ -89,27 +89,27 @@ router.get('/edu/subjectReg', (req, res) => {
 
   const sql = `
 SELECT
-  subjectsregister.id AS id,
+  subjectsRegister.id AS id,
   subjects.idsubject AS idSubject,
   subjects.name AS SUBJECT,
   subjects.credit ,
   category.name AS category ,
-  subjectsregister.sec,
+  subjectsRegister.sec,
   user.name AS NAME,
-  subjectsregister.N_people,
-  subjectsregister.branch,
-  day.name AS DAY,
-  subjectsregister.st,
-  subjectsregister.et
+  subjectsRegister.N_people,
+  subjectsRegister.branch,
+  day.name AS day,
+  subjectsRegister.st,
+  subjectsRegister.et
 FROM
-  subjectsregister
-JOIN USER ON subjectsregister.user_id = user.id
-JOIN subjects ON subjectsregister.Subjects_id = subjects.id
-JOIN DAY ON subjectsregister.day_id = day.id
-JOIN STATUS ON subjectsregister.status_id = status.id
-JOIN category ON subjectsregister.category_id = category.id
+subjectsRegister
+JOIN user ON subjectsRegister.user_id = user.id
+JOIN subjects ON subjectsRegister.Subjects_id = subjects.id
+JOIN day ON subjectsRegister.day_id = day.id
+JOIN status ON subjectsRegister.status_id = status.id
+JOIN category ON subjectsRegister.category_id = category.id
 WHERE
-  STATUS.id = 1` ;
+  status.id = 1` ;
 
   db.query(sql, (err, results) => {
     if (err) {
@@ -121,35 +121,6 @@ WHERE
   });
 });
 
-// //ดึงข้อมูลจาก database table ไฟล์ แสดง เวลา ชื่อไฟล์ ที่อยู่ไฟล์สำหรับกดดาวน์โหลด
-// router.get('/api/file/:filename', (req, res) => {
-//   const fileName = req.params.filename; // รับชื่อไฟล์จากพารามิเตอร์ใน URL
-//   const filesDir = path.join(__dirname, 'files'); // เส้นทางไปยังโฟลเดอร์ที่เก็บไฟล์
-  
-//   fs.readdir(filesDir, (err, files) => { // สแกนโฟลเดอร์เพื่อหาชื่อไฟล์ทั้งหมด
-//     if (err) {
-//       console.error(err);
-//       res.status(500).send('เกิดข้อผิดพลาดในการอ่านไดเรกทอรี');
-//       return;
-//     }
-
-//     const foundFile = files.find(file => file === fileName); // ตรวจสอบว่ามีไฟล์ที่ตรงกับชื่อที่รับเข้ามาหรือไม่
-//     if (!foundFile) {
-//       res.status(404).send('ไม่พบไฟล์ที่ระบุ');
-//       return;
-//     }
-
-//     const filePath = path.join(filesDir, foundFile); // สร้างเส้นทางไฟล์ที่จะอ่าน
-//     fs.readFile(filePath, 'utf8', (err, data) => { // อ่านเนื้อหาของไฟล์
-//       if (err) {
-//         console.error(err);
-//         res.status(500).send('เกิดข้อผิดพลาดในการอ่านไฟล์');
-//         return;
-//       }
-//       res.send(data); // ส่งเนื้อหาของไฟล์กลับไปยัง client
-//     });
-//   });
-// });
 
 // teacher 
 
@@ -162,19 +133,19 @@ router.get('/teacher/schedule',(req, res)=>{
   subjects.credit ,
   category.name AS Moo,
   user.name AS NAME,
-  subjectsregister.N_people,
-  subjectsregister.branch,
-  day.name AS DAY , 
-  subjectsregister.st, 
-  subjectsregister.et,
+  subjectsRegister.N_people,
+  subjectsRegister.branch,
+  day.name AS day , 
+  subjectsRegister.st, 
+  subjectsRegister.et,
   status.name AS status
 FROM 
-  subjectsregister 
-  JOIN USER ON subjectsregister.user_id = user.id 
-  JOIN subjects ON subjectsregister.Subjects_id = subjects.id
-  JOIN day ON subjectsregister.day_id = day.id 
-  JOIN category ON subjectsregister.category_id = category.id
-  JOIN status ON subjectsregister.status_id = status.id`;
+subjectsRegister 
+  JOIN user ON subjectsRegister.user_id = user.id 
+  JOIN subjects ON subjectsRegister.Subjects_id = subjects.id
+  JOIN day ON subjectsRegister.day_id = day.id 
+  JOIN category ON subjectsRegister.category_id = category.id
+  JOIN status ON subjectsRegister.status_id = status.id`;
 
   db.query(sql, (err, results) => {
     if (err) {
@@ -200,19 +171,19 @@ router.get('/teacher/schedule_single/:id', (req, res) => {
     subjects.credit ,
     category.name AS Moo,
     user.name AS NAME,
-    subjectsregister.N_people,
-    subjectsregister.branch,
-    day.name AS DAY , 
-    subjectsregister.st, 
-    subjectsregister.et,
+    subjectsRegister.N_people,
+    subjectsRegister.branch,
+    day.name AS day , 
+    subjectsRegister.st, 
+    subjectsRegister.et,
     status.name AS status
   FROM 
-    subjectsregister 
-  JOIN USER ON subjectsregister.user_id = user.id 
-  JOIN subjects ON subjectsregister.Subjects_id = subjects.id
-  JOIN day ON subjectsregister.day_id = day.id 
-  JOIN category ON subjectsregister.category_id = category.id
-  JOIN status ON subjectsregister.status_id = status.id
+  subjectsRegister 
+  JOIN user ON subjectsRegister.user_id = user.id 
+  JOIN subjects ON subjectsRegister.Subjects_id = subjects.id
+  JOIN day ON subjectsRegister.day_id = day.id 
+  JOIN category ON subjectsRegister.category_id = category.id
+  JOIN status ON subjectsRegister.status_id = status.id
   WHERE
     user.id = ?`;
 
@@ -242,19 +213,19 @@ router.get('/teacher/subjectsregister/:id', (req, res) => {
   }
   const sql = `
   SELECT
-    subjectsregister.id AS id,
+    subjectsRegister.id AS id,
     subjects.name AS SUBJECT,
-    day.name AS DAY,
-    subjectsregister.st,
-    subjectsregister.et,
+    day.name AS day,
+    subjectsRegister.st,
+    subjectsRegister.et,
     status.name AS status
   FROM
-    subjectsregister
-  JOIN USER ON subjectsregister.User_id = user.id
-  JOIN subjects ON subjectsregister.Subjects_id = subjects.id
-  JOIN DAY ON subjectsregister.day_id = day.id
-  JOIN STATUS ON subjectsregister.status_id =STATUS.id
-  JOIN category ON subjectsregister.category_id = category.id
+  subjectsRegister
+  JOIN user ON subjectsRegister.User_id = user.id
+  JOIN subjects ON subjectsRegister.Subjects_id = subjects.id
+  JOIN day ON subjectsRegister.day_id = day.id
+  JOIN status ON subjectsRegister.status_id =status.id
+  JOIN category ON subjectsRegister.category_id = category.id
   WHERE
     user.id = ?`;
 
@@ -273,5 +244,9 @@ router.get('/teacher/subjectsregister/:id', (req, res) => {
     res.json(results);
   });
 });
+
+//ลบ วิชาที่ลงทะเบียน
+
+
 
 module.exports = router;
