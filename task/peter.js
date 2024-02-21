@@ -135,17 +135,48 @@ router.post("/education/Course/uploadfile", upload.single('file'), (req, res) =>
     const creditColumnIndex = rows[0].indexOf("หน่วยกิต");
     const subject_categoryColumnIndex = rows[0].indexOf("หมวด");
     for (let i = 1; i < rows.length; i++) {
-      const data = { // Create a dictionary for each row
-        idsubject: rows[i][idsubjectColumnIndex] ? rows[i][idsubjectColumnIndex].length === 8 ? rows[i][idsubjectColumnIndex] : "0" + rows[i][idsubjectColumnIndex] : null,
-        name: rows[i][nameColumnIndex],
-        credit: rows[i][creditColumnIndex] ? rows[i][creditColumnIndex].split("(")[0] : null,
-        practice_t: rows[i][creditColumnIndex] ? rows[i][creditColumnIndex].split("(")[1].split("-")[1] : null,
-        lecture_t: rows[i][creditColumnIndex] ? rows[i][creditColumnIndex].split("(")[1].split("-")[0] : null,
-        mt: rows[i][creditColumnIndex] ? rows[i][creditColumnIndex].split("(")[1].split("-")[2].replace(")", "") : null,
-        years: y,
-        subject_category_id: assignSubjectCategoryId(rows[i][subject_categoryColumnIndex]) // Call a function to assign category ID
-      };
-      list.push(data); // Add the dictionary to the list
+      try {
+        const data = { // Create a dictionary for each row
+          idsubject: rows[i][idsubjectColumnIndex] ? rows[i][idsubjectColumnIndex].length === 8 ? rows[i][idsubjectColumnIndex] : "0" + rows[i][idsubjectColumnIndex] : null,
+          name: rows[i][nameColumnIndex],
+          credit: rows[i][creditColumnIndex] ? rows[i][creditColumnIndex].split("(")[0] : null,
+          practice_t: rows[i][creditColumnIndex] ? rows[i][creditColumnIndex].split("(")[1].split("-")[1] : null,
+          lecture_t: rows[i][creditColumnIndex] ? rows[i][creditColumnIndex].split("(")[1].split("-")[0] : null,
+          mt: rows[i][creditColumnIndex] ? rows[i][creditColumnIndex].split("(")[1].split("-")[2].replace(")", "") : null,
+          years: y,
+          subject_category_id: assignSubjectCategoryId(rows[i][subject_categoryColumnIndex]) // Call a function to assign category ID
+        };
+        list.push(data);
+      } catch (error) {
+        try {
+          const data = { // Create a dictionary for each row
+            idsubject: rows[i][idsubjectColumnIndex] ? rows[i][idsubjectColumnIndex].length === 8 ? rows[i][idsubjectColumnIndex] : "0" + rows[i][idsubjectColumnIndex] : null,
+            name: rows[i][nameColumnIndex],
+            credit: rows[i][creditColumnIndex].split("-")?0:rows[i][creditColumnIndex],
+            practice_t: 0,
+            lecture_t: 0,
+            mt: 0,
+            years: y,
+            subject_category_id: assignSubjectCategoryId(rows[i][subject_categoryColumnIndex]) // Call a function to assign category ID
+          };
+          list.push(data);
+        } catch (error) {
+          const data = { // Create a dictionary for each row
+            idsubject: rows[i][idsubjectColumnIndex] ? rows[i][idsubjectColumnIndex].length === 8 ? rows[i][idsubjectColumnIndex] : "0" + rows[i][idsubjectColumnIndex] : null,
+            name: rows[i][nameColumnIndex],
+            credit: rows[i][creditColumnIndex],
+            practice_t: 0,
+            lecture_t: 0,
+            mt: 0,
+            years: y,
+            subject_category_id: assignSubjectCategoryId(rows[i][subject_categoryColumnIndex]) // Call a function to assign category ID
+          };
+          list.push(data);
+        }
+
+      }
+
+      // Add the dictionary to the list
     }
     education_import(list).then((data) => {
       fs.unlink(filePath, (err) => {
@@ -159,16 +190,24 @@ router.post("/education/Course/uploadfile", upload.single('file'), (req, res) =>
       checkfile();
       res.status(200).json({ msg: "บันทึกไฟล์ สำเร็จ " + data.data, warning: data.warn })
 
-    }).catch((err) => { res.status(500).json({ msgerror: err.data, warning: err.warn }) })
+    }).catch((err) => {
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log('File is deleted.', filePath);
+        }
+      }); res.status(500).json({ msgerror: err.data, error: err.errors, warning: err.warn })
+    })
   })
 
 });
 function assignSubjectCategoryId(name) {
-  if (name === "วิชาเฉพาะ") {
-    return 1;
-  } else if (name === "วิชาเฉพาะเลือก") {
+  if (name === "วิชาเลือก") {
     return 2;
-  } else if (name === "วิชาเสรี") {
+  } else if (name === "วิชาบังคับ") {
+    return 1;
+  } else if (name === "วิชาแกน") {
     return 3;
   } else {
     return null;
@@ -221,7 +260,7 @@ function upDatefile() {
               worksheet.getCell(i + 2, 1).value = results[i].idsubject;
               worksheet.getCell(i + 2, 2).value = results[i].name;
               worksheet.getCell(i + 2, 3).value = `${results[i].credit}(${results[i].lecture_t}-${results[i].practice_t ? results[i].practice_t : 0}-${results[i].m_t})`;
-              worksheet.getCell(i + 2, 4).value = results[i].subject_category_id === 1 ? "วิชาเฉพาะ" : results[i].subject_category_id === 2 ? "วิชาเฉพาะเลือก" : "วิชาเสรี";
+              worksheet.getCell(i + 2, 4).value = results[i].subject_category_id === 1 ? "วิชาบังคับ" : results[i].subject_category_id === 2 ? "วิชาเลือก" : "วิชาแกน";
             }
             workbook.xlsx.writeFile("public/files/" + "course_" + v.years + ".xlsx").then((data) => console.log("save " + "public/files/" + "course_" + v.years + ".xlsx"));
             const currentDate = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
@@ -282,8 +321,8 @@ router.post("/education/subjectOpen", (req, res) => {
         if (results.changedRows === 0) {
           warn.push(subject.id)
         }
-        
-        
+
+
         resolve(results);
       });
     });
@@ -291,7 +330,7 @@ router.post("/education/subjectOpen", (req, res) => {
 
   Promise.all(updatePromises)
     .then((results) => {
-      res.status(200).json({ msg: "เปิดวิชาสำเร็จ",warning:warn});
+      res.status(200).json({ msg: "เปิดวิชาสำเร็จ", warning: warn });
     })
     .catch(err => {
       res.status(500).json({ msgerror: "ไม่สามารถอัปเดต databases" });

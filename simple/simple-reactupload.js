@@ -4,7 +4,8 @@ import axios from 'axios';
 function App() {
   const [file, setFile] = useState(null);
   const [progress, setProgress] = useState(0);
-
+  const [errors, setErr] = useState([]);
+  const [warn, setWarn] = useState([]);
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
@@ -25,25 +26,22 @@ function App() {
           setProgress(percent);
         }
       });
-      if(response.data.warning){
+      if (response.data.warning !== null) {
         alert(response.data.warning.warnmsg)
-        response.data.warning.data.map((v,i)=>{
-          alert(`${v.Message}${v.value.name} ${v.value.years}`);
-        })
-        
-      }else{
+        setWarn(response.data.warning.data);
+
+      } else {
         alert(response.data.msg);
       }
-      
-      
+
+
     } catch (error) {
       console.log(error)
       alert(error.response.data.msgerror);
-      if(error.response.data.warning){
+      setErr(error.response.data.error)
+      if (error.response.data.warning !== null) {
         alert(error.response.data.warning.warnmsg)
-        error.response.data.warning.data.map((v,i)=>{
-          alert(`${v.Message}${v.value.name} ${v.value.years}`);
-        })
+        setWarn(error.response.data.warning.data);
       }
     }
   };
@@ -56,6 +54,15 @@ function App() {
         <progress value={progress} max="100" />
         <span>{progress}%</span>
       </div>
+      {errors.map((v,i)=>(
+        <div style={{backgroundColor:"red"}}>{v.value.idsubject} {v.value.name} {v.errorMessage}</div>
+      ))}
+      {
+        warn.map((v, i) => (
+          <div style={{backgroundColor:"#4f4f"}}>{`${v.Message}${v.value.name} ${v.value.years}`}</div>
+        ))
+      }
+
     </div>
   );
 }
