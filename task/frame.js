@@ -170,6 +170,46 @@ router.get('/statusRegistered', (req, res) => {
   });
 });
 
+//รับ ชื่อแล้วค้นหาคำ โดย เอาชื่อ มา
+router.get('/searchshceduling/:search',(req,res)=>{
+  const {search}=req.params;
+  const sql = 'select idsubject,subjects.name as subject_name,years,user.name from subjects,user where idsubject like "%?%" or user.name like "%?%" or subjects.name like "%?%" ';
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error executing SELECT statement:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
+
+    if (results.length > 0) {
+      res.json({ message: results });
+    } else {
+      res.status(401).json({ error: 'No data found for the provided user ID' });
+    }
+  });
+});
+
+router.get('/searchregister/:search',(req,res)=>{
+  const {search}=req.params;
+  const sql = 'select idsubject,name as subject_name,years, from subjects where idsubject like "%?%" or  name like "%?%" ';
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error executing SELECT statement:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
+
+    if (results.length > 0) {
+      res.json({ message: results });
+    } else {
+      res.status(401).json({ error: 'No data found for the provided user ID' });
+    }
+  });
+});
+
+
+
+
 //doneeeeeeeeeeeeeeeeeeeeeeeeee
 
 
