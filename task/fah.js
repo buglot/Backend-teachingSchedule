@@ -20,7 +20,6 @@ router.get('/login', (req, res) => {
   });
 
 
-//เขียนเลย
 
 // admin
 
@@ -39,6 +38,7 @@ router.get('/admin/user', (req, res) => {
 });
 
 // READ single user from db (database email ชื่อนามสกุล  role รายบุคคล)
+// ดึง database email ชื่อนามสกุล  role โดยคัดจาก คนที่นั้นมีสิทธ์ มีการตำแหน่ง
 router.get('/admin/user/single/:email', (req, res) => {
   const email = req.params.email;
 
@@ -57,6 +57,7 @@ router.get('/admin/user/single/:email', (req, res) => {
 });
 
 // DELETE user (ลบ database ตาม id)
+// ลบ database ตาม id
 router.delete('/admin/delete_user/:id', (req, res) => {
   const idToDelete = req.params.id;
 
@@ -83,9 +84,11 @@ router.delete('/admin/delete_user/:id', (req, res) => {
 // education department 
 
 // subjectReg (ผลการลงทะเบียน ที่ผ่านแล้ว)
+//ดึงข้อมูลจาก database table วิชาที่ลงทะเบียน [{},{}]
 router.get('/edu/subjectReg', (req, res) => {
 
-  const sql = `SELECT
+  const sql = `
+SELECT
   subjectsregister.id AS id,
   subjects.idsubject AS idSubject,
   subjects.name AS SUBJECT,
@@ -118,12 +121,39 @@ WHERE
   });
 });
 
+// //ดึงข้อมูลจาก database table ไฟล์ แสดง เวลา ชื่อไฟล์ ที่อยู่ไฟล์สำหรับกดดาวน์โหลด
+// router.get('/api/file/:filename', (req, res) => {
+//   const fileName = req.params.filename; // รับชื่อไฟล์จากพารามิเตอร์ใน URL
+//   const filesDir = path.join(__dirname, 'files'); // เส้นทางไปยังโฟลเดอร์ที่เก็บไฟล์
+  
+//   fs.readdir(filesDir, (err, files) => { // สแกนโฟลเดอร์เพื่อหาชื่อไฟล์ทั้งหมด
+//     if (err) {
+//       console.error(err);
+//       res.status(500).send('เกิดข้อผิดพลาดในการอ่านไดเรกทอรี');
+//       return;
+//     }
 
+//     const foundFile = files.find(file => file === fileName); // ตรวจสอบว่ามีไฟล์ที่ตรงกับชื่อที่รับเข้ามาหรือไม่
+//     if (!foundFile) {
+//       res.status(404).send('ไม่พบไฟล์ที่ระบุ');
+//       return;
+//     }
 
+//     const filePath = path.join(filesDir, foundFile); // สร้างเส้นทางไฟล์ที่จะอ่าน
+//     fs.readFile(filePath, 'utf8', (err, data) => { // อ่านเนื้อหาของไฟล์
+//       if (err) {
+//         console.error(err);
+//         res.status(500).send('เกิดข้อผิดพลาดในการอ่านไฟล์');
+//         return;
+//       }
+//       res.send(data); // ส่งเนื้อหาของไฟล์กลับไปยัง client
+//     });
+//   });
+// });
 
 // teacher 
 
-// schedule page( ทุกรายวิชาที่ลงทะเบียน)
+// schedule page(ทุกรายวิชาที่ลงทะเบียน)
 router.get('/teacher/schedule',(req, res)=>{
   const sql = `
   SELECT 
@@ -156,7 +186,8 @@ FROM
   })
 });
 
-//schedule page(ทุกรายวิชาที่ลงทะเบียน แบบตารางสอน my schedule)
+//schedule page(ทุกรายวิชาที่ลงทะเบียน แบบตารางสอนของ my schedule)
+// ดึงข้อมูลจากdatabase table วิชาที่ลงทะเบียน คัดกรองด้วย iduser 
 router.get('/teacher/schedule_single/:id', (req, res) => {
   const idUser = req.params.id;
   if (!idUser || isNaN(idUser)) {
@@ -164,25 +195,25 @@ router.get('/teacher/schedule_single/:id', (req, res) => {
   }
   const sql = `
   SELECT 
-  subjects.idsubject AS idSubject, 
-  subjects.name AS SUBJECT, 
-  subjects.credit ,
-  category.name AS Moo,
-  user.name AS NAME,
-  subjectsregister.N_people,
-  subjectsregister.branch,
-  day.name AS DAY , 
-  subjectsregister.st, 
-  subjectsregister.et,
-  status.name AS status
-FROM 
-  subjectsregister 
+    subjects.idsubject AS idSubject, 
+    subjects.name AS SUBJECT, 
+    subjects.credit ,
+    category.name AS Moo,
+    user.name AS NAME,
+    subjectsregister.N_people,
+    subjectsregister.branch,
+    day.name AS DAY , 
+    subjectsregister.st, 
+    subjectsregister.et,
+    status.name AS status
+  FROM 
+    subjectsregister 
   JOIN USER ON subjectsregister.user_id = user.id 
   JOIN subjects ON subjectsregister.Subjects_id = subjects.id
   JOIN day ON subjectsregister.day_id = day.id 
   JOIN category ON subjectsregister.category_id = category.id
   JOIN status ON subjectsregister.status_id = status.id
-WHERE
+  WHERE
     user.id = ?`;
 
   db.query(sql, [parseInt(idUser)], (err, results) => {
@@ -193,7 +224,6 @@ WHERE
     }
 
     if (results.length === 0) {
-
       //db.query()
       return res.status(404).json({ error: 'schedule not found' });
     }
@@ -201,51 +231,10 @@ WHERE
   });
 });
 
-
-//schedule page(เลือกรายวิชา ตามเงื่อนไข รหัส/วิชา/ผู้สอน/สาขา/ชั้นปี)
-router.get('/teacher/schedule_single/:condition', (req, res) => {
-  const condition = req.params.id;
-  if (!condition || isNaN(condition)) {
-    return res.status(400).json({ error: 'Invalid condition parameter' });
-  }
-  const sql = `
-  SELECT 
-  subjects.idsubject AS idSubject, 
-  subjects.name AS SUBJECT, 
-  subjects.credit ,
-  category.name AS Moo,
-  user.name AS NAME,
-  subjectsregister.N_people,
-  subjectsregister.branch,
-  day.name AS DAY , 
-  subjectsregister.st, 
-  subjectsregister.et
-FROM 
-  subjectsregister 
-  JOIN USER ON subjectsregister.user_id = user.id 
-  JOIN subjects ON subjectsregister.Subjects_id = subjects.id
-  JOIN day ON subjectsregister.day_id = day.id 
-  JOIN category ON subjectsregister.category_id = category.id
-WHERE
-    user.id = ? || subject.name = ? || user.name = ? || category.name = ? || branch = ?`;
-
-  db.query(sql, [condition], (err, results) => {
-    if (err) {
-      console.error('Error executing SELECT statement:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
-      return;
-    }
-    if (results.length === 0) {
-      //db.query()
-      return res.status(404).json({ error: 'schedule not found' });
-    }
-    res.json(results);
-  });
-});
-//ยังไม่เสร็จ
 
 
 //  teacher_subjectsregister (ลงทะเบียนรายวิชา)
+// ดึงข้อมูลจากdatabase table วิชาที่ลงทะเบียน คัดกรองด้วย email อันเดียวกับตารางสอน 
 router.get('/teacher/subjectsregister/:id', (req, res) => {
   const idUser = req.params.id;
   if (!idUser || isNaN(idUser)) {
@@ -259,14 +248,14 @@ router.get('/teacher/subjectsregister/:id', (req, res) => {
     subjectsregister.st,
     subjectsregister.et,
     status.name AS status
-FROM
+  FROM
     subjectsregister
-JOIN USER ON subjectsregister.User_id = user.id
-JOIN subjects ON subjectsregister.Subjects_id = subjects.id
-JOIN DAY ON subjectsregister.day_id = day.id
-JOIN STATUS ON subjectsregister.status_id =STATUS.id
-JOIN category ON subjectsregister.category_id = category.id
-WHERE
+  JOIN USER ON subjectsregister.User_id = user.id
+  JOIN subjects ON subjectsregister.Subjects_id = subjects.id
+  JOIN DAY ON subjectsregister.day_id = day.id
+  JOIN STATUS ON subjectsregister.status_id =STATUS.id
+  JOIN category ON subjectsregister.category_id = category.id
+  WHERE
     user.id = ?`;
 
   db.query(sql, [parseInt(idUser)], (err, results) => {
@@ -284,6 +273,5 @@ WHERE
     res.json(results);
   });
 });
-
 
 module.exports = router;
