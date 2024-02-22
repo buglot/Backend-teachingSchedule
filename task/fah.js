@@ -246,7 +246,28 @@ router.get('/teacher/subjectsregister/:id', (req, res) => {
 });
 
 //ลบ วิชาที่ลงทะเบียน
+router.delete('/teacher/delete_subjectsregister/:Subjects_id', (req, res) => {
+  const idSubject = req.params.Subjects_id;
 
+  if (!idSubject) {
+    return res.status(400).json({ error: 'Subjects_id parameter is required' });
+  }
+
+  const sql = 'DELETE FROM subjectsRegister WHERE Subjects_id = ? ;';
+
+  db.query(sql, [idSubject], (err, results) => {
+      if (err) {
+          console.error('Error executing DELETE statement:', err);
+          return res.status(500).json({ error: 'Internal Server Error' });
+      }
+
+      if (results.affectedRows > 0) {
+          res.json({ message: 'Data deleted successfully' });
+      } else {
+          res.status(404).json({ error: 'Subjects_id not found' });
+      }
+  });
+});
 
 
 module.exports = router;
