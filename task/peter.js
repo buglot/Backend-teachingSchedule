@@ -6,7 +6,8 @@ const path = require('path');
 const readfiles = require('read-excel-file/node');
 //ตัวอย่าง
 const fs = require('fs');
-const exceljs = require("exceljs")
+const exceljs = require("exceljs");
+const { TIMEOUT } = require('dns');
 
 
 router.post('/admin/System', (req, res) => {
@@ -152,7 +153,7 @@ router.post("/education/Course/uploadfile", upload.single('file'), (req, res) =>
           const data = { // Create a dictionary for each row
             idsubject: rows[i][idsubjectColumnIndex] ? rows[i][idsubjectColumnIndex].length === 8 ? rows[i][idsubjectColumnIndex] : "0" + rows[i][idsubjectColumnIndex] : null,
             name: rows[i][nameColumnIndex],
-            credit: rows[i][creditColumnIndex].split("-")?0:rows[i][creditColumnIndex],
+            credit: rows[i][creditColumnIndex].split("-") ? 0 : rows[i][creditColumnIndex],
             practice_t: 0,
             lecture_t: 0,
             mt: 0,
@@ -197,7 +198,8 @@ router.post("/education/Course/uploadfile", upload.single('file'), (req, res) =>
         } else {
           console.log('File is deleted.', filePath);
         }
-      }); res.status(500).json({ msgerror: err.data, error: err.errors, warning: err.warn })
+      });
+      res.status(500).json({ msgerror: err.data, error: err.errors, warning: err.warn })
     })
   })
 
@@ -337,5 +339,57 @@ router.post("/education/subjectOpen", (req, res) => {
     });
 
 
+})
+
+router.post("/teacher/registersubject", (req, res) => {
+  const { subjects } = req.body;
+  const { user_id, st, et, day_id, n_people, branch, category_id, subjects_id } = req.body;
+  db.query('select * from timeSystem', (err, result) => {
+    if (err) {
+      reject('database error ' + err);
+    } else {
+      if (!result[0].status) {
+        return res.status(500).json({ msgerror: "ไม่ได้เปิดระบบให้ลงทะเบียน" });
+      }else{
+        const time = new Date()
+        if (result[0].S_date){
+          const data = new Date(result[0].S_date)
+          data.setTime(result[0].S_time *1000);
+          console.log(data.toLocaleString("th-th"),result[0].S_time,result[0].S_date)
+        }
+      }
+    }
+  });
+  if (!subjects) {
+    res.status(500).json({ msgerror: "error subjects null" })
+    return;
+  }
+  const InsertDatabase = subjects.map((v, i) => {
+    return new Promise((resolve, reject) => {
+      db.query('select * from timeSystem', (err, result) => {
+        if (err) {
+          reject('database error ' + err);
+        } else {
+
+          // db.query("INSERT INTO subjectsRegister (User_id, st, et, day_id, status_id, N_people, branch, category_id, Subjects_id) VALUES (?,?,?,?,?,?,?,?,?)",[v.user_id,v.st,v.et,v.day_id,v.n_people,v.branch,v.category_id,v.subjects_id],(err,results)=>{
+          resolve(result[0])
+          // })
+        }
+      });
+
+    })
+
+  })
+  Promise.all(InsertDatabase).then((data) => res.status(200).send(data)).catch(() => res.status(500).send("error"))
+});
+
+router.get("/subject_category",(req,res)=>{
+  db.query("Select * from subject_category",(err,results)=>{
+    if(err){
+      return res.status(500).json({"msgerr":err})
+    }else{
+      return res.status(200).json(results)
+    }
+  });
 })
 module.exports = router;
