@@ -150,12 +150,46 @@ WHERE
 // teacher 
 
 // schedule page(ทุกรายวิชาที่ลงทะเบียน)
+// router.get('/teacher/schedule',(req, res)=>{
+//   const sql = `
+//   SELECT 
+//   subjects.idsubject AS idSubject, 
+//   subjects.name AS SUBJECT, 
+//   subjects.credit ,
+//   category.name AS Moo,
+//   user.name AS NAME,
+//   subjectsRegister.N_people,
+//   subjectsRegister.branch,
+//   day.name AS day , 
+//   subjectsRegister.st, 
+//   subjectsRegister.et,
+//   status.name AS status
+// FROM 
+// subjectsRegister 
+//   JOIN user ON subjectsRegister.user_id = user.id 
+//   JOIN subjects ON subjectsRegister.Subjects_id = subjects.id
+//   JOIN day ON subjectsRegister.day_id = day.id 
+//   JOIN category ON subjectsRegister.category_id = category.id
+//   JOIN status ON subjectsRegister.status_id = status.id`;
+
+//   db.query(sql, (err, results) => {
+//     if (err) {
+//       console.error('Error executing SELECT statement:', err);
+//       res.status(500).json({ error: 'Internal Server Error' });
+//       return;
+//     }
+//     res.json(results);
+//   })
+// });
+
+
+//schedule page ทุกรายวิชา ที่ลงทะเบียนผ่านแล้ว
 router.get('/teacher/schedule',(req, res)=>{
   const sql = `
   SELECT 
-  subjects.idsubject AS idSubject, 
+  subjects.id AS idSubject, 
   subjects.name AS SUBJECT, 
-  subjects.credit ,
+  subjects.credit,
   category.name AS Moo,
   user.name AS NAME,
   subjectsRegister.N_people,
@@ -163,14 +197,24 @@ router.get('/teacher/schedule',(req, res)=>{
   day.name AS day , 
   subjectsRegister.st, 
   subjectsRegister.et,
-  status.name AS status
+  status.name AS status,
+  subject_category.name AS subject_category
 FROM 
-subjectsRegister 
-  JOIN user ON subjectsRegister.user_id = user.id 
-  JOIN subjects ON subjectsRegister.Subjects_id = subjects.id
-  JOIN day ON subjectsRegister.day_id = day.id 
-  JOIN category ON subjectsRegister.category_id = category.id
-  JOIN status ON subjectsRegister.status_id = status.id`;
+  subjectsRegister
+JOIN 
+  subjects ON subjectsRegister.Subjects_id = subjects.id
+JOIN 
+  user ON subjectsRegister.user_id = user.id 
+JOIN 
+  day ON subjectsRegister.day_id = day.id 
+JOIN 
+  category ON subjectsRegister.category_id = category.id
+JOIN 
+  status ON subjectsRegister.status_id = status.id
+JOIN
+  subject_category ON subjects.subject_category_id = subject_category.id
+WHERE 
+  subjectsRegister.status_id = 1`;
 
   db.query(sql, (err, results) => {
     if (err) {
@@ -181,6 +225,7 @@ subjectsRegister
     res.json(results);
   })
 });
+
 
 //schedule page(ทุกรายวิชาที่ลงทะเบียน แบบตารางสอนของ my schedule)
 // ดึงข้อมูลจากdatabase table วิชาที่ลงทะเบียน คัดกรองด้วย iduser 
