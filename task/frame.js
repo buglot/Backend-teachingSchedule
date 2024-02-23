@@ -190,21 +190,37 @@ router.get('/searchshceduling/:search',(req,res)=>{
 });
 
 router.get('/searchregister/:search',(req,res)=>{
-  const {search}=req.params;
-  const sql = 'select idsubject,name as subject_name,years, from subjects where idsubject like ? or  name like ? ';
-  db.query(sql,["%"+search+"%","%"+search+"%"], (err, results) => {
+  const { search } = req.params;
+  const sql = 'SELECT S.idsubject, S.name, S.years FROM subjects S WHERE S.idsubject LIKE ? OR S.name LIKE ?';
+  const sql1 = 'SELECT id, name AS username FROM user WHERE name LIKE ?';
+  
+  db.query(sql, [`%${search}%`, `%${search}%`], (err, results) => {
     if (err) {
       console.error('Error executing SELECT statement:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
-      return;
+      return res.status(500).json({ error: 'Internal Server Error' });
     }
-
-    if (results.length > 0) {
-      res.json({ message: results });
-    } else {
-      res.status(401).json({ error: 'No data found for the provided user ID' });
-    }
+  
+    const data = results;
+  
+    db.query(sql1, [`%${search}%`], (err, result) => {
+      if (err) {
+        console.error('Error executing SELECT statement:', err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+  
+      if (result.length > 0) {
+        data.push(result[0]);
+      }
+  
+      if (data.length === 0) {
+        res.status(401).json({ error: 'No data found for the provided search term' });
+      } else {
+        res.status(200).json({ message: data });
+      }
+    });
   });
+  
+  
 });
 
 
