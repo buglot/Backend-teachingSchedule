@@ -191,8 +191,8 @@ router.get('/searchshceduling/:search',(req,res)=>{
 
 router.get('/searchregister/:search',(req,res)=>{
   const {search}=req.params;
-  const sql = 'select idsubject,name as subject_name,years, from subjects where idsubject like "%?%" or  name like "%?%" ';
-  db.query(sql, (err, results) => {
+  const sql = 'select idsubject,name as subject_name,years, from subjects where idsubject like ? or  name like ? ';
+  db.query(sql,["%"+search+"%","%"+search+"%"], (err, results) => {
     if (err) {
       console.error('Error executing SELECT statement:', err);
       res.status(500).json({ error: 'Internal Server Error' });
