@@ -8,6 +8,7 @@ const readfiles = require('read-excel-file/node');
 const fs = require('fs');
 const exceljs = require("exceljs");
 const { TIMEOUT } = require('dns');
+const { Types } = require('mysql2');
 
 
 router.post('/admin/System', (req, res) => {
@@ -346,48 +347,70 @@ router.post("/teacher/registersubject", (req, res) => {
   const { user_id, st, et, day_id, n_people, branch, category_id, subjects_id } = req.body;
   db.query('select * from timeSystem', (err, result) => {
     if (err) {
-      reject('database error ' + err);
+      return res.status(500).json({ msgerror: 'database error ' + err });
     } else {
       if (!result[0].status) {
         return res.status(500).json({ msgerror: "ไม่ได้เปิดระบบให้ลงทะเบียน" });
-      }else{
+      } else {
         const time = new Date()
-        if (result[0].S_date){
+        if (result[0].S_date) {
           const data = new Date(result[0].S_date)
-          data.setTime(result[0].S_time *1000);
-          console.log(result[0].S_date)
+          const [hours, minutes] = result[0].S_time.split(':').map(Number);
+          data.setHours(hours);
+          data.setMinutes(minutes);
+          const data1 = new Date(result[0].E_date)
+          const [hours1, minutes1] = result[0].E_time.split(':').map(Number);
+          data1.setHours(hours1);
+          data1.setMinutes(minutes1);
+          if (!(data <= time && data1 >= time)) {
+            return res.status(500).json({ msgerror: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })} ถึง ${data1.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })}` });
+          }
         }
       }
     }
-  });
-  if (!subjects) {
-    res.status(500).json({ msgerror: "error subjects null" })
-    return;
-  }
-  const InsertDatabase = subjects.map((v, i) => {
-    return new Promise((resolve, reject) => {
-      db.query('select * from timeSystem', (err, result) => {
-        if (err) {
-          reject('database error ' + err);
-        } else {
-
-          // db.query("INSERT INTO subjectsRegister (User_id, st, et, day_id, status_id, N_people, branch, category_id, Subjects_id) VALUES (?,?,?,?,?,?,?,?,?)",[v.user_id,v.st,v.et,v.day_id,v.n_people,v.branch,v.category_id,v.subjects_id],(err,results)=>{
-          resolve(result[0])
-          // })
+    // ส่วนนี้ให้เพิ่มเงื่อนไข else ให้เป็นส่วนของ if (!subjects) ก่อนเพื่อเช็คเงื่อนไขที่ขึ้นอยู่กับการ query ฐานข้อมูล
+    if(user_id && st && et && day_id && n_people && branch && category_id && subjects_id){
+      db.query("select S1.name from subjects S,subjects S1,subjectsRegister Sr where S.id = 2 and (S.subject_category_id =1 or S.subject_category_id=3) and (S1.subject_category_id =1 or S1.subject_category_id=3) and Sr.Subjects_id = S1.id and S.id != S1.id and Sr.day_id = 2 and ((st1 <= et2 AND et1 >= st2) OR (st2 <= et1 AND et2 >= st1))",[subjects_id],(err,result)=>{
+        let statusset = 2;
+        if(err){
+          return res.status(500).json({msgerror:"Error databases ->"+err})
+        }else{
+          if(result.length>0){
+          }
         }
-      });
+        db.query("INSERT INTO subjectsRegister (status_id,User_id, st, et, day_id,  N_people, branch, category_id, Subjects_id) VALUES (?,?,?,?,?,?,?,?,?)", [statusset,v.user_id, v.st, v.et, v.day_id, v.n_people, v.branch, v.category_id, v.subjects_id], (err, results) => {
+          if(err){
+            return res.status(500).json({msgerror:"Error databases ->"+err})
+          }else{
+            
+          }
+        })
 
+
+      })
+    }
+    if (!subjects) {
+      return res.status(500).json({ msgerror: "error subjects null" })
+    }
+    const InsertDatabase = subjects.map((v, i) => {
+      return new Promise((resolve, reject) => {
+        db.query("INSERT INTO subjectsRegister (User_id, st, et, day_id, status_id, N_people, branch, category_id, Subjects_id) VALUES (?,?,?,?,?,?,?,?,?)", [v.user_id, v.st, v.et, v.day_id, v.n_people, v.branch, v.category_id, v.subjects_id], (err, results) => {
+          resolve(result[0])
+        })
+      })
     })
-
-  })
-  Promise.all(InsertDatabase).then((data) => res.status(200).send(data)).catch(() => res.status(500).send("error"))
+    Promise.all(InsertDatabase).then((data) => res.status(200).send(data)).catch(() => res.status(500).send("error"))
+  });
 });
 
-router.get("/subject_category",(req,res)=>{
-  db.query("Select * from subject_category",(err,results)=>{
-    if(err){
-      return res.status(500).json({"msgerr":err})
-    }else{
+
+
+
+router.get("/subject_category", (req, res) => {
+  db.query("Select * from subject_category", (err, results) => {
+    if (err) {
+      return res.status(500).json({ "msgerr": err })
+    } else {
       return res.status(200).json(results)
     }
   });
