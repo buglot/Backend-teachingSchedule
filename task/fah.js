@@ -274,6 +274,7 @@ router.get('/teacher/subjectsregister/:id', (req, res) => {
 router.delete('/teacher/delete_subjectsregister/:id', (req, res) => {
   const idSubject = req.params.id;
 
+
   if (!idSubject) {
     return res.status(400).json({ error: 'Subjects parameter is required' });
   }
@@ -285,6 +286,15 @@ router.delete('/teacher/delete_subjectsregister/:id', (req, res) => {
           console.error('Error executing DELETE statement:', err);
           return res.status(500).json({ error: 'Internal Server Error' });
       }
+
+
+      if (results.affectedRows > 0) {
+          res.json({ message: 'Data deleted successfully' });
+      } else {
+          res.status(404).json({ error: 'Id not found' });
+      }
+  });
+});
 
       if (results.affectedRows > 0) {
           res.json({ message: 'Data deleted successfully' });
