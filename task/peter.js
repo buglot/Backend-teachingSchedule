@@ -383,4 +383,13 @@ router.post("/teacher/registersubject", (req, res) => {
   Promise.all(InsertDatabase).then((data) => res.status(200).send(data)).catch(() => res.status(500).send("error"))
 });
 
+router.get("/subject_category",(req,res)=>{
+  db.query("Select * from subject_category",(err,results)=>{
+    if(err){
+      return res.status(500).json({"msgerr":err})
+    }else{
+      return res.status(200).json(results)
+    }
+  });
+})
 module.exports = router;
