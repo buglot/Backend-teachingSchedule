@@ -246,7 +246,15 @@ router.get('/teacher/subjectsregister/:id', (req, res) => {
 });
 
 //ลบ วิชาที่ลงทะเบียน
-
+router.get("/subject_category",(req,res)=>{
+  db.query("Select * from subject_category",(err,results)=>{
+    if(err){
+      return res.status(500).json({"msgerr":err})
+    }else{
+      return res.status(200).json(results)
+    }
+  });
+})
 
 
 module.exports = router;
