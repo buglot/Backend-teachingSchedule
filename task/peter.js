@@ -14,7 +14,7 @@ router.post('/admin/System', (req, res) => {
   const { systemstatus, S_date, E_date, S_time, E_time } = req.body;
   if (systemstatus || systemstatus === 0) {
     if (S_date && E_date && S_time && E_time) {
-      db.query("update timesystem set status=?,S_date=?,E_date=?,S_time=?,E_time=? where id=1", [systemstatus, S_date, E_date, S_time, E_time], (err, results) => {
+      db.query("update timeSystem set status=?,S_date=?,E_date=?,S_time=?,E_time=? where id=1", [systemstatus, S_date, E_date, S_time, E_time], (err, results) => {
         if (err) {
           res.status(500).json({ msgerror: "Database Error :" + err })
         } else {
@@ -24,7 +24,7 @@ router.post('/admin/System', (req, res) => {
       })
       return;
     } else {
-      db.query("update timesystem set status=? where id=1", [systemstatus], (err, results) => {
+      db.query("update timeSystem set status=? where id=1", [systemstatus], (err, results) => {
         if (err) {
           res.status(404).json({ msgerror: "Database Error: " + err });
         } else {
@@ -355,7 +355,7 @@ router.post("/teacher/registersubject", (req, res) => {
         if (result[0].S_date){
           const data = new Date(result[0].S_date)
           data.setTime(result[0].S_time *1000);
-          console.log(data.toLocaleString("th-th"),result[0].S_time,result[0].S_date)
+          console.log(result[0].S_date)
         }
       }
     }
