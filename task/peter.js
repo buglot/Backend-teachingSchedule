@@ -200,6 +200,8 @@ router.post("/education/Course/uploadfile", upload.single('file'), (req, res) =>
           console.log('File is deleted.', filePath);
         }
       });
+      upDatefile();
+      checkfile();
       res.status(500).json({ msgerror: err.data, error: err.errors, warning: err.warn })
     })
   })
@@ -404,8 +406,6 @@ router.post("/teacher/registersubject", (req, res) => {
 });
 
 
-
-
 router.get("/subject_category", (req, res) => {
   db.query("Select * from subject_category", (err, results) => {
     if (err) {
@@ -425,6 +425,20 @@ router.get("/education/downloadlist", (req, res) => {
         res.status(200).json(results)
       } else {
         res.status(200).json({msg:"ไม่มีไฟล์ถูกอัปโหลดไว้"})
+      }
+    }
+  })
+})
+
+router.get("/education/getallsubjects", (req, res) => {
+  db.query("select subjects.id,idsubject,subjects.name,credit,practice_t,lecture_t,years,IsOpen,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id order by years DESC", (err, results) => {
+    if (err) {
+      res.status(500).json({msgerror:"error server databases please report admin"})
+    } else {
+      if (results.length > 0) {
+        res.status(200).json(results)
+      } else {
+        res.status(200).json({msg:"ไม่มีวิชาที่อัปโหลดไว้"})
       }
     }
   })
