@@ -370,7 +370,7 @@ router.post("/teacher/registersubject", (req, res) => {
     }
     // ส่วนนี้ให้เพิ่มเงื่อนไข else ให้เป็นส่วนของ if (!subjects) ก่อนเพื่อเช็คเงื่อนไขที่ขึ้นอยู่กับการ query ฐานข้อมูล
     if(user_id && st && et && day_id && n_people && branch && category_id && subjects_id){
-      db.query("select S1.name from subjects S,subjects S1,subjectsRegister Sr where S.id = 2 and (S.subject_category_id =1 or S.subject_category_id=3) and (S1.subject_category_id =1 or S1.subject_category_id=3) and Sr.Subjects_id = S1.id and S.id != S1.id and Sr.day_id = 2 and ((st1 <= et2 AND et1 >= st2) OR (st2 <= et1 AND et2 >= st1))",[subjects_id],(err,result)=>{
+      db.query("select S1.name from subjects S,subjects S1,subjectsRegister Sr where S.id = ? and (S.subject_category_id =1 or S.subject_category_id=3) and (S1.subject_category_id =1 or S1.subject_category_id=3) and Sr.Subjects_id = S1.id and S.id != S1.id and Sr.day_id = 2 and ((st <= ? AND et >= ?) OR (? <= et AND ? >= st))",[subjects_id,et,st,st,et],(err,result)=>{
         let statusset = 2;
         if(err){
           return res.status(500).json({msgerror:"Error databases ->"+err})
@@ -414,5 +414,19 @@ router.get("/subject_category", (req, res) => {
       return res.status(200).json(results)
     }
   });
+})
+
+router.get("/education/downloadlist", (req, res) => {
+  db.query("select years,link,filename from file", (err, results) => {
+    if (err) {
+      res.status(500).json({msgerror:"error server databases please report admin"})
+    } else {
+      if (results.length > 0) {
+        res.status(200).json(results)
+      } else {
+        res.status(200).json({msg:"ไม่มีไฟล์ถูกอัปโหลดไว้"})
+      }
+    }
+  })
 })
 module.exports = router;
