@@ -233,7 +233,7 @@ router.get('/searchregister/:search',(req,res)=>{
 
 
 router.get('/eu/allRegister',(req,res)=>{
-  const sql = 'SELECT id as ID,User_id as USERID,st as STARTTIME,et as ENDTIME,day_id as DAY,sec as SEC,status_id as STATUS,N_people as PEOPLE,branch as BRANCH,category_id as CATEGORY,Subjects_id as SUBJECT FROM subjectsRegister;'
+  const sql = `SELECT subjectsRegister.id ,User_id ,st ,et ,day_id ,sec ,status_id ,N_people ,branch ,category_id ,Subjects_id,subjects.name as SUBJECTNAME,category.name as CATEGORYNAME,day.name as DAYNAME,status.name as STATUSNAME,user.name as USERNAME FROM user,status,day,subjectsRegister,subjects,category where subjectsRegister.id = subjects.id and subjectsRegister.category_id = category.id and day_id=day.id and status_id = status.id and User_id = user.id;`
   db.query(sql, (err, results) => {
     if (err) {
       console.error('Error executing SELECT statement:', err);
