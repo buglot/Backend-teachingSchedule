@@ -457,7 +457,7 @@ router.get("/subjest", (req, res) => {
   })
 });
 
-router.get("/teacher/subjests", (req, res) => {
+router.get("/teacher/subjects", (req, res) => {
   db.query("select status,S_date,E_date,S_time,E_time from timeSystem where id =1", (err, results) => {
     if (err) {
       res.status(500).json({ msgerror: "Error Server Database! Please calling admin to fix" })
@@ -493,9 +493,9 @@ router.get("/teacher/subjests", (req, res) => {
                 res.status(500).json({ msgerr: "Error Server Databases! Please calling admin to fix" });
               } else {
                 if (results.length > 0) {
-                  res.status(200).json({results,msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })} ถึง ${data1.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })}` });
+                  res.status(200).json({ results, msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })} ถึง ${data1.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })}` });
                 } else {
-                  res.status(200).json({ msg: "ไม่มีวิชาที่เปิดสอน",msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })} ถึง ${data1.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })}` });
+                  res.status(200).json({ msg: "ไม่มีวิชาที่เปิดสอน", msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })} ถึง ${data1.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })}` });
                 }
               }
             })
@@ -517,4 +517,46 @@ router.get("/teacher/subjests", (req, res) => {
     }
   });
 });
+
+router.get("/teacher/subject/:idsubject", (req, res) => {
+  const { id } = req.params;
+  db.query("select status,S_date,E_date,S_time,E_time from timeSystem where id =1", (err, results) => {
+    if (err) {
+      res.status(500).json({ msgerror: "Error Server Database! Please calling admin to fix" })
+    } else {
+      if (results[0].status === 0) {
+        res.status(404).json({msgerrortime:"ระบบไม่ได้เปิด"})
+      } else {
+        const time = new Date()
+        if (results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time) {
+          const data = new Date(results[0].S_date)
+          const [hours, minutes] = results[0].S_time.split(':').map(Number);
+          data.setHours(hours);
+          data.setMinutes(minutes);
+          const data1 = new Date(results[0].E_date)
+          const [hours1, minutes1] = results[0].E_time.split(':').map(Number);
+          data1.setHours(hours1);
+          data1.setMinutes(minutes1);
+          if (!(data <= time && data1 >= time)) {
+            res.status(404).json({ msgerrortime: "ระบบไม่ได้เปิด" })
+            return;
+          }
+        }
+        db.query("select * from subjects where IsOpen=1 and id=?", [id], (err, results) => {
+          if (err) {
+            res.status(500).json({msgerror:"Error Server Database! Please calling admin to fix"})
+          } else {
+            if (results.length > 0) {
+              res.status(200).json({results})
+            } else {
+              res.status(404).json({msgerr:"วิชานี้ไม่ได้เปิดลงทะเบียน"})
+            }
+          }
+        })
+      }
+
+    }
+  });
+}
+);
 module.exports = router;
