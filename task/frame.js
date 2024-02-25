@@ -153,7 +153,7 @@ const {userid} = req.body;
 //ตรวจสอบจาก database table วิชาที่ลงทะเบียน คัดกรอง สถานะผ่าน และ เวลาของคนที่แก้ไข ฉบับรอทดสอบ
 router.get('/statusRegistered', (req, res) => {
   const { userid } = req.body;
-  const sql = `SELECT GROUP_CONCAT(subjectsRegister.st) AS st_values,subjectsRegister.et,subjectsRegister.day_id,day.name AS day_name,user.name AS user_name,status.name AS status_name,subjectsRegister.category_id FROM subjectsRegister INNER JOIN day ON subjectsRegister.day_id = day.id INNER JOIN status ON subjectsRegister.status_id = status.id INNER JOIN user ON subjectsRegister.User_id = user.id WHERE subjectsRegister.status_id = 3 AND subjectsRegister.category_id = 1 AND (subjectsRegister.st,subjectsRegister.et,subjectsRegister.day_id) IN (SELECT st,et,day_id FROM subjectsRegister WHERE User_id = ${userid}) GROUP BY subjectsRegister.et, subjectsRegister.day_id,day.name,user.name,status.name,subjectsRegister.category_id`;
+  const sql = `SELECT GROUP_CONCAT(subjectsRegister.st) AS st_values,subjectsRegister.et,subjectsRegister.day_id,day.name AS day_name,user.name AS user_name,status.name AS status_name,subjectsRegister.category_id FROM subjectsRegister INNER JOIN day ON subjectsRegister.day_id = day.id INNER JOIN status ON subjectsRegister.status_id = status.id INNER JOIN user ON subjectsRegister.User_id = user.id WHERE subjectsRegister.status_id = 3 AND subjectsRegister.category_id = 1 OR subjectsRegister.category_id = 3 AND (subjectsRegister.st,subjectsRegister.et,subjectsRegister.day_id) IN (SELECT st,et,day_id FROM subjectsRegister WHERE User_id = ${userid}) GROUP BY subjectsRegister.et, subjectsRegister.day_id,day.name,user.name,status.name,subjectsRegister.category_id`;
                
   db.query(sql, (err, results) => {
     if (err) {
@@ -206,7 +206,22 @@ router.get('/searchregister/:search',(req,res)=>{
 });
 
 
+router.get('/eu/allRegister',(req,res)=>{
+  const sql = 'SELECT * FROM subjectsRegister;;'
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error executing SELECT statement:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
 
+    if (results.length > 0) {
+      res.json({ message: results });
+    } else {
+      res.status(401).json({ error: 'Invalid credentials' });
+    }
+  })
+});
 
 //doneeeeeeeeeeeeeeeeeeeeeeeeee
 
