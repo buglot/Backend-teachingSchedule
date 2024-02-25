@@ -431,9 +431,9 @@ router.get("/education/downloadlist", (req, res) => {
 })
 
 router.get("/education/getallsubjects", (req, res) => {
-  db.query("select subjects.id,idsubject,subjects.name,credit,practice_t,lecture_t,years,IsOpen,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id order by years DESC", (err, results) => {
+  db.query("select subjects.id,idsubject,subjects.name,credit,practice_t,lecture_t,years,IsOpen,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 0 order by years DESC", (err, results) => {
     if (err) {
-      res.status(500).json({msgerror:"error server databases please report admin"})
+      res.status(500).json({msgerror:"Error Server database! Please report admin"})
     } else {
       if (results.length > 0) {
         res.status(200).json(results)
@@ -445,11 +445,14 @@ router.get("/education/getallsubjects", (req, res) => {
 })
 
 router.get("/subjest",(req,res)=>{
-  db.query("Select * from subjects where IsOpen= 1",(err,results)=>{
+  db.query("Select subjects.id,idsubject,subjects.name,credit,practice_t,lecture_t,years,IsOpen,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 1",(err,results)=>{
     if(err){
-      res.status(500).json("Error Databases! Please calling admin to fix");
+      res.status(500).json({msgerr:"Error Server Databases! Please calling admin to fix"});
     }else{
+      if(results.length>0)
       res.status(200).json(results);
+      else
+      res.status(200).json({msg:"ไม่มีวิชาที่เปิดสอน"});
     }
   })
 });
