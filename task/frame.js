@@ -56,7 +56,13 @@ router.post('/user1',(req,res)=>{
 //หน้ารายวิชาที่เปิดสอนdsadsadsa
 
 router.get('/opensubject',(req,res)=>{
-  const sql = 'select subjects.id,idsubject,subject_category.name as category,subjects.name as subject_name,years,subjects.subject_category_id from subjects,subject_category where subjects.IsOpen= 1'
+  const sql = `
+  select subjects.id,idsubject,
+  subject_category.name as category,
+  subjects.name as subject_name,
+  years,subjects.subject_category_id 
+  from subjects,subject_category 
+  where subjects.IsOpen= 1`
   db.query(sql, (err, results) => {
     if (err) {
       console.error('Error executing SELECT statement:', err);
@@ -150,10 +156,30 @@ const {userid} = req.body;
     }
   })
 });
-//ตรวจสอบจาก database table วิชาที่ลงทะเบียน คัดกรอง สถานะผ่าน และ เวลาของคนที่แก้ไข ฉบับรอทดสอบ
+//ตรวจสอบจาก database table วิชาที่ลงทะเบียน คัดกรอง สถานะผ่าน และ เวลาของคนที่แก้ไข ฉบับของจริง
 router.get('/statusRegistered', (req, res) => {
   const { userid } = req.body;
-  const sql = `SELECT GROUP_CONCAT(subjectsRegister.st) AS st_values,subjectsRegister.et,subjectsRegister.day_id,day.name AS day_name,user.name AS user_name,status.name AS status_name,subjectsRegister.category_id FROM subjectsRegister INNER JOIN day ON subjectsRegister.day_id = day.id INNER JOIN status ON subjectsRegister.status_id = status.id INNER JOIN user ON subjectsRegister.User_id = user.id WHERE subjectsRegister.status_id = 3 AND subjectsRegister.category_id = 1 OR subjectsRegister.category_id = 3 AND (subjectsRegister.st,subjectsRegister.et,subjectsRegister.day_id) IN (SELECT st,et,day_id FROM subjectsRegister WHERE User_id = ${userid}) GROUP BY subjectsRegister.et, subjectsRegister.day_id,day.name,user.name,status.name,subjectsRegister.category_id`;
+  const sql = `
+    SELECT GROUP_CONCAT(subjectsRegister.st) AS st_values,
+    subjectsRegister.et,
+    subjectsRegister.day_id,
+    day.name AS day_name,
+    user.name AS user_name,
+    status.name AS status_name,
+    subjectsRegister.category_id 
+    FROM subjectsRegister INNER JOIN day ON subjectsRegister.day_id = day.id 
+    INNER JOIN status ON subjectsRegister.status_id = status.id 
+    INNER JOIN user ON subjectsRegister.User_id = user.id 
+    WHERE subjectsRegister.status_id = 3 AND 
+    subjectsRegister.category_id = 1 OR 
+    subjectsRegister.category_id = 3 AND 
+    (subjectsRegister.st,subjectsRegister.et,subjectsRegister.day_id) 
+    IN (SELECT st,et,day_id FROM subjectsRegister WHERE User_id = ${userid}) 
+    GROUP BY subjectsRegister.et, 
+    subjectsRegister.day_id,
+    day.name,user.name,
+    status.name,
+    subjectsRegister.category_id`;
                
   db.query(sql, (err, results) => {
     if (err) {
