@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+
+const fs = require('fs');
+
 //ตัวอย่าง
 router.get('/login', (req, res) => {
     const sql = 'SELECT * FROM table1';
@@ -146,42 +149,42 @@ WHERE
   });
 });
 
+// ลบหลักสูตร
+router.delete('/edu/delete_subjects/:years', (req, res) => {
+  const OpenYear = req.params.years;
+
+  if (!OpenYear) {
+    return res.status(400).json({ error: 'Subjects parameter is required' });
+  }
+
+  const sql = 'DELETE FROM subjects WHERE years=? ';
+
+  db.query(sql, [OpenYear], (err, results) => {
+      if (err) {
+          console.error('Error executing DELETE statement:', err);
+          return res.status(500).json({ error: 'Internal Server Error' });
+      }
+
+      if (results.affectedRows > 0) {
+          res.json({ message: 'Data delete successfully' });
+      } else {
+          res.status(404).json({ error: 'ไม่พบหลักสูตรที่กำหนด' });
+      }
+  });
+
+  db.query("DELETE FROM file WHERE years = ?", [OpenYear], (err, results) => {
+    fs.unlink("public/files/" + "course_" + OpenYear.years + ".xlsx", (err) => {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log('File is deleted.', "public/files/" + "course_" + OpenYear.years + ".xlsx");
+      }
+    })
+  })
+});
+
 
 // teacher 
-
-// schedule page(ทุกรายวิชาที่ลงทะเบียน)
-// router.get('/teacher/schedule',(req, res)=>{
-//   const sql = `
-//   SELECT 
-//   subjects.idsubject AS idSubject, 
-//   subjects.name AS SUBJECT, 
-//   subjects.credit ,
-//   category.name AS Moo,
-//   user.name AS NAME,
-//   subjectsRegister.N_people,
-//   subjectsRegister.branch,
-//   day.name AS day , 
-//   subjectsRegister.st, 
-//   subjectsRegister.et,
-//   status.name AS status
-// FROM 
-// subjectsRegister 
-//   JOIN user ON subjectsRegister.user_id = user.id 
-//   JOIN subjects ON subjectsRegister.Subjects_id = subjects.id
-//   JOIN day ON subjectsRegister.day_id = day.id 
-//   JOIN category ON subjectsRegister.category_id = category.id
-//   JOIN status ON subjectsRegister.status_id = status.id`;
-
-//   db.query(sql, (err, results) => {
-//     if (err) {
-//       console.error('Error executing SELECT statement:', err);
-//       res.status(500).json({ error: 'Internal Server Error' });
-//       return;
-//     }
-//     res.json(results);
-//   })
-// });
-
 
 //schedule page ทุกรายวิชา ที่ลงทะเบียนผ่านแล้ว
 router.get('/teacher/schedule',(req, res)=>{
