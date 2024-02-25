@@ -443,4 +443,14 @@ router.get("/education/getallsubjects", (req, res) => {
     }
   })
 })
+
+router.get("/subjest",(req,res)=>{
+  db.query("Select * from subjects where IsOpen= 1",(err,results)=>{
+    if(err){
+      res.status(500).json("Error Databases! Please calling admin to fix");
+    }else{
+      res.status(200).json(results);
+    }
+  })
+});
 module.exports = router;
