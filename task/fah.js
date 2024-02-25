@@ -157,32 +157,50 @@ router.delete('/edu/delete_subjects/:years', (req, res) => {
     return res.status(400).json({ error: 'Subjects parameter is required' });
   }
 
-  const sql = 'DELETE FROM subjects WHERE years=? ';
+  const checkSubjectsRegister = `
+    SELECT COUNT(subjects.idsubject) AS idSubject
+    FROM subjectsRegister
+    JOIN subjects ON subjectsRegister.Subjects_id = subjects.id
+    WHERE subjects.years = ? `;
 
-  db.query(sql, [OpenYear], (err, results) => {
-      if (err) {
-          console.error('Error executing DELETE statement:', err);
+  db.query(checkSubjectsRegister, [OpenYear], (err, results) => {
+    if (err) {
+      console.error('Error checking subjectsRegister:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    const count = results[0].idSubject;
+
+    if (count > 0) {
+      return res.status(400).json({ error: 'Cannot delete. Data exists in SubjectsRegister Table.' });
+    } else {
+      const deleteSubjectsSQL = 'DELETE FROM subjects WHERE years=?';
+      const deleteFileSQL = 'DELETE FROM file WHERE years = ?';
+
+      db.query(deleteSubjectsSQL, [OpenYear], (err, results) => {
+        if (err) {
+          console.error('Error executing DELETE statement for subjects:', err);
           return res.status(500).json({ error: 'Internal Server Error' });
-      }
+        }
 
-      if (results.affectedRows > 0) {
+        if (results.affectedRows > 0) {
           res.json({ message: 'Data delete successfully' });
-      } else {
+        } else {
           res.status(404).json({ error: 'ไม่พบหลักสูตรที่กำหนด' });
-      }
+        }
+      });
+
+      db.query(deleteFileSQL, [OpenYear], (err, results) => {
+        try {
+          fs.unlinkSync(`public/files/course_${OpenYear}.xlsx`);
+          console.log('File is deleted.', `public/files/course_${OpenYear}.xlsx`);
+        } catch (err) {
+          console.error('Error deleting file:', err);
+        }
+      });
+    }
   });
-
-  db.query("DELETE FROM file WHERE years = ?", [OpenYear], (err, results) => {
-    fs.unlink("public/files/" + "course_" + OpenYear.years + ".xlsx", (err) => {
-      if (err) {
-        console.error(err);
-      } else {
-        console.log('File is deleted.', "public/files/" + "course_" + OpenYear.years + ".xlsx");
-      }
-    })
-  })
 });
-
 
 // teacher 
 
