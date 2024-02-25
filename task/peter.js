@@ -371,20 +371,20 @@ router.post("/teacher/registersubject", (req, res) => {
       }
     }
     // ส่วนนี้ให้เพิ่มเงื่อนไข else ให้เป็นส่วนของ if (!subjects) ก่อนเพื่อเช็คเงื่อนไขที่ขึ้นอยู่กับการ query ฐานข้อมูล
-    if(user_id && st && et && day_id && n_people && branch && category_id && subjects_id){
-      db.query("select S1.name from subjects S,subjects S1,subjectsRegister Sr where S.id = ? and (S.subject_category_id =1 or S.subject_category_id=3) and (S1.subject_category_id =1 or S1.subject_category_id=3) and Sr.Subjects_id = S1.id and S.id != S1.id and Sr.day_id = 2 and ((st <= ? AND et >= ?) OR (? <= et AND ? >= st))",[subjects_id,et,st,st,et],(err,result)=>{
+    if (user_id && st && et && day_id && n_people && branch && category_id && subjects_id) {
+      db.query("select S1.name from subjects S,subjects S1,subjectsRegister Sr where S.id = ? and (S.subject_category_id =1 or S.subject_category_id=3) and (S1.subject_category_id =1 or S1.subject_category_id=3) and Sr.Subjects_id = S1.id and S.id != S1.id and Sr.day_id = 2 and ((st <= ? AND et >= ?) OR (? <= et AND ? >= st))", [subjects_id, et, st, st, et], (err, result) => {
         let statusset = 2;
-        if(err){
-          return res.status(500).json({msgerror:"Error databases ->"+err})
-        }else{
-          if(result.length>0){
+        if (err) {
+          return res.status(500).json({ msgerror: "Error databases ->" + err })
+        } else {
+          if (result.length > 0) {
           }
         }
-        db.query("INSERT INTO subjectsRegister (status_id,User_id, st, et, day_id,  N_people, branch, category_id, Subjects_id) VALUES (?,?,?,?,?,?,?,?,?)", [statusset,v.user_id, v.st, v.et, v.day_id, v.n_people, v.branch, v.category_id, v.subjects_id], (err, results) => {
-          if(err){
-            return res.status(500).json({msgerror:"Error databases ->"+err})
-          }else{
-            
+        db.query("INSERT INTO subjectsRegister (status_id,User_id, st, et, day_id,  N_people, branch, category_id, Subjects_id) VALUES (?,?,?,?,?,?,?,?,?)", [statusset, v.user_id, v.st, v.et, v.day_id, v.n_people, v.branch, v.category_id, v.subjects_id], (err, results) => {
+          if (err) {
+            return res.status(500).json({ msgerror: "Error databases ->" + err })
+          } else {
+
           }
         })
 
@@ -419,12 +419,12 @@ router.get("/subject_category", (req, res) => {
 router.get("/education/downloadlist", (req, res) => {
   db.query("select years,link,filename from file", (err, results) => {
     if (err) {
-      res.status(500).json({msgerror:"error server databases please report admin"})
+      res.status(500).json({ msgerror: "error server databases please report admin" })
     } else {
       if (results.length > 0) {
         res.status(200).json(results)
       } else {
-        res.status(200).json({msg:"ไม่มีไฟล์ถูกอัปโหลดไว้"})
+        res.status(200).json({ msg: "ไม่มีไฟล์ถูกอัปโหลดไว้" })
       }
     }
   })
@@ -433,27 +433,88 @@ router.get("/education/downloadlist", (req, res) => {
 router.get("/education/getallsubjects", (req, res) => {
   db.query("select subjects.id,idsubject,subjects.name,credit,practice_t,lecture_t,years,IsOpen,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 0 order by years DESC", (err, results) => {
     if (err) {
-      res.status(500).json({msgerror:"Error Server database! Please report admin"})
+      res.status(500).json({ msgerror: "Error Server database! Please report admin" })
     } else {
       if (results.length > 0) {
         res.status(200).json(results)
       } else {
-        res.status(200).json({msg:"ไม่มีวิชาที่อัปโหลดไว้"})
+        res.status(200).json({ msg: "ไม่มีวิชาที่อัปโหลดไว้" })
       }
     }
   })
 })
 
-router.get("/subjest",(req,res)=>{
-  db.query("Select subjects.id,idsubject,subjects.name,credit,practice_t,lecture_t,years,IsOpen,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 1",(err,results)=>{
-    if(err){
-      res.status(500).json({msgerr:"Error Server Databases! Please calling admin to fix"});
-    }else{
-      if(results.length>0)
-      res.status(200).json(results);
+router.get("/subjest", (req, res) => {
+  db.query("Select subjects.id,idsubject,subjects.name,credit,years,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 1", (err, results) => {
+    if (err) {
+      res.status(500).json({ msgerr: "Error Server Databases! Please calling admin to fix" });
+    } else {
+      if (results.length > 0)
+        res.status(200).json(results);
       else
-      res.status(200).json({msg:"ไม่มีวิชาที่เปิดสอน"});
+        res.status(200).json({ msg: "ไม่มีวิชาที่เปิดสอน" });
     }
   })
+});
+
+router.get("/teacher/subjests", (req, res) => {
+  db.query("select status,S_date,E_date,S_time,E_time from timeSystem where id =1", (err, results) => {
+    if (err) {
+      res.status(500).json({ msgerror: "Error Server Database! Please calling admin to fix" })
+    } else {
+      if (results[0].status === 0) {
+        if (results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time) {
+          const data = new Date(results[0].S_date)
+          const [hours, minutes] = results[0].S_time.split(':').map(Number);
+          data.setHours(hours);
+          data.setMinutes(minutes);
+          const data1 = new Date(results[0].E_date)
+          const [hours1, minutes1] = results[0].E_time.split(':').map(Number);
+          data1.setHours(hours1);
+          data1.setMinutes(minutes1);
+          res.status(404).json({ msgerrortime: `ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้ เปิดล่าสุด ${data.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })} ถึง ${data1.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })}` });
+        } else {
+          res.status(404).json({ msgerrortime: "ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้" })
+        }
+      } else {
+        const time = new Date()
+        if (results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time) {
+          const data = new Date(results[0].S_date)
+          const [hours, minutes] = results[0].S_time.split(':').map(Number);
+          data.setHours(hours);
+          data.setMinutes(minutes);
+          const data1 = new Date(results[0].E_date)
+          const [hours1, minutes1] = results[0].E_time.split(':').map(Number);
+          data1.setHours(hours1);
+          data1.setMinutes(minutes1);
+          if (!(data <= time && data1 >= time)) {
+            db.query("Select subjects.id,idsubject,subjects.name,credit,years,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 1", (err, results) => {
+              if (err) {
+                res.status(500).json({ msgerr: "Error Server Databases! Please calling admin to fix" });
+              } else {
+                if (results.length > 0) {
+                  res.status(200).json({results,msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })} ถึง ${data1.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })}` });
+                } else {
+                  res.status(200).json({ msg: "ไม่มีวิชาที่เปิดสอน",msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })} ถึง ${data1.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })}` });
+                }
+              }
+            })
+            return;
+          }
+        }
+        db.query("Select subjects.id,idsubject,subjects.name,credit,years,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 1", (err, results) => {
+          if (err) {
+            res.status(500).json({ msgerr: "Error Server Databases! Please calling admin to fix" });
+          } else {
+            if (results.length > 0) {
+              res.status(200).json({ results });
+            } else {
+              res.status(200).json({ msg: "ไม่มีวิชาที่เปิดสอน" });
+            }
+          }
+        })
+      }
+    }
+  });
 });
 module.exports = router;
