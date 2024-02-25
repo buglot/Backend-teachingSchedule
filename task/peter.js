@@ -518,7 +518,7 @@ router.get("/teacher/subjects", (req, res) => {
   });
 });
 
-router.get("/teacher/subject/:idsubject", (req, res) => {
+router.get("/teacher/subject/:id", (req, res) => {
   const { id } = req.params;
   db.query("select status,S_date,E_date,S_time,E_time from timeSystem where id =1", (err, results) => {
     if (err) {
@@ -538,18 +538,18 @@ router.get("/teacher/subject/:idsubject", (req, res) => {
           data1.setHours(hours1);
           data1.setMinutes(minutes1);
           if (!(data <= time && data1 >= time)) {
-            res.status(404).json({ msgerrortime: "ระบบไม่ได้เปิด" })
+            res.status(404).json({ msgerrortime: "ระบบไม่ได้เปิดในลงทะเบียน" })
             return;
           }
         }
-        db.query("select * from subjects where IsOpen=1 and id=?", [id], (err, results) => {
+        db.query("select S.name,S.idsubject,S.credit,S.practice_t,S.lecture_t,S.years,Sr.name as subject_category from subjects S join subject_category Sr on Sr.id=S.subject_category_id  where IsOpen=1 and S.id=?", [id], (err, results) => {
           if (err) {
             res.status(500).json({msgerror:"Error Server Database! Please calling admin to fix"})
           } else {
             if (results.length > 0) {
-              res.status(200).json({results})
+              res.status(200).json(results)
             } else {
-              res.status(404).json({msgerr:"วิชานี้ไม่ได้เปิดลงทะเบียน"})
+              res.status(450).json({msgerror:`${results}วิชานี้ไม่ได้ให้ลงทะเบียน`})
             }
           }
         })
