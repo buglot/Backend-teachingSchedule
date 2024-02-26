@@ -88,8 +88,8 @@ function education_import(data) {
     data.forEach((value, index) => {
       db.query("SELECT * FROM subjects where idsubject =? and years=?", [value.idsubject, value.years], (err, results) => {
         if (results.length === 0) {
-          const query = "INSERT INTO subjects (`idsubject`, `name`, `credit`, `practice_t`, `lecture_t`,`m_t`, `years`, `subject_category_id`, `term`, `IsOpen`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-          const values = [value.idsubject, value.name, value.credit, value.practice_t, value.lecture_t, value.mt, value.years, value.subject_category_id, value.term ? value.term : null, 0];
+          const query = "INSERT INTO subjects (`idsubject`, `name`, `credit`, `practice_t`, `lecture_t`,`m_t`, `years`, `subject_category_id`, `term`, `IsOpen`,`exsub`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+          const values = [value.idsubject, value.name, value.credit, value.practice_t, value.lecture_t, value.mt, value.years, value.subject_category_id, value.term ? value.term : null, 0,value.exsub];
 
           db.query(query, values, (err, results) => {
             if (err) {
@@ -146,23 +146,11 @@ router.post("/education/Course/uploadfile", upload.single('file'), (req, res) =>
           lecture_t: rows[i][creditColumnIndex] ? rows[i][creditColumnIndex].split("(")[1].split("-")[0] : null,
           mt: rows[i][creditColumnIndex] ? rows[i][creditColumnIndex].split("(")[1].split("-")[2].replace(")", "") : null,
           years: y,
+          exsub:0,
           subject_category_id: assignSubjectCategoryId(rows[i][subject_categoryColumnIndex]) // Call a function to assign category ID
         };
         list.push(data);
       } catch (error) {
-        try {
-          const data = { // Create a dictionary for each row
-            idsubject: rows[i][idsubjectColumnIndex] ? rows[i][idsubjectColumnIndex].length === 8 ? rows[i][idsubjectColumnIndex] : "0" + rows[i][idsubjectColumnIndex] : null,
-            name: rows[i][nameColumnIndex],
-            credit: rows[i][creditColumnIndex].split("-") ? 0 : rows[i][creditColumnIndex],
-            practice_t: 0,
-            lecture_t: 0,
-            mt: 0,
-            years: y,
-            subject_category_id: assignSubjectCategoryId(rows[i][subject_categoryColumnIndex]) // Call a function to assign category ID
-          };
-          list.push(data);
-        } catch (error) {
           const data = { // Create a dictionary for each row
             idsubject: rows[i][idsubjectColumnIndex] ? rows[i][idsubjectColumnIndex].length === 8 ? rows[i][idsubjectColumnIndex] : "0" + rows[i][idsubjectColumnIndex] : null,
             name: rows[i][nameColumnIndex],
@@ -171,11 +159,10 @@ router.post("/education/Course/uploadfile", upload.single('file'), (req, res) =>
             lecture_t: 0,
             mt: 0,
             years: y,
+            exsub:1,
             subject_category_id: assignSubjectCategoryId(rows[i][subject_categoryColumnIndex]) // Call a function to assign category ID
           };
           list.push(data);
-        }
-
       }
 
       // Add the dictionary to the list
@@ -542,7 +529,7 @@ router.get("/teacher/subject/:id", (req, res) => {
             return;
           }
         }
-        db.query("select S.name,S.idsubject,S.credit,S.practice_t,S.lecture_t,S.years,Sr.name as subject_category from subjects S join subject_category Sr on Sr.id=S.subject_category_id  where IsOpen=1 and S.id=?", [id], (err, results) => {
+        db.query("select S.name,S.idsubject,S.credit,S.practice_t,S.lecture_t,S.years,Sr.name as subject_category ,S.exsub from subjects S join subject_category Sr on Sr.id=S.subject_category_id  where IsOpen=1 and S.id=?", [id], (err, results) => {
           if (err) {
             res.status(500).json({msgerror:"Error Server Database! Please calling admin to fix"})
           } else {
