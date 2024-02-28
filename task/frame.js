@@ -154,7 +154,7 @@ const {userid} = req.body;
   })
 });
 //ตรวจสอบจาก database table วิชาที่ลงทะเบียน คัดกรอง สถานะผ่าน และ เวลาของคนที่แก้ไข ฉบับของจริง
-router.get('/statusRegistered', (req, res) => {
+router.get('/statusRegistered/:userid', (req, res) => {
   const { userid } = req.params;
   const sql = `
     SELECT GROUP_CONCAT(subjectsRegister.st) AS st_values,
@@ -277,6 +277,6 @@ router.get('/all/status',(req,res)=>{
 });
 
 //doneeeeeeeeeeeeeeeeeeeeeeeeee
-//aaaa
+//sssssssssssss
 
 module.exports = router;
