@@ -15,7 +15,7 @@ router.post('/admin/System', (req, res) => {
   const { systemstatus, S_date, E_date, S_time, E_time } = req.body;
   if (systemstatus || systemstatus === 0) {
     if (S_date && E_date && S_time && E_time) {
-      db.query("update timeSystem set status=?,S_date=?,E_date=?,S_time=?,E_time=? where id=1", [systemstatus, S_date, E_date, S_time, E_time], (err, results) => {
+      db.query("update timeSystem set status=?,S_date=?,E_date=?,S_time=?,E_time=?,type=1 where id=1", [systemstatus, S_date, E_date, S_time, E_time], (err, results) => {
         if (err) {
           res.status(500).json({ msgerror: "Database Error :" + err })
         } else {
@@ -25,7 +25,7 @@ router.post('/admin/System', (req, res) => {
       })
       return;
     } else {
-      db.query("update timeSystem set status=? where id=1", [systemstatus], (err, results) => {
+      db.query("update timeSystem set status=?,type=0 where id=1", [systemstatus], (err, results) => {
         if (err) {
           res.status(404).json({ msgerror: "Database Error: " + err });
         } else {
@@ -146,23 +146,23 @@ router.post("/education/Course/uploadfile", upload.single('file'), (req, res) =>
           lecture_t: rows[i][creditColumnIndex] ? rows[i][creditColumnIndex].split("(")[1].split("-")[0] : null,
           mt: rows[i][creditColumnIndex] ? rows[i][creditColumnIndex].split("(")[1].split("-")[2].replace(")", "") : null,
           years: y,
-          exsub:0,
+          exsub: 0,
           subject_category_id: assignSubjectCategoryId(rows[i][subject_categoryColumnIndex]) // Call a function to assign category ID
         };
         list.push(data);
       } catch (error) {
-          const data = { // Create a dictionary for each row
-            idsubject: rows[i][idsubjectColumnIndex] ? rows[i][idsubjectColumnIndex].length === 8 ? rows[i][idsubjectColumnIndex] : "0" + rows[i][idsubjectColumnIndex] : null,
-            name: rows[i][nameColumnIndex],
-            credit: rows[i][creditColumnIndex],
-            practice_t: 0,
-            lecture_t: 0,
-            mt: 0,
-            years: y,
-            exsub:1,
-            subject_category_id: assignSubjectCategoryId(rows[i][subject_categoryColumnIndex]) // Call a function to assign category ID
-          };
-          list.push(data);
+        const data = { // Create a dictionary for each row
+          idsubject: rows[i][idsubjectColumnIndex] ? rows[i][idsubjectColumnIndex].length === 8 ? rows[i][idsubjectColumnIndex] : "0" + rows[i][idsubjectColumnIndex] : null,
+          name: rows[i][nameColumnIndex],
+          credit: rows[i][creditColumnIndex],
+          practice_t: 0,
+          lecture_t: 0,
+          mt: 0,
+          years: y,
+          exsub: 1,
+          subject_category_id: assignSubjectCategoryId(rows[i][subject_categoryColumnIndex]) // Call a function to assign category ID
+        };
+        list.push(data);
       }
 
       // Add the dictionary to the list
@@ -340,7 +340,7 @@ router.post("/teacher/registersubject", (req, res) => {
         return res.status(500).json({ msgerror: "ไม่ได้เปิดระบบให้ลงทะเบียน" });
       } else {
         const time = new Date()
-        if (result[0].S_date) {
+        if (result[0].type===1) {
           const data = new Date(result[0].S_date)
           const [hours, minutes] = result[0].S_time.split(':').map(Number);
           data.setHours(hours);
@@ -463,7 +463,7 @@ router.get("/teacher/subjects", (req, res) => {
         }
       } else {
         const time = new Date()
-        if (results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time) {
+        if (results[0].type ===1 && results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time) {
           const data = new Date(results[0].S_date)
           const [hours, minutes] = results[0].S_time.split(':').map(Number);
           data.setHours(hours);
@@ -507,13 +507,14 @@ router.get("/teacher/subject/:id", (req, res) => {
   const { id } = req.params;
   db.query("select status,S_date,E_date,S_time,E_time from timeSystem where id =1", (err, results) => {
     if (err) {
+
       res.status(500).json({ msgerror: "Error Server Database! Please calling admin to fix" })
     } else {
       if (results[0].status === 0) {
-        res.status(404).json({msgerrortime:"ระบบไม่ได้เปิด"})
+        res.status(404).json({ msgerrortime: "ระบบไม่ได้เปิด" })
       } else {
         const time = new Date()
-        if (results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time) {
+        if (results.type ===1 &&results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time) {
           const data = new Date(results[0].S_date)
           const [hours, minutes] = results[0].S_time.split(':').map(Number);
           data.setHours(hours);
@@ -529,12 +530,13 @@ router.get("/teacher/subject/:id", (req, res) => {
         }
         db.query("select S.name,S.idsubject,S.credit,S.practice_t,S.lecture_t,S.years,Sr.name as subject_category ,S.exsub from subjects S join subject_category Sr on Sr.id=S.subject_category_id  where IsOpen=1 and S.id=?", [id], (err, results) => {
           if (err) {
-            res.status(500).json({msgerror:"Error Server Database! Please calling admin to fix"})
+            console.log(err)
+            res.status(500).json({ msgerror: "Error Server Database! Please calling admin to fix" })
           } else {
             if (results.length > 0) {
               res.status(200).json(results)
             } else {
-              res.status(450).json({msgerror:`${results}วิชานี้ไม่ได้ให้ลงทะเบียน`})
+              res.status(450).json({ msgerror: `${results}วิชานี้ไม่ได้ให้ลงทะเบียน` })
             }
           }
         })
@@ -544,4 +546,25 @@ router.get("/teacher/subject/:id", (req, res) => {
   });
 }
 );
+
+router.get("/admin/user/:id",(req,res)=>{
+  const {id} = req.params;
+  db.query("selecte * from user where id=?",[id],(err,result)=>{
+    if(err){
+      res.status(500).json({msgerror:"Error Server Databases! Please calling admin to fix."});
+    }else{
+      if(result.length>0){
+         res.status(200).json(result);
+      }else{
+        res.status(404).json({msgerror:"ไม่พบ user นี้"})
+      }
+    }
+  })
+});
+
+router.post("/admin/userupdate",(req,res)=>{
+  const {id,name,email,role} = req.body;
+  db.query()
+})
+
 module.exports = router;

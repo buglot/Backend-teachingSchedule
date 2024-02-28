@@ -1,6 +1,6 @@
 CREATE DATABASE  IF NOT EXISTS `teachingschedule` /*!40100 DEFAULT CHARACTER SET utf8mb3 */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `teachingschedule`;
--- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.34, for Win64 (x86_64)
 --
 -- Host: 127.0.0.1    Database: teachingschedule
 -- ------------------------------------------------------
@@ -114,7 +114,7 @@ CREATE TABLE `file` (
 
 LOCK TABLES `file` WRITE;
 /*!40000 ALTER TABLE `file` DISABLE KEYS */;
-INSERT INTO `file` VALUES (14,'2024-02-26 11:35:15','course_2565.xlsx','/download/course_2565.xlsx',NULL,2565);
+INSERT INTO `file` VALUES (14,'2024-02-28 07:45:27','course_2565.xlsx','/download/course_2565.xlsx',NULL,2565);
 /*!40000 ALTER TABLE `file` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -202,7 +202,7 @@ CREATE TABLE `subjects` (
   `id` int NOT NULL AUTO_INCREMENT,
   `idsubject` varchar(10) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
-  `credit` varchar(10) NOT NULL,
+  `credit` int NOT NULL,
   `practice_t` int DEFAULT NULL,
   `m_t` int DEFAULT NULL,
   `lecture_t` int DEFAULT NULL,
@@ -214,7 +214,7 @@ CREATE TABLE `subjects` (
   PRIMARY KEY (`id`),
   KEY `fk_Subjects_subject_category1_idx` (`subject_category_id`),
   CONSTRAINT `fk_Subjects_subject_category1` FOREIGN KEY (`subject_category_id`) REFERENCES `subject_category` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1038 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=1036 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -223,7 +223,7 @@ CREATE TABLE `subjects` (
 
 LOCK TABLES `subjects` WRITE;
 /*!40000 ALTER TABLE `subjects` DISABLE KEYS */;
-INSERT INTO `subjects` VALUES (971,'03603111','Programming Fundamentals I','3',3,6,2,'2565',3,NULL,0,0),(972,'03603112','Programming Fundamentals II','3',3,6,2,'2565',3,NULL,0,0),(973,'01204111','Computers and Programming','3',3,6,2,'2565',3,NULL,0,0),(974,'03603101','Introduction to Computer Programming','3',3,6,2,'2565',3,NULL,0,0),(975,'03603171','Introduction to Computer Engineering and Informatics','3',0,6,3,'2565',1,NULL,0,0),(976,'03603352','Laws and Ethics in Information Technology','3',0,6,3,'2565',1,NULL,0,0),(977,'03603251','Database Systems','3',0,6,3,'2565',1,NULL,0,0),(978,'03603252','Database Systems Laboratory','1',3,2,0,'2565',1,NULL,0,0),(979,'03603212','Abstract Data Types and Problem Solving','3',0,6,3,'2565',1,NULL,0,0),(980,'03603213','Algorithm Design and Analysis','3',0,6,3,'2565',1,NULL,0,0),(981,'03603214','Programming Skills Development Laboratory','1',3,2,0,'2565',1,NULL,0,0),(982,'03603241','Application Development','3',0,6,3,'2565',1,NULL,0,0),(983,'03603341','Software Engineering','4',3,8,3,'2565',1,NULL,0,0),(984,'00360334','Combined Information Technology for Software Development Laboratory','1',3,2,0,'2565',1,NULL,0,0),(985,'03603211','Discrete Mathematics','3',0,6,3,'2565',1,NULL,0,0),(986,'03603312','Probability and Statistics for Informatics','3',0,6,3,'2565',1,NULL,0,0),(987,'03603325','Data Communications and Computer Networks','3',0,6,3,'2565',1,NULL,0,0),(988,'03603332','Operating Systems','3',0,6,3,'2565',1,NULL,0,0),(989,'03603221','Digital Systems Design','3',0,6,3,'2565',1,NULL,0,0),(990,'03603222','Logic Circuit Laboratory','1',3,2,0,'2565',1,NULL,0,0),(991,'03603223','Computer Architecture and Organization','3',0,6,3,'2565',1,NULL,0,0),(992,'03603323','Introduction to Embedded Systems','3',0,6,3,'2565',1,NULL,0,0),(993,'03603324','Embedded Systems Laboratory','1',3,2,0,'2565',1,NULL,0,0),(994,'03603497','Seminar','1',0,0,0,'2565',1,NULL,0,1),(995,'03603321','Computer Networks Laboratory','3',6,6,1,'2565',2,NULL,0,0),(996,'03603421','Internetworking with TCP/IP','3',0,6,3,'2565',2,NULL,0,0),(997,'03603422','Wireless and Mobile Networks','3',0,6,3,'2565',2,NULL,0,0),(998,'03603423','Network Programming','3',0,6,3,'2565',2,NULL,0,0),(999,'03603426','Cyber Security','3',0,6,3,'2565',2,NULL,0,0),(1000,'03603427','Mobile Computing','3',0,6,3,'2565',2,NULL,0,0),(1001,'03603428','Internet of Things','3',0,6,3,'2565',2,NULL,0,0),(1002,'03603429','Cryptography and Blockchain Technology','3',0,6,3,'2565',2,NULL,0,0),(1003,'03603411','Functional Programming','3',0,6,3,'2565',2,NULL,0,0),(1004,'03603435','Cloud Computing','3',0,6,3,'2565',2,NULL,0,0),(1005,'03603436','Web Application Development','3',0,6,3,'2565',2,NULL,0,0),(1006,'03603437','Mobile Application Development','3',0,6,3,'2565',2,NULL,0,0),(1007,'03603482','User Experience Design','3',0,6,3,'2565',2,NULL,0,0),(1008,'03603484','Computer Game Development','3',0,6,3,'2565',2,NULL,0,0),(1009,'03603441','Software Testing','3',0,6,3,'2565',2,NULL,0,0),(1010,'03603351','Introduction to Data Science','3',0,6,3,'2565',2,NULL,0,0),(1011,'03603452','Mining Big Data','3',0,6,3,'2565',2,NULL,0,0),(1012,'03603461','Artificial Intelligence','3',0,6,3,'2565',2,NULL,0,0),(1013,'03603462','Machine Learning','3',0,6,3,'2565',2,NULL,0,0),(1014,'03603463','Biologically-Inspired Computational Intelligence','3',0,6,3,'2565',2,NULL,0,0),(1015,'03603465','Natural Language Processing','3',0,6,3,'2565',2,NULL,0,0),(1016,'03603381','Digital Signal Processing for Computer Engineers','3',0,6,3,'2565',2,NULL,1,0),(1017,'03603382','Digital Image Processing','3',0,6,3,'2565',2,NULL,0,0),(1018,'03603383','Digital Identification','3',0,6,3,'2565',2,NULL,0,0),(1019,'03603464','Computer Vision','3',0,6,3,'2565',2,NULL,0,0),(1020,'03603481','Computer Graphics','3',0,6,3,'2565',2,NULL,0,0),(1021,'03603484','Computer Game Development','3',0,6,3,'2565',2,NULL,0,0),(1022,'03603485','Digital Audio and Computer Music','3',0,6,3,'2565',2,NULL,0,0),(1023,'03603371','Application Development for Embedded Devices','3',0,6,3,'2565',2,NULL,0,0),(1024,'03603471','Embedded Systems Interfacing','3',0,6,3,'2565',2,NULL,0,0),(1025,'03603472','Industrial Automation and Control','3',0,6,3,'2565',2,NULL,0,0),(1026,'03603473','Digital Circuit Design with VHDL','3',0,6,3,'2565',2,NULL,0,0),(1027,'03603474','Real-Time Operating System','3',0,6,3,'2565',2,NULL,0,0),(1028,'03603475','Sensors and Transducer','3',0,6,3,'2565',2,NULL,0,0),(1029,'03603476','Embedded System Circuit Design','3',0,6,3,'2565',2,NULL,0,0),(1030,'03603495','Computer Engineering and Informatics Project Preparation','1',3,2,0,'2565',2,NULL,0,0),(1031,'03603499','Computer Engineering and Informatics Project','2',6,3,0,'2565',2,NULL,0,0),(1032,'03603432','Programming Language Concepts','3',0,6,3,'2565',2,NULL,0,0),(1033,'03603451','Information Technology Management','3',0,6,3,'2565',2,NULL,0,0),(1034,'03603496','Selected Topics in Computer Engineering and Informatics','1-3',0,0,0,'2565',2,NULL,0,1),(1035,'03603498','Special Problems','1-3',0,0,0,'2565',2,NULL,0,1),(1036,'03600390','Co-operative Education Preparation','3',0,6,3,'2565',2,NULL,0,0),(1037,'03600490','Co-operative Education','6',0,0,0,'2565',2,NULL,0,1);
+INSERT INTO `subjects` VALUES (971,'03603111','Programming Fundamentals I',3,3,6,2,'2565',3,NULL,0,0),(972,'03603112','Programming Fundamentals II',3,3,6,2,'2565',3,NULL,0,0),(973,'01204111','Computers and Programming',3,3,6,2,'2565',3,NULL,0,0),(974,'03603101','Introduction to Computer Programming',3,3,6,2,'2565',3,NULL,0,0),(975,'03603171','Introduction to Computer Engineering and Informatics',3,0,6,3,'2565',1,NULL,0,0),(976,'03603352','Laws and Ethics in Information Technology',3,0,6,3,'2565',1,NULL,0,0),(977,'03603251','Database Systems',3,0,6,3,'2565',1,NULL,0,0),(978,'03603252','Database Systems Laboratory',1,3,2,0,'2565',1,NULL,0,0),(979,'03603212','Abstract Data Types and Problem Solving',3,0,6,3,'2565',1,NULL,0,0),(980,'03603213','Algorithm Design and Analysis',3,0,6,3,'2565',1,NULL,0,0),(981,'03603214','Programming Skills Development Laboratory',1,3,2,0,'2565',1,NULL,0,0),(982,'03603241','Application Development',3,0,6,3,'2565',1,NULL,0,0),(983,'03603341','Software Engineering',4,3,8,3,'2565',1,NULL,0,0),(984,'00360334','Combined Information Technology for Software Development Laboratory',1,3,2,0,'2565',1,NULL,0,0),(985,'03603211','Discrete Mathematics',3,0,6,3,'2565',1,NULL,0,0),(986,'03603312','Probability and Statistics for Informatics',3,0,6,3,'2565',1,NULL,0,0),(987,'03603325','Data Communications and Computer Networks',3,0,6,3,'2565',1,NULL,0,0),(988,'03603332','Operating Systems',3,0,6,3,'2565',1,NULL,0,0),(989,'03603221','Digital Systems Design',3,0,6,3,'2565',1,NULL,0,0),(990,'03603222','Logic Circuit Laboratory',1,3,2,0,'2565',1,NULL,0,0),(991,'03603223','Computer Architecture and Organization',3,0,6,3,'2565',1,NULL,0,0),(992,'03603323','Introduction to Embedded Systems',3,0,6,3,'2565',1,NULL,0,0),(993,'03603324','Embedded Systems Laboratory',1,3,2,0,'2565',1,NULL,0,0),(994,'03603497','Seminar',1,0,0,0,'2565',1,NULL,0,1),(995,'03603321','Computer Networks Laboratory',3,6,6,1,'2565',2,NULL,0,0),(996,'03603421','Internetworking with TCP/IP',3,0,6,3,'2565',2,NULL,0,0),(997,'03603422','Wireless and Mobile Networks',3,0,6,3,'2565',2,NULL,0,0),(998,'03603423','Network Programming',3,0,6,3,'2565',2,NULL,0,0),(999,'03603426','Cyber Security',3,0,6,3,'2565',2,NULL,0,0),(1000,'03603427','Mobile Computing',3,0,6,3,'2565',2,NULL,0,0),(1001,'03603428','Internet of Things',3,0,6,3,'2565',2,NULL,0,0),(1002,'03603429','Cryptography and Blockchain Technology',3,0,6,3,'2565',2,NULL,0,0),(1003,'03603411','Functional Programming',3,0,6,3,'2565',2,NULL,0,0),(1004,'03603435','Cloud Computing',3,0,6,3,'2565',2,NULL,0,0),(1005,'03603436','Web Application Development',3,0,6,3,'2565',2,NULL,0,0),(1006,'03603437','Mobile Application Development',3,0,6,3,'2565',2,NULL,0,0),(1007,'03603482','User Experience Design',3,0,6,3,'2565',2,NULL,0,0),(1008,'03603484','Computer Game Development',3,0,6,3,'2565',2,NULL,0,0),(1009,'03603441','Software Testing',3,0,6,3,'2565',2,NULL,0,0),(1010,'03603351','Introduction to Data Science',3,0,6,3,'2565',2,NULL,0,0),(1011,'03603452','Mining Big Data',3,0,6,3,'2565',2,NULL,0,0),(1012,'03603461','Artificial Intelligence',3,0,6,3,'2565',2,NULL,0,0),(1013,'03603462','Machine Learning',3,0,6,3,'2565',2,NULL,0,0),(1014,'03603463','Biologically-Inspired Computational Intelligence',3,0,6,3,'2565',2,NULL,0,0),(1015,'03603465','Natural Language Processing',3,0,6,3,'2565',2,NULL,0,0),(1016,'03603381','Digital Signal Processing for Computer Engineers',3,0,6,3,'2565',2,NULL,0,0),(1017,'03603382','Digital Image Processing',3,0,6,3,'2565',2,NULL,0,0),(1018,'03603383','Digital Identification',3,0,6,3,'2565',2,NULL,0,0),(1019,'03603464','Computer Vision',3,0,6,3,'2565',2,NULL,0,0),(1020,'03603481','Computer Graphics',3,0,6,3,'2565',2,NULL,0,0),(1021,'03603484','Computer Game Development',3,0,6,3,'2565',2,NULL,0,0),(1022,'03603485','Digital Audio and Computer Music',3,0,6,3,'2565',2,NULL,0,0),(1023,'03603371','Application Development for Embedded Devices',3,0,6,3,'2565',2,NULL,0,0),(1024,'03603471','Embedded Systems Interfacing',3,0,6,3,'2565',2,NULL,0,0),(1025,'03603472','Industrial Automation and Control',3,0,6,3,'2565',2,NULL,0,0),(1026,'03603473','Digital Circuit Design with VHDL',3,0,6,3,'2565',2,NULL,0,0),(1027,'03603474','Real-Time Operating System',3,0,6,3,'2565',2,NULL,0,0),(1028,'03603475','Sensors and Transducer',3,0,6,3,'2565',2,NULL,0,0),(1029,'03603476','Embedded System Circuit Design',3,0,6,3,'2565',2,NULL,0,0),(1030,'03603495','Computer Engineering and Informatics Project Preparation',1,3,2,0,'2565',2,NULL,0,0),(1031,'03603499','Computer Engineering and Informatics Project',2,6,3,0,'2565',2,NULL,0,0),(1032,'03603432','Programming Language Concepts',3,0,6,3,'2565',2,NULL,0,0),(1033,'03603451','Information Technology Management',3,0,6,3,'2565',2,NULL,0,0),(1034,'03600390','Co-operative Education Preparation',3,0,6,3,'2565',2,NULL,0,0),(1035,'03600490','Co-operative Education',6,0,0,0,'2565',2,NULL,0,1);
 /*!40000 ALTER TABLE `subjects` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -246,7 +246,6 @@ CREATE TABLE `subjectsRegister` (
   `branch` json NOT NULL,
   `category_id` int NOT NULL,
   `Subjects_id` int NOT NULL,
-  `realcredit` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_SubjectsRegister_User1_idx` (`User_id`),
   KEY `fk_SubjectsRegister_day1_idx` (`day_id`),
@@ -294,7 +293,7 @@ CREATE TABLE `timeSystem` (
 
 LOCK TABLES `timeSystem` WRITE;
 /*!40000 ALTER TABLE `timeSystem` DISABLE KEYS */;
-INSERT INTO `timeSystem` VALUES (1,'2024-02-25','2024-03-02','09:30:00','20:30:00',1);
+INSERT INTO `timeSystem` VALUES (1,NULL,NULL,NULL,NULL,1);
 /*!40000 ALTER TABLE `timeSystem` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -314,7 +313,7 @@ CREATE TABLE `user` (
   UNIQUE KEY `email_UNIQUE` (`email`),
   KEY `fk_User_role_idx` (`role_id`),
   CONSTRAINT `fk_User_role` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -323,7 +322,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'yongkeat.s@ku.th','ยงเกียรติ หล่อ',2),(2,'jenny.yatika@gmail.com','gen',2),(3,'jakkapop80@gmail.com','mann โต',2),(4,'revoitz158@gmail.com','ใคร',2),(5,'nitharee2@gmail.com','ฟ้า',2),(8,'yatika.p@ku.th','yati',1),(9,'yatika.p@gmail.com','YYY',2),(10,'nthr.ph.pad@gmail.com','NNN',3),(11,'nitharee.p@ku.th','nitha',2),(12,'kanonkphorn.p@gmail.com','FFF',1),(13,'ptii2x@gmail.com','ปีเตอร์',3);
+INSERT INTO `user` VALUES (1,'yongkeat.s@ku.th','ยงเกียรติ หล่อ',2),(2,'jenny.yatika@gmail.com','gen',2),(3,'jakkapop80@gmail.com','mann โต',2),(4,'revoitz158@gmail.com','ใคร',2),(5,'nitharee2@gmail.com','ฟ้า',2),(12,'ptii2x@gmail.com','ปีเตอร์',3);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -336,4 +335,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-02-26 19:21:49
+-- Dump completed on 2024-02-28 14:48:45
