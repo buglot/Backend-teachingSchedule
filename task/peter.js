@@ -89,7 +89,7 @@ function education_import(data) {
       db.query("SELECT * FROM subjects where idsubject =? and years=?", [value.idsubject, value.years], (err, results) => {
         if (results.length === 0) {
           const query = "INSERT INTO subjects (`idsubject`, `name`, `credit`, `practice_t`, `lecture_t`,`m_t`, `years`, `subject_category_id`, `term`, `IsOpen`,`exsub`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-          const values = [value.idsubject, value.name, value.credit, value.practice_t, value.lecture_t, value.mt, value.years, value.subject_category_id, value.term ? value.term : null, 0,value.exsub];
+          const values = [value.idsubject, value.name, value.credit, value.practice_t, value.lecture_t, value.mt, value.years, value.subject_category_id, value.term ? value.term : null, 0, value.exsub];
 
           db.query(query, values, (err, results) => {
             if (err) {
@@ -340,7 +340,7 @@ router.post("/teacher/registersubject", (req, res) => {
         return res.status(500).json({ msgerror: "ไม่ได้เปิดระบบให้ลงทะเบียน" });
       } else {
         const time = new Date()
-        if (result[0].type===1) {
+        if (result[0].type === 1) {
           const data = new Date(result[0].S_date)
           const [hours, minutes] = result[0].S_time.split(':').map(Number);
           data.setHours(hours);
@@ -463,7 +463,7 @@ router.get("/teacher/subjects", (req, res) => {
         }
       } else {
         const time = new Date()
-        if (results[0].type ===1 && results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time) {
+        if (results[0].type === 1 && results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time) {
           const data = new Date(results[0].S_date)
           const [hours, minutes] = results[0].S_time.split(':').map(Number);
           data.setHours(hours);
@@ -514,7 +514,7 @@ router.get("/teacher/subject/:id", (req, res) => {
         res.status(404).json({ msgerrortime: "ระบบไม่ได้เปิด" })
       } else {
         const time = new Date()
-        if (results.type ===1 &&results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time) {
+        if (results.type === 1 && results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time) {
           const data = new Date(results[0].S_date)
           const [hours, minutes] = results[0].S_time.split(':').map(Number);
           data.setHours(hours);
@@ -547,25 +547,45 @@ router.get("/teacher/subject/:id", (req, res) => {
 }
 );
 
-router.get("/admin/user/:id",(req,res)=>{
-  const {id} = req.params;
-  db.query("selecte * from user where id=?",[id],(err,result)=>{
-    if(err){
-      res.status(500).json({msgerror:"Error Server Databases! Please calling admin to fix."});
-    }else{
-      if(result.length>0){
-         res.status(200).json(result);
-      }else{
-        res.status(404).json({msgerror:"ไม่พบ user นี้"})
+router.get("/admin/user/:id", (req, res) => {
+  const { id } = req.params;
+  db.query("select U.name,U.email,U.role_id,R.name as role from user U join role R on U.role_id = R.id where U.id=?", [id], (err, result) => {
+    if (err) {
+      console.log(err);
+      res.status(500).json({ msgerror: "Error Server Databases! Please calling admin to fix." });
+    } else {
+      if (result.length > 0) {
+        res.status(200).json(result);
+      } else {
+        res.status(404).json({ msgerror: "ไม่พบ user นี้" })
       }
     }
   })
 });
 
-router.post("/admin/userupdate",(req,res)=>{
-  const {id,name,email,role} = req.body;
-  db.query()
+router.post("/admin/userupdate", (req, res) => {
+  const { id, name, email, role_id } = req.body;
+  if (id && name && email && role_id && name!=="" && email!=="") {
+    db.query("UPDATE user SET `email` = ?, `name` = ?, `role_id` = ? WHERE (`id` = ?)", [email, name, role_id, id], (err, results) => {
+      if (err) {
+        res.status(500).json({ msgerror: "Error server Database ! Please calling admin." })
+      } else {
+        res.status(200).json({ msg: "แก้ไขสำเร็จ" })
+      }
+    })
+  }else{
+    res.status(500).json({msgerror : "กรอกข้อมูลไม่ครบและไม่ถูกต้อง"})
+  }
 })
 
+router.get("/admin/role",(req,res)=>{
+  db.query("select * from role",(err,result)=>{
+    if (err) {
+      res.status(500).json({ msgerror: "Error server Database ! Please calling admin." })
+    } else {
+      res.status(200).json({ msg: "แก้ไขสำเร็จ" })
+    }
+  })
+})
 
 module.exports = router;

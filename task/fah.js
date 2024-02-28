@@ -45,7 +45,7 @@ router.get('/admin/user', (req, res) => {
 router.get('/admin/user/single/:email', (req, res) => {
   const email = req.params.email;
 
-  const sql = 'SELECT role.id, user.name AS name, user.email AS mail, role.name AS role FROM user JOIN role ON user.role_id = role.id WHERE user.email = ?';
+  const sql = 'SELECT user.id,role.id, user.name AS name, user.email, role.name AS role FROM user JOIN role ON user.role_id = role.id WHERE user.email = ?';
   db.query(sql, [email], (err, results) => {
     if (err) {
       console.error('Error executing SELECT statement:', err);
