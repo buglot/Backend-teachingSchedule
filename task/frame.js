@@ -246,7 +246,37 @@ router.get('/eu/allRegister',(req,res)=>{
   })
 });
 
+router.post('/eu/ubdatestatusregister',(req,res)=>{
+  const {id} = req.body; 
+  const {status_id} = req.body;
+  const sql = 'UPDATE subjectsRegister SET (status_id) VALUES (?) where id=?'
+  db.query(sql, [st, et, status_id, id], (err, result) => { 
+    if (err) {
+      return res.status(500).send("Error updating subject register");
+    } else {
+      return res.status(200).send("Subject register updated successfully"); 
+    }
+  })
+});
+
+router.get('all/status',(req,res)=>{
+  const sql = 'select id,name from status'
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error executing SELECT statement:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
+
+    if (results.length > 0) {
+      res.json({ message: results });
+    } else {
+      res.status(401).json({ error: 'Invalid credentials' });
+    }
+  })
+});
+
 //doneeeeeeeeeeeeeeeeeeeeeeeeee
-//eee
+//aaaa
 
 module.exports = router;
