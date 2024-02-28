@@ -230,7 +230,7 @@ router.get('/searchregister/:search',(req,res)=>{
 
 
 router.get('/eu/allRegister',(req,res)=>{
-  const sql = `SELECT subjectsRegister.id ,User_id ,credit,st ,et ,day_id ,sec ,status_id ,N_people ,branch ,category_id ,Subjects_id,subjects.name as SUBJECTNAME,category.name as CATEGORYNAME,day.name as DAYNAME,status.name as STATUSNAME,user.name as USERNAME FROM user,status,day,subjectsRegister,subjects,category where subjectsRegister.id = subjects.id and subjectsRegister.category_id = category.id and subjectsRegister.day_id=day.id and subjectsRegister.status_id = status.id and subjectsRegister.User_id = user.id;`
+  const sql = `SELECT subjectsRegister.id ,User_id ,credit,st ,et ,day_id ,sec ,status_id ,N_people ,branch ,category_id ,Subjects_id,subjects.name as SUBJECTNAME,category.name as CATEGORYNAME,day.name as DAYNAME,status.name as STATUSNAME,user.name as USERNAME FROM user,status,day,subjectsRegister,subjects,category where subjectsRegister.subjects_id = subjects.id and subjectsRegister.category_id = category.id and subjectsRegister.day_id=day.id and subjectsRegister.status_id = status.id and subjectsRegister.User_id = user.id;`
   db.query(sql, (err, results) => {
     if (err) {
       console.error('Error executing SELECT statement:', err);
@@ -247,6 +247,6 @@ router.get('/eu/allRegister',(req,res)=>{
 });
 
 //doneeeeeeeeeeeeeeeeeeeeeeeeee
-
+//eee
 
 module.exports = router;
