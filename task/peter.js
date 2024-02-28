@@ -567,4 +567,5 @@ router.post("/admin/userupdate",(req,res)=>{
   db.query()
 })
 
+
 module.exports = router;
