@@ -313,8 +313,6 @@ router.post("/education/subjectOpen", (req, res) => {
         if (results.changedRows === 0) {
           warn.push(subject.id)
         }
-
-
         resolve(results);
       });
     });

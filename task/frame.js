@@ -58,22 +58,19 @@ router.post('/user1',(req,res)=>{
 router.get('/opensubject',(req,res)=>{
   const sql = `
   select subjects.id,idsubject,
-  subject_category.name as category,
-  subjects.name as subject_name,
+  subject_category.name as subject_category,
+  subjects.name,
   years,subjects.subject_category_id 
   from subjects,subject_category 
-  where subjects.IsOpen= 1`
+  where subjects.IsOpen= 1 and subject_category.id = subjects.subject_category_id`
   db.query(sql, (err, results) => {
     if (err) {
-      console.error('Error executing SELECT statement:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
-      return;
-    }
-
-    if (results.length > 0) {
-      res.json({ message: results });
+      res.status(500).json({ msgerr: "Error Server Databases! Please calling admin to fix" });
     } else {
-      res.status(401).json({ error: 'Invalid credentials' });
+      if (results.length > 0)
+        res.status(200).json(results);
+      else
+        res.status(200).json({ msg: "ไม่มีวิชาที่เปิดสอน" });
     }
   })
 });
