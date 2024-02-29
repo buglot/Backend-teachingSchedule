@@ -6,21 +6,21 @@ const fs = require('fs');
 
 //ตัวอย่าง
 router.get('/login', (req, res) => {
-    const sql = 'SELECT * FROM table1';
-    db.query(sql, (err, results) => {
-      if (err) {
-        console.error('Error executing SELECT statement:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-        return;
-      }
-  
-      if (results.length > 0) {
-        res.json({ message: results });
-      } else {
-        res.status(401).json({ error: 'Invalid credentials' });
-      }
-    });
+  const sql = 'SELECT * FROM table1';
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error executing SELECT statement:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
+
+    if (results.length > 0) {
+      res.json({ message: results });
+    } else {
+      res.status(401).json({ error: 'Invalid credentials' });
+    }
   });
+});
 
 
 
@@ -71,16 +71,16 @@ router.delete('/admin/delete_user/:id', (req, res) => {
   const sql = 'DELETE FROM user WHERE id = ?';
 
   db.query(sql, [idToDelete], (err, results) => {
-      if (err) {
-          console.error('Error executing DELETE statement:', err);
-          return res.status(500).json({ error: 'Internal Server Error' });
-      }
+    if (err) {
+      console.error('Error executing DELETE statement:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
 
-      if (results.affectedRows > 0) {
-          res.json({ message: 'Data deleted successfully' });
-      } else {
-          res.status(404).json({ error: 'Data not found' });
-      }
+    if (results.affectedRows > 0) {
+      res.json({ message: 'Data deleted successfully' });
+    } else {
+      res.status(404).json({ error: 'Data not found' });
+    }
   });
 });
 
@@ -97,16 +97,16 @@ router.put('/edu/delete_subjectsIsopen/:id', (req, res) => {
   const sql = 'UPDATE subjects SET IsOpen = 0 WHERE id = ?';
 
   db.query(sql, [idSubject], (err, results) => {
-      if (err) {
-          console.error('Error executing UPDATE statement:', err);
-          return res.status(500).json({ error: 'Internal Server Error' });
-      }
+    if (err) {
+      console.error('Error executing UPDATE statement:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
 
-      if (results.affectedRows > 0) {
-          res.json({ message: 'Data update successfully' });
-      } else {
-          res.status(404).json({ error: 'Id not found' });
-      }
+    if (results.affectedRows > 0) {
+      res.json({ message: 'Data update successfully' });
+    } else {
+      res.status(404).json({ error: 'Id not found' });
+    }
   });
 });
 
@@ -205,11 +205,13 @@ router.delete('/edu/delete_subjects/:years', (req, res) => {
 // teacher 
 
 //schedule page ทุกรายวิชา ที่ลงทะเบียนผ่านแล้ว
-router.get('/teacher/schedule',(req, res)=>{
+router.get('/teacher/schedule', (req, res) => {
   const sql = `
   SELECT 
   subjects.id AS idSubject, 
-  subjects.name AS SUBJECT, 
+  subjects.name AS SUBJECT,
+  subjects.idsubject AS id_subject,
+  subjects.years AS ySubject,
   subjects.credit,
   category.name AS Moo,
   user.name AS NAME,
@@ -347,16 +349,16 @@ router.delete('/teacher/delete_subjectsregister/:id', (req, res) => {
   const sql = 'DELETE FROM subjectsRegister WHERE id = ? ;';
 
   db.query(sql, [idSubject], (err, results) => {
-      if (err) {
-          console.error('Error executing DELETE statement:', err);
-          return res.status(500).json({ error: 'Internal Server Error' });
-      }
+    if (err) {
+      console.error('Error executing DELETE statement:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
 
-      if (results.affectedRows > 0) {
-          res.json({ message: 'Data deleted successfully' });
-      } else {
-          res.status(404).json({ error: 'Id not found' });
-      }
+    if (results.affectedRows > 0) {
+      res.json({ message: 'Data deleted successfully' });
+    } else {
+      res.status(404).json({ error: 'Id not found' });
+    }
   });
 });
 
