@@ -331,7 +331,6 @@ router.post("/education/subjectOpen", (req, res) => {
 
 router.post("/teacher/registersubject", (req, res) => {
   const { subjects } = req.body;
-  const { user_id, st, et, day_id, n_people, branch, category_id, subjects_id } = req.body;
   db.query('select * from timeSystem', (err, result) => {
     if (err) {
       return res.status(500).json({ msgerror: 'database error ' + err });
@@ -355,33 +354,12 @@ router.post("/teacher/registersubject", (req, res) => {
         }
       }
     }
-    // ส่วนนี้ให้เพิ่มเงื่อนไข else ให้เป็นส่วนของ if (!subjects) ก่อนเพื่อเช็คเงื่อนไขที่ขึ้นอยู่กับการ query ฐานข้อมูล
-    if (user_id && st && et && day_id && n_people && branch && category_id && subjects_id) {
-      db.query("select S1.name from subjects S,subjects S1,subjectsRegister Sr where S.id = ? and (S.subject_category_id =1 or S.subject_category_id=3) and (S1.subject_category_id =1 or S1.subject_category_id=3) and Sr.Subjects_id = S1.id and S.id != S1.id and Sr.day_id = 2 and ((st <= ? AND et >= ?) OR (? <= et AND ? >= st))", [subjects_id, et, st, st, et], (err, result) => {
-        let statusset = 2;
-        if (err) {
-          return res.status(500).json({ msgerror: "Error databases ->" + err })
-        } else {
-          if (result.length > 0) {
-          }
-        }
-        db.query("INSERT INTO subjectsRegister (status_id,User_id, st, et, day_id,  N_people, branch, category_id, Subjects_id) VALUES (?,?,?,?,?,?,?,?,?)", [statusset, v.user_id, v.st, v.et, v.day_id, v.n_people, v.branch, v.category_id, v.subjects_id], (err, results) => {
-          if (err) {
-            return res.status(500).json({ msgerror: "Error databases ->" + err })
-          } else {
-
-          }
-        })
-
-
-      })
-    }
     if (!subjects) {
       return res.status(500).json({ msgerror: "error subjects null" })
     }
     const InsertDatabase = subjects.map((v, i) => {
       return new Promise((resolve, reject) => {
-        db.query("INSERT INTO subjectsRegister (User_id, st, et, day_id, status_id, N_people, branch, category_id, Subjects_id) VALUES (?,?,?,?,?,?,?,?,?)", [v.user_id, v.st, v.et, v.day_id, v.n_people, v.branch, v.category_id, v.subjects_id], (err, results) => {
+        db.query("INSERT INTO subjectsRegister (User_id, st, et, day_id, status_id, N_people, branch, category_id, Subjects_id, realcredit) VALUES (?,?,?,?,?,?,?,?,?)", [v.user_id, v.st, v.et, v.day_id, v.n_people, v.branch, v.category_id, v.subjects_id,v.realcredit], (err, results) => {
           resolve(result[0])
         })
       })
