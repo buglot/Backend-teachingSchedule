@@ -9,6 +9,7 @@ const fs = require('fs');
 const exceljs = require("exceljs");
 const { TIMEOUT } = require('dns');
 const { Types } = require('mysql2');
+const { error } = require('console');
 
 
 router.post('/admin/System', (req, res) => {
@@ -452,7 +453,7 @@ router.get("/teacher/subjects", (req, res) => {
             })
             return;
           } else if (!(data1 >= time)) {
-             return res.status(404).json({ msgerrortime: `ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้ เปิดล่าสุด ${data.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })} ถึง ${data1.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })}` });
+            return res.status(404).json({ msgerrortime: `ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้ เปิดล่าสุด ${data.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })} ถึง ${data1.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })}` });
           }
         }
         db.query("Select subjects.id,idsubject,subjects.name,credit,years,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 1", (err, results) => {
@@ -555,4 +556,34 @@ router.get("/admin/role", (req, res) => {
   })
 })
 
+router.get("/years", (req, res) => {
+  db.query("select distinct years from subjects", (err, results) => {
+    if (err) {
+      res.status(500).json({msgerror:"Error Server database ! Please calling admin to fix"})
+    } else {
+      res.status(200).json({data:results});
+    }
+  })
+})
+
+router.get("/Searchsubject/:key", (req, res) => {
+  const { key } = req.params;
+  db.query("select * from subjects where name like ? or idsubject like ? ", [`%${key}%`, `%${key}%`], (err, results) => {
+    if (err) {
+      res.status(500).json({msgerror:"Error Server database ! Please calling admin to fix"})
+    } else {
+      res.status(200).json({data:results});
+    }
+  })
+})
+router.get("/Searchsubjectopen/:key", (req, res) => {
+  const { key } = req.params;
+  db.query("select * from subjects where (name like ? or idsubject like ?) and IsOpen=1 ", [`%${key}%`, `%${key}%`], (err, results) => {
+    if (err) {
+      res.status(500).json({msgerror:"Error Server database ! Please calling admin to fix"})
+    } else {
+      res.status(200).json({data:results});
+    }
+  })
+})
 module.exports = router;
