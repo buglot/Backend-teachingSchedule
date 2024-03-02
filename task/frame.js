@@ -196,9 +196,8 @@ router.get('/statusRegistered/:userid', (req, res) => {
 //รับ ชื่อแล้วค้นหาคำ โดย เอาชื่อ มา
 router.get('/searchregister/:search',(req,res)=>{
   const { search } = req.params;
-  const sql = 'SELECT S.idsubject, S.name, S.years FROM subjects S WHERE S.idsubject LIKE ? OR S.name LIKE ?';
+  const sql = 'SELECT distinct S.idsubject, S.name FROM subjects S WHERE S.idsubject LIKE ? OR S.name LIKE ? and isOpen=1';
   const sql1 = 'SELECT id, name AS username FROM user WHERE name LIKE ?';
-  
   db.query(sql, [`%${search}%`, `%${search}%`], (err, results) => {
     if (err) {
       console.error('Error executing SELECT statement:', err);
@@ -224,8 +223,6 @@ router.get('/searchregister/:search',(req,res)=>{
       }
     });
   });
-  
-  
 });
 
 

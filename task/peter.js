@@ -9,6 +9,7 @@ const fs = require('fs');
 const exceljs = require("exceljs");
 const { TIMEOUT } = require('dns');
 const { Types } = require('mysql2');
+const { error } = require('console');
 
 
 router.post('/admin/System', (req, res) => {
@@ -359,7 +360,7 @@ router.post("/teacher/registersubject", (req, res) => {
     }
     const InsertDatabase = subjects.map((v, i) => {
       return new Promise((resolve, reject) => {
-        db.query("INSERT INTO subjectsRegister (User_id, st, et, day_id, status_id, N_people, branch, category_id, Subjects_id, realcredit) VALUES (?,?,?,?,?,?,?,?,?)", [v.user_id, v.st, v.et, v.day_id, v.n_people, v.branch, v.category_id, v.subjects_id,v.realcredit], (err, results) => {
+        db.query("INSERT INTO subjectsRegister (User_id, st, et, day_id, status_id, N_people, branch, category_id, Subjects_id, realcredit) VALUES (?,?,?,?,?,?,?,?,?)", [v.user_id, v.st, v.et, v.day_id, v.n_people, v.branch, v.category_id, v.subjects_id, v.realcredit], (err, results) => {
           resolve(result[0])
         })
       })
@@ -421,24 +422,12 @@ router.get("/subjest", (req, res) => {
 });
 
 router.get("/teacher/subjects", (req, res) => {
-  db.query("select status,S_date,E_date,S_time,E_time from timeSystem where id =1", (err, results) => {
+  db.query("select status,S_date,E_date,S_time,E_time,type from timeSystem where id =1", (err, results) => {
     if (err) {
       res.status(500).json({ msgerror: "Error Server Database! Please calling admin to fix" })
     } else {
       if (results[0].status === 0) {
-        if (results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time) {
-          const data = new Date(results[0].S_date)
-          const [hours, minutes] = results[0].S_time.split(':').map(Number);
-          data.setHours(hours);
-          data.setMinutes(minutes);
-          const data1 = new Date(results[0].E_date)
-          const [hours1, minutes1] = results[0].E_time.split(':').map(Number);
-          data1.setHours(hours1);
-          data1.setMinutes(minutes1);
-          res.status(404).json({ msgerrortime: `ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้ เปิดล่าสุด ${data.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })} ถึง ${data1.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })}` });
-        } else {
-          res.status(404).json({ msgerrortime: "ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้" })
-        }
+        res.status(404).json({ msgerrortime: "ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้" })
       } else {
         const time = new Date()
         if (results[0].type === 1 && results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time) {
@@ -450,7 +439,7 @@ router.get("/teacher/subjects", (req, res) => {
           const [hours1, minutes1] = results[0].E_time.split(':').map(Number);
           data1.setHours(hours1);
           data1.setMinutes(minutes1);
-          if (!(data <= time && data1 >= time)) {
+          if (!(data <= time)) {
             db.query("Select subjects.id,idsubject,subjects.name,credit,years,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 1", (err, results) => {
               if (err) {
                 res.status(500).json({ msgerr: "Error Server Databases! Please calling admin to fix" });
@@ -463,6 +452,8 @@ router.get("/teacher/subjects", (req, res) => {
               }
             })
             return;
+          } else if (!(data1 >= time)) {
+            return res.status(404).json({ msgerrortime: `ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้ เปิดล่าสุด ${data.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })} ถึง ${data1.toLocaleString('th-th', { "year": "numeric", "day": "2-digit", "month": "long", "hour": "2-digit", "minute": "2-digit" })}` });
           }
         }
         db.query("Select subjects.id,idsubject,subjects.name,credit,years,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 1", (err, results) => {
@@ -483,9 +474,8 @@ router.get("/teacher/subjects", (req, res) => {
 
 router.get("/teacher/subject/:id", (req, res) => {
   const { id } = req.params;
-  db.query("select status,S_date,E_date,S_time,E_time from timeSystem where id =1", (err, results) => {
+  db.query("select status,S_date,E_date,S_time,E_time,type from timeSystem where id =1", (err, results) => {
     if (err) {
-
       res.status(500).json({ msgerror: "Error Server Database! Please calling admin to fix" })
     } else {
       if (results[0].status === 0) {
@@ -543,7 +533,7 @@ router.get("/admin/user/:id", (req, res) => {
 
 router.post("/admin/userupdate", (req, res) => {
   const { id, name, email, role_id } = req.body;
-  if (id && name && email && role_id && name!=="" && email!=="") {
+  if (id && name && email && role_id && name !== "" && email !== "") {
     db.query("UPDATE user SET `email` = ?, `name` = ?, `role_id` = ? WHERE (`id` = ?)", [email, name, role_id, id], (err, results) => {
       if (err) {
         res.status(500).json({ msgerror: "Error server Database ! Please calling admin." })
@@ -551,13 +541,13 @@ router.post("/admin/userupdate", (req, res) => {
         res.status(200).json({ msg: "แก้ไขสำเร็จ" })
       }
     })
-  }else{
-    res.status(500).json({msgerror : "กรอกข้อมูลไม่ครบและไม่ถูกต้อง"})
+  } else {
+    res.status(500).json({ msgerror: "กรอกข้อมูลไม่ครบและไม่ถูกต้อง" })
   }
 })
 
-router.get("/admin/role",(req,res)=>{
-  db.query("select * from role",(err,result)=>{
+router.get("/admin/role", (req, res) => {
+  db.query("select * from role", (err, result) => {
     if (err) {
       res.status(500).json({ msgerror: "Error server Database ! Please calling admin." })
     } else {
@@ -566,4 +556,34 @@ router.get("/admin/role",(req,res)=>{
   })
 })
 
+router.get("/years", (req, res) => {
+  db.query("select distinct years from subjects", (err, results) => {
+    if (err) {
+      res.status(500).json({msgerror:"Error Server database ! Please calling admin to fix"})
+    } else {
+      res.status(200).json({data:results});
+    }
+  })
+})
+
+router.get("/Searchsubject/:key", (req, res) => {
+  const { key } = req.params;
+  db.query("select * from subjects where name like ? or idsubject like ? ", [`%${key}%`, `%${key}%`], (err, results) => {
+    if (err) {
+      res.status(500).json({msgerror:"Error Server database ! Please calling admin to fix"})
+    } else {
+      res.status(200).json({data:results});
+    }
+  })
+})
+router.get("/Searchsubjectopen/:key", (req, res) => {
+  const { key } = req.params;
+  db.query("select * from subjects where (name like ? or idsubject like ?) and IsOpen=1 ", [`%${key}%`, `%${key}%`], (err, results) => {
+    if (err) {
+      res.status(500).json({msgerror:"Error Server database ! Please calling admin to fix"})
+    } else {
+      res.status(200).json({data:results});
+    }
+  })
+})
 module.exports = router;
