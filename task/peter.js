@@ -582,7 +582,12 @@ router.get("/Searchsubjectopen/:key", (req, res) => {
     if (err) {
       res.status(500).json({msgerror:"Error Server database ! Please calling admin to fix"})
     } else {
-      res.status(200).json({data:results});
+      if(results.length>0){
+        res.status(200).json({data:results});
+      }else{
+        res.status(404).json({error:"ไม่พบเจอ "+key})
+      }
+      
     }
   })
 })
