@@ -59,7 +59,7 @@ router.get('/opensubject',(req,res)=>{
   const sql = `
   select subjects.id,idsubject,
   subject_category.name as subject_category,
-  subjects.name,
+  subjects.name,subjects.credit,
   years,subjects.subject_category_id 
   from subjects,subject_category 
   where subjects.IsOpen= 1 and subject_category.id = subjects.subject_category_id`
@@ -68,7 +68,7 @@ router.get('/opensubject',(req,res)=>{
       res.status(500).json({ msgerr: "Error Server Databases! Please calling admin to fix" });
     } else {
       if (results.length > 0)
-        res.status(200).json(results);
+        res.status(200).json({ results });
       else
         res.status(200).json({ msg: "ไม่มีวิชาที่เปิดสอน" });
     }
