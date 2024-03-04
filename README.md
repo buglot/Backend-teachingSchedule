@@ -1,4 +1,4 @@
-# backend web with epress + mysql
+# backend web with express + mysql
 ## easy run one command
 #### cmd windows
 ```cmd 
