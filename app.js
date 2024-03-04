@@ -5,8 +5,10 @@ const frameRoutes = require('./task/frame');
 const fahRoutes = require('./task/fah');
 const chalk = require('chalk');
 const path = require('path');
+const fs = require("fs")
 const app = express();
 const port = 4133;
+
 app.use(cors());
 app.use(express.json());
 app.use((req, res, next) => {
@@ -28,6 +30,9 @@ app.get("/",(req,res)=>{
 })
 app.listen(port, () => {
   console.log()
+  if (!fs.existsSync("files")) {
+    fs.mkdirSync("files")
+  }
   console.log(chalk.bgRed(` Server is running on` + chalk.bgGreen(` port ${port} `) + "\n"));
   console.log("=======================================\n")
   console.log('  api on web: ', chalk.bgBlue(` http://localhost:${port}/ \n`))
