@@ -3,12 +3,17 @@ const cors = require('cors');
 const peterRoutes = require('./task/peter');
 const frameRoutes = require('./task/frame');
 const fahRoutes = require('./task/fah');
+const auto = require("./task/auto")
 const chalk = require('chalk');
 const path = require('path');
 const fs = require("fs")
 const app = express();
 const port = 4133;
-
+//check folder files exists?
+if (!fs.existsSync("files")) {
+  fs.mkdirSync("files")
+}
+auto.start();
 app.use(cors());
 app.use(express.json());
 app.use((req, res, next) => {
@@ -28,11 +33,9 @@ app.get('/download/:file',(req,res)=>{
 app.get("/",(req,res)=>{
   res.sendFile(path.join(__dirname, '/index.html'));
 })
+
 app.listen(port, () => {
   console.log()
-  if (!fs.existsSync("files")) {
-    fs.mkdirSync("files")
-  }
   console.log(chalk.bgRed(` Server is running on` + chalk.bgGreen(` port ${port} `) + "\n"));
   console.log("=======================================\n")
   console.log('  api on web: ', chalk.bgBlue(` http://localhost:${port}/ \n`))
