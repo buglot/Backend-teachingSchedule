@@ -18,26 +18,80 @@ USE `teachingschedule`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `autodetect`
+-- Table structure for table `allowlink`
 --
 
-DROP TABLE IF EXISTS `autodetect`;
+DROP TABLE IF EXISTS `allowlink`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `autodetect` (
-  `date` datetime NOT NULL,
-  `latesedDate` datetime DEFAULT NULL,
-  PRIMARY KEY (`date`)
+CREATE TABLE `allowlink` (
+  `id` int NOT NULL,
+  `linapath` varchar(1024) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `linapath_UNIQUE` (`linapath`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `autodetect`
+-- Dumping data for table `allowlink`
 --
 
-LOCK TABLES `autodetect` WRITE;
-/*!40000 ALTER TABLE `autodetect` DISABLE KEYS */;
-/*!40000 ALTER TABLE `autodetect` ENABLE KEYS */;
+LOCK TABLES `allowlink` WRITE;
+/*!40000 ALTER TABLE `allowlink` DISABLE KEYS */;
+/*!40000 ALTER TABLE `allowlink` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `allowlink_has_role`
+--
+
+DROP TABLE IF EXISTS `allowlink_has_role`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `allowlink_has_role` (
+  `allowlink_id` int NOT NULL,
+  `role_id` int NOT NULL,
+  PRIMARY KEY (`allowlink_id`,`role_id`),
+  KEY `fk_allowlink_has_role_role1_idx` (`role_id`),
+  KEY `fk_allowlink_has_role_allowlink1_idx` (`allowlink_id`),
+  CONSTRAINT `fk_allowlink_has_role_allowlink1` FOREIGN KEY (`allowlink_id`) REFERENCES `allowlink` (`id`),
+  CONSTRAINT `fk_allowlink_has_role_role1` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `allowlink_has_role`
+--
+
+LOCK TABLES `allowlink_has_role` WRITE;
+/*!40000 ALTER TABLE `allowlink_has_role` DISABLE KEYS */;
+/*!40000 ALTER TABLE `allowlink_has_role` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `autoday`
+--
+
+DROP TABLE IF EXISTS `autoday`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `autoday` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `day_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_autoday_day1_idx` (`day_id`),
+  CONSTRAINT `fk_autoday_day1` FOREIGN KEY (`day_id`) REFERENCES `day` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `autoday`
+--
+
+LOCK TABLES `autoday` WRITE;
+/*!40000 ALTER TABLE `autoday` DISABLE KEYS */;
+INSERT INTO `autoday` VALUES (3,2),(1,3),(2,7);
+/*!40000 ALTER TABLE `autoday` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -119,6 +173,31 @@ INSERT INTO `file` VALUES (15,'2024-02-28 10:12:41','course_2565.xlsx','/downloa
 UNLOCK TABLES;
 
 --
+-- Table structure for table `historyautodetect`
+--
+
+DROP TABLE IF EXISTS `historyautodetect`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `historyautodetect` (
+  `Timer` time NOT NULL,
+  `latesedDate` datetime DEFAULT NULL,
+  `id` int NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `historyautodetect`
+--
+
+LOCK TABLES `historyautodetect` WRITE;
+/*!40000 ALTER TABLE `historyautodetect` DISABLE KEYS */;
+INSERT INTO `historyautodetect` VALUES ('15:23:30',NULL,1);
+/*!40000 ALTER TABLE `historyautodetect` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `role`
 --
 
@@ -127,7 +206,7 @@ DROP TABLE IF EXISTS `role`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `role` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(45) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -178,7 +257,7 @@ CREATE TABLE `subject_category` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -187,7 +266,7 @@ CREATE TABLE `subject_category` (
 
 LOCK TABLES `subject_category` WRITE;
 /*!40000 ALTER TABLE `subject_category` DISABLE KEYS */;
-INSERT INTO `subject_category` VALUES (1,'วิชาบังคับ'),(2,'วิชาเลือก'),(3,'วิชาเอก');
+INSERT INTO `subject_category` VALUES (1,'วิชาบังคับ'),(2,'วิชาเอก'),(3,'วิชาเลือก');
 /*!40000 ALTER TABLE `subject_category` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -337,4 +416,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-02-29 22:45:59
+-- Dump completed on 2024-03-05 15:39:02

@@ -13,27 +13,36 @@ const port = 4133;
 if (!fs.existsSync("files")) {
   fs.mkdirSync("files")
 }
-auto.start();
 app.use(cors());
 app.use(express.json());
 app.use((req, res, next) => {
   const now = new Date().toString().slice(16, 24);
   res.on("finish", () => {
-   console.log(`${chalk.bgGreen(req.method+" ")}${res.statusCode <400?chalk.bgBlue(" "+res.statusCode+" "):res.statusCode<500?chalk.bgRed(" "+res.statusCode+" "):chalk.bgYellow(" "+res.statusCode+" ")} ${now} ${req.originalUrl}`);
+    console.log(`${chalk.bgGreen(req.method + " ")}${res.statusCode < 400 ? chalk.bgBlue(" " + res.statusCode + " ") : res.statusCode < 500 ? chalk.bgRed(" " + res.statusCode + " ") : chalk.bgYellow(" " + res.statusCode + " ")} ${now} ${req.originalUrl}`);
   });
   next();
- });
+});
 app.use('/api', peterRoutes);
 app.use('/api', frameRoutes);
 app.use('/api', fahRoutes);
-app.get('/download/:file',(req,res)=>{
-  const {file} = req.params;
-  res.sendFile(path.join(__dirname, 'public/files/'+file));
+app.get('/download/:file', (req, res) => {
+  const { file } = req.params;
+  res.sendFile(path.join(__dirname, 'public/files/' + file));
 })
-app.get("/",(req,res)=>{
+app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, '/index.html'));
 })
-
+app.get('/restart-server', (req, res) => {
+  res.send('Server is restarting...');
+  const { spawn } = require('child_process');
+  const child = spawn('node', ['app.js'], {
+    detached: true,
+    stdio: 'ignore',
+  });
+  console.log(child.pid)
+  child.unref();
+  process.exit(0);
+});
 app.listen(port, () => {
   console.log()
   console.log(chalk.bgRed(` Server is running on` + chalk.bgGreen(` port ${port} `) + "\n"));
