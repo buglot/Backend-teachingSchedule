@@ -43,6 +43,10 @@ app.get('/restart-server', (req, res) => {
   child.unref();
   process.exit(0);
 });
+app.get('/stop-server', (req, res) => {
+  res.send('Server is restarting...');
+  process.exit(0);
+});
 app.listen(port, () => {
   console.log()
   console.log(chalk.bgRed(` Server is running on` + chalk.bgGreen(` port ${port} `) + "\n"));
