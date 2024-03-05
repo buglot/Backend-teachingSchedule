@@ -32,6 +32,9 @@ app.get('/download/:file', (req, res) => {
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, '/index.html'));
 })
+app.get("/pidprocess",(req,res) => {
+    res.status(200).send(process.pid.toString())
+})
 app.get('/restart-server', (req, res) => {
   res.send('Server is restarting...');
   const { spawn } = require('child_process');
