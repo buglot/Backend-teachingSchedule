@@ -220,9 +220,9 @@ router.post(
               : null,
             mt: rows[i][creditColumnIndex]
               ? rows[i][creditColumnIndex]
-                  .split("(")[1]
-                  .split("-")[2]
-                  .replace(")", "")
+                .split("(")[1]
+                .split("-")[2]
+                .replace(")", "")
               : null,
             years: y,
             exsub: 0,
@@ -363,17 +363,15 @@ function upDatefile() {
               for (let i = 0; i < results.length; i++) {
                 worksheet.getCell(i + 2, 1).value = results[i].idsubject;
                 worksheet.getCell(i + 2, 2).value = results[i].name;
-                worksheet.getCell(i + 2, 3).value = `${results[i].credit}(${
-                  results[i].lecture_t
-                }-${results[i].practice_t ? results[i].practice_t : 0}-${
-                  results[i].m_t
-                })`;
+                worksheet.getCell(i + 2, 3).value = `${results[i].credit}(${results[i].lecture_t
+                  }-${results[i].practice_t ? results[i].practice_t : 0}-${results[i].m_t
+                  })`;
                 worksheet.getCell(i + 2, 4).value =
                   results[i].subject_category_id === 1
                     ? "วิชาบังคับ"
                     : results[i].subject_category_id === 2
-                    ? "วิชาเลือก"
-                    : "วิชาแกน";
+                      ? "วิชาเลือก"
+                      : "วิชาแกน";
               }
               workbook.xlsx
                 .writeFile("public/files/" + "course_" + v.years + ".xlsx")
@@ -614,130 +612,128 @@ router.get("/subjest", (req, res) => {
 });
 
 router.get("/teacher/subjects", (req, res) => {
-  db.query(
-    "select status,S_date,E_date,S_time,E_time,type from timeSystem where id =1",
-    (err, results) => {
-      if (err) {
-        res.status(500).json({
-          msgerror: "Error Server Database! Please calling admin to fix",
+  db.query("select status,S_date,E_date,S_time,E_time,type from timeSystem where id =1", (err, results) => {
+    if (err) {
+      res.status(500).json({
+        msgerror: "Error Server Database! Please calling admin to fix",
+      });
+    } else {
+      if (results[0].status === 0) {
+        res.status(404).json({
+          msgerrortime: "ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้",
         });
       } else {
-        if (results[0].status === 0) {
-          res.status(404).json({
-            msgerrortime: "ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้",
-          });
-        } else {
-          const time = new Date();
-          if (
-            results[0].type === 1 &&
-            results[0].S_date &&
-            results[0].E_date &&
-            results[0].S_time &&
-            results[0].E_time
-          ) {
-            const data = new Date(results[0].S_date);
-            const [hours, minutes] = results[0].S_time.split(":").map(Number);
-            data.setHours(hours);
-            data.setMinutes(minutes);
-            const data1 = new Date(results[0].E_date);
-            const [hours1, minutes1] = results[0].E_time.split(":").map(Number);
-            data1.setHours(hours1);
-            data1.setMinutes(minutes1);
-            if (!(data <= time)) {
-              db.query(
-                "Select subjects.id,idsubject,subjects.name,credit,years,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 1",
-                (err, results) => {
-                  if (err) {
-                    res.status(500).json({
-                      msgerr:
-                        "Error Server Databases! Please calling admin to fix",
+        const time = new Date();
+        if (
+          results[0].type === 1 &&
+          results[0].S_date &&
+          results[0].E_date &&
+          results[0].S_time &&
+          results[0].E_time
+        ) {
+          const data = new Date(results[0].S_date);
+          const [hours, minutes] = results[0].S_time.split(":").map(Number);
+          data.setHours(hours);
+          data.setMinutes(minutes);
+          const data1 = new Date(results[0].E_date);
+          const [hours1, minutes1] = results[0].E_time.split(":").map(Number);
+          data1.setHours(hours1);
+          data1.setMinutes(minutes1);
+          if (!(data <= time)) {
+            db.query(
+              "Select subjects.id,idsubject,subjects.name,credit,years,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 1",
+              (err, results) => {
+                if (err) {
+                  res.status(500).json({
+                    msgerr:
+                      "Error Server Databases! Please calling admin to fix",
+                  });
+                } else {
+                  if (results.length > 0) {
+                    res.status(200).json({
+                      results,
+                      msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString(
+                        "th-th",
+                        {
+                          year: "numeric",
+                          day: "2-digit",
+                          month: "long",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )} ถึง ${data1.toLocaleString("th-th", {
+                        year: "numeric",
+                        day: "2-digit",
+                        month: "long",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}`,
                     });
                   } else {
-                    if (results.length > 0) {
-                      res.status(200).json({
-                        results,
-                        msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString(
-                          "th-th",
-                          {
-                            year: "numeric",
-                            day: "2-digit",
-                            month: "long",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }
-                        )} ถึง ${data1.toLocaleString("th-th", {
+                    res.status(200).json({
+                      msg: "ไม่มีวิชาที่เปิดสอน",
+                      msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString(
+                        "th-th",
+                        {
                           year: "numeric",
                           day: "2-digit",
                           month: "long",
                           hour: "2-digit",
                           minute: "2-digit",
-                        })}`,
-                      });
-                    } else {
-                      res.status(200).json({
-                        msg: "ไม่มีวิชาที่เปิดสอน",
-                        msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString(
-                          "th-th",
-                          {
-                            year: "numeric",
-                            day: "2-digit",
-                            month: "long",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }
-                        )} ถึง ${data1.toLocaleString("th-th", {
-                          year: "numeric",
-                          day: "2-digit",
-                          month: "long",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}`,
-                      });
-                    }
+                        }
+                      )} ถึง ${data1.toLocaleString("th-th", {
+                        year: "numeric",
+                        day: "2-digit",
+                        month: "long",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}`,
+                    });
                   }
                 }
-              );
-              return;
-            } else if (!(data1 >= time)) {
-              return res.status(404).json({
-                msgerrortime: `ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้ เปิดล่าสุด ${data.toLocaleString(
-                  "th-th",
-                  {
-                    year: "numeric",
-                    day: "2-digit",
-                    month: "long",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  }
-                )} ถึง ${data1.toLocaleString("th-th", {
+              }
+            );
+            return;
+          } else if (!(data1 >= time)) {
+            return res.status(404).json({
+              msgerrortime: `ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้ เปิดล่าสุด ${data.toLocaleString(
+                "th-th",
+                {
                   year: "numeric",
                   day: "2-digit",
                   month: "long",
                   hour: "2-digit",
                   minute: "2-digit",
-                })}`,
-              });
-            }
-          }
-          db.query(
-            "Select subjects.id,idsubject,subjects.name,credit,years,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 1",
-            (err, results) => {
-              if (err) {
-                res.status(500).json({
-                  msgerr: "Error Server Databases! Please calling admin to fix",
-                });
-              } else {
-                if (results.length > 0) {
-                  res.status(200).json({ results });
-                } else {
-                  res.status(200).json({ msg: "ไม่มีวิชาที่เปิดสอน" });
                 }
+              )} ถึง ${data1.toLocaleString("th-th", {
+                year: "numeric",
+                day: "2-digit",
+                month: "long",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}`,
+            });
+          }
+        }
+        db.query(
+          "Select subjects.id,idsubject,subjects.name,credit,years,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 1",
+          (err, results) => {
+            if (err) {
+              res.status(500).json({
+                msgerr: "Error Server Databases! Please calling admin to fix",
+              });
+            } else {
+              if (results.length > 0) {
+                res.status(200).json({ results });
+              } else {
+                res.status(200).json({ msg: "ไม่มีวิชาที่เปิดสอน" });
               }
             }
-          );
-        }
+          }
+        );
       }
     }
+  }
   );
 });
 
@@ -1144,5 +1140,15 @@ router.get("/teacher/schedule_edit", (req, res) => {
     }
   );
 });
+
+router.get("/category",(req,res)=>{
+  db.query("select * from category",(err,results)=>{
+    if(err){
+      res.status(500).json({"msgerror":"Error database"})
+    }else{
+      res.status(200).json(results)
+    }
+  })
+})
 
 module.exports = router;
