@@ -145,13 +145,10 @@ const {userid} = req.params;
     }
 
     if (results.length > 0) {
-      res.json({ message: results,m:re });
       db.query('SELECT subjectsRegister.st,subjectsRegister.et,subjectsRegister.day_id,day.name AS day_name,user.name AS user_name,status.name AS status_name,subjectsRegister.category_id FROM  subjectsRegister INNER JOIN day ON subjectsRegister.day_id = day.id INNER JOIN status ON subjectsRegister.status_id = status.id INNER JOIN user ON subjectsRegister.User_id = user.id WHERE subjectsRegister.status_id = 3 AND subjectsRegister.category_id = 1 OR subjectsRegister.category_id = 2  ;' ,(err,re)=>{
-      if(result.length > 0){
-        res.json({ message: results,m:re });
-      }else {
-        res.status(401).json({ error: 'Invalid credentials' });
-      }
+      res.json({ message: results,m:re });
+
+
         //สำหรับเช็ควิชาที่ไม่ผ่าน
         
       })
