@@ -132,9 +132,11 @@ router.post('/ubdatesubjectsRegister',(req,res)=>{
 
 //ตรวจสอบจาก database table วิชาที่ลงทะเบียน คัดกรอง สถานะผ่าน และ เวลาของคนที่แก้ไข
 
+
 router.get('/statusRegisteredpro1',(req,res)=>{
 const {userid} = req.params;
   const sql = `SELECT st,et,day_id,day.name AS day_name,status_id,status.name,category_id from subjectsRegister,day,status,user where user.id = ${userid}  and subjectsRegister.User_id = user.id and day.id = day_id and status_id = status.id`
+
   db.query(sql, (err, results) => {
     if (err) {
       console.error('Error executing SELECT statement:', err);
@@ -143,7 +145,9 @@ const {userid} = req.params;
     }
 
     if (results.length > 0) {
+
       db.query('SELECT subjectsRegister.st,subjectsRegister.et,subjectsRegister.day_id,day.name AS day_name,user.name AS user_name,status.name AS status_name,subjectsRegister.category_id FROM  subjectsRegister INNER JOIN day ON subjectsRegister.day_id = day.id INNER JOIN status ON subjectsRegister.status_id = status.id INNER JOIN user ON subjectsRegister.User_id = user.id WHERE subjectsRegister.status_id = 3 AND subjectsRegister.category_id = 1 OR subjectsRegister.category_id = 2  ;' ,(err,re)=>{
+
         //สำหรับเช็ควิชาที่ไม่ผ่าน
         res.json({ message: results,m:re });
       })
