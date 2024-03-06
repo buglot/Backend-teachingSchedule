@@ -132,8 +132,8 @@ router.post('/ubdatesubjectsRegister',(req,res)=>{
 
 //ตรวจสอบจาก database table วิชาที่ลงทะเบียน คัดกรอง สถานะผ่าน และ เวลาของคนที่แก้ไข
 
-router.get('/statusRegisteredpro1',(req,res)=>{
-const {userid} = req.body;
+router.get('/statusRegisteredpro1/',(req,res)=>{
+const {userid} = req.params;
   const sql = 'SELECT st,et,day_id,day.name,status_id,status.name,category_id from subjectsRegister,day,status,user where user.id = ${userid}  and subjectsRegister.User_id = user.id and day.id = day_id and status_id = status.id'
   db.query(sql, (err, results) => {
     if (err) {
