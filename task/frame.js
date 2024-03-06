@@ -135,7 +135,7 @@ router.post('/ubdatesubjectsRegister',(req,res)=>{
 
 router.get('/statusRegisteredpro1/:userid',(req,res)=>{
 const {userid} = req.params;
-  const sql = `SELECT st,et,day_id,day.name AS day_name,status_id,status.name,category_id from subjectsRegister,day,status,user where user.id = ${userid}  and subjectsRegister.User_id = user.id and day.id = day_id and status_id = status.id`
+  const sql = `SELECT st,et,day_id,day.name AS day_name,status_id,status.name,category_id,subjects.name from subjects,subjectsRegister,day,status,user where subjects.id  = subjectsRegister.Subjects_id and user.id = ${userid}  and subjectsRegister.User_id = user.id and day.id = day_id and status_id = status.id`
 
   db.query(sql, (err, results) => {
     if (err) {
@@ -145,7 +145,9 @@ const {userid} = req.params;
     }
 
     if (results.length > 0) {
-      db.query('SELECT subjectsRegister.st,subjectsRegister.et,subjectsRegister.day_id,day.name AS day_name,user.name AS user_name,status.name AS status_name,subjectsRegister.category_id FROM  subjectsRegister INNER JOIN day ON subjectsRegister.day_id = day.id INNER JOIN status ON subjectsRegister.status_id = status.id INNER JOIN user ON subjectsRegister.User_id = user.id WHERE subjectsRegister.status_id = 3 AND subjectsRegister.category_id = 1 OR subjectsRegister.category_id = 2  ;' ,(err,re)=>{
+
+      db.query('SELECT subjectsRegister.st,subjectsRegister.et,subjectsRegister.day_id,day.name AS day_name,user.name AS user_name,status.name AS status_name,subjectsRegister.category_id,subjects.name FROM  subjects,subjectsRegister INNER JOIN day ON subjectsRegister.day_id = day.id INNER JOIN status ON subjectsRegister.status_id = status.id INNER JOIN user ON subjectsRegister.User_id = user.id WHEREsubjects.id  = subjectsRegister.Subjects_id and subjectsRegister.status_id = 3 AND subjectsRegister.category_id = 1 OR subjectsRegister.category_id = 2  ;' ,(err,re)=>{
+
       res.json({ message: results,m:re });
 
 
