@@ -247,7 +247,7 @@ router.post('/eu/ubdatestatusregister',(req,res)=>{
   const {id} = req.body; 
   const {status_id} = req.body;
   const sql = 'UPDATE subjectsRegister SET (status_id) VALUES (?) where id=?'
-  db.query(sql, [st, et, status_id, id], (err, result) => { 
+  db.query(sql, [status_id, id], (err, result) => { 
     if (err) {
       return res.status(500).send("Error updating subject register");
     } else {
