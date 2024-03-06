@@ -1141,14 +1141,23 @@ router.get("/teacher/schedule_edit", (req, res) => {
   );
 });
 
-router.get("/category",(req,res)=>{
-  db.query("select * from category",(err,results)=>{
-    if(err){
-      res.status(500).json({"msgerror":"Error database"})
+router.get("/category", (req, res) => {
+  db.query("select * from category", (err, results) => {
+    if (err) {
+      res.status(500).json({ "msgerror": "Error database" })
+    } else {
+      res.status(200).json(results)
+    }
+  })
+})
+router.get("/countstatus1", (req, res) => {
+  db.query("select s.name,count(status_id) as counts,(select count(Isopen) from subjects where Isopen =1) as allopen from subjectsRegister Sr join status s on s.id = Sr.status_id group by status_id", (err, results) => {
+    if (err) {
+      res.status(500).json({ msgerror: "Error database", err })
     }else{
       res.status(200).json(results)
     }
   })
 })
-
+"select count(id) as allopen,(select  count(distinct Sr.subjects_id) from subjectsRegister Sr) as subjectcont  from subjects where isopen=1;"
 module.exports = router;
