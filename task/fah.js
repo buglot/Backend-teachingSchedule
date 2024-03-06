@@ -1,39 +1,38 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const db = require('../db');
+const db = require("../db");
 
-const fs = require('fs');
+const fs = require("fs");
 
 //ตัวอย่าง
-router.get('/login', (req, res) => {
-  const sql = 'SELECT * FROM table1';
+router.get("/login", (req, res) => {
+  const sql = "SELECT * FROM table1";
   db.query(sql, (err, results) => {
     if (err) {
-      console.error('Error executing SELECT statement:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error executing SELECT statement:", err);
+      res.status(500).json({ error: "Internal Server Error" });
       return;
     }
 
     if (results.length > 0) {
       res.json({ message: results });
     } else {
-      res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: "Invalid credentials" });
     }
   });
 });
 
-
-
 // admin
 
 // READ user from db (database email ชื่อนามสกุล  role)
-router.get('/admin/user', (req, res) => {
+router.get("/admin/user", (req, res) => {
   //const sql = 'SELECT * FROM user';
-  const sql = 'SELECT user.name AS name, user.email AS mail, role.name AS role  FROM user JOIN role ON user.role_id = role.id;'
+  const sql =
+    "SELECT user.name AS name, user.email AS mail, role.name AS role  FROM user JOIN role ON user.role_id = role.id;";
   db.query(sql, (err, results) => {
     if (err) {
-      console.error('Error executing SELECT statement:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error executing SELECT statement:", err);
+      res.status(500).json({ error: "Internal Server Error" });
       return;
     }
     res.json(results);
@@ -42,18 +41,19 @@ router.get('/admin/user', (req, res) => {
 
 // READ single user from db (database email ชื่อนามสกุล  role รายบุคคล)
 // ดึง database email ชื่อนามสกุล  role โดยคัดจาก คนที่นั้นมีสิทธ์ มีการตำแหน่ง
-router.get('/admin/user/single/:email', (req, res) => {
+router.get("/admin/user/single/:email", (req, res) => {
   const email = req.params.email;
 
-  const sql = 'SELECT user.id,role.id, user.name AS name, user.email, role.name AS role FROM user JOIN role ON user.role_id = role.id WHERE user.email = ?';
+  const sql =
+    "SELECT user.id,role.id, user.name AS name, user.email, role.name AS role FROM user JOIN role ON user.role_id = role.id WHERE user.email = ?";
   db.query(sql, [email], (err, results) => {
     if (err) {
-      console.error('Error executing SELECT statement:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error executing SELECT statement:", err);
+      res.status(500).json({ error: "Internal Server Error" });
       return;
     }
     if (results.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
     res.json(results[0]);
   });
@@ -61,60 +61,58 @@ router.get('/admin/user/single/:email', (req, res) => {
 
 // DELETE user (ลบ database ตาม id)
 // ลบ database ตาม id
-router.delete('/admin/delete_user/:id', (req, res) => {
+router.delete("/admin/delete_user/:id", (req, res) => {
   const idToDelete = req.params.id;
 
   if (!idToDelete) {
-    return res.status(400).json({ error: 'ID parameter is required' });
+    return res.status(400).json({ error: "ID parameter is required" });
   }
 
-  const sql = 'DELETE FROM user WHERE id = ?';
+  const sql = "DELETE FROM user WHERE id = ?";
 
   db.query(sql, [idToDelete], (err, results) => {
     if (err) {
-      console.error('Error executing DELETE statement:', err);
-      return res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error executing DELETE statement:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
 
     if (results.affectedRows > 0) {
-      res.json({ message: 'Data deleted successfully' });
+      res.json({ message: "Data deleted successfully" });
     } else {
-      res.status(404).json({ error: 'Data not found' });
+      res.status(404).json({ error: "Data not found" });
     }
   });
 });
 
-// education department 
+// education department
 
 // ลบวิชาที่เปิดสอน แก้ isopen 0
-router.put('/edu/delete_subjectsIsopen/:id', (req, res) => {
+router.put("/edu/delete_subjectsIsopen/:id", (req, res) => {
   const idSubject = req.params.id;
 
   if (!idSubject) {
-    return res.status(400).json({ error: 'Subjects parameter is required' });
+    return res.status(400).json({ error: "Subjects parameter is required" });
   }
 
-  const sql = 'UPDATE subjects SET IsOpen = 0 WHERE id = ?';
+  const sql = "UPDATE subjects SET IsOpen = 0 WHERE id = ?";
 
   db.query(sql, [idSubject], (err, results) => {
     if (err) {
-      console.error('Error executing UPDATE statement:', err);
-      return res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error executing UPDATE statement:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
 
     if (results.affectedRows > 0) {
-      res.json({ message: 'Data update successfully' });
+      res.json({ message: "Data update successfully" });
     } else {
-      res.status(404).json({ error: 'Id not found' });
+      res.status(404).json({ error: "Id not found" });
     }
   });
 });
 
-
 // subjectReg (ผลการลงทะเบียน ที่ผ่านแล้ว)
 //ดึงข้อมูลจาก database table วิชาที่ลงทะเบียน [{},{}]
-router.get('/edu/subjectReg', (req, res) => {
-
+router.get("/edu/subjectReg", (req, res) => {
   const sql = `
 SELECT
   subjectsRegister.id AS id,
@@ -137,12 +135,12 @@ JOIN day ON subjectsRegister.day_id = day.id
 JOIN status ON subjectsRegister.status_id = status.id
 JOIN category ON subjectsRegister.category_id = category.id
 WHERE
-  status.id = 1` ;
+  status.id = 1`;
 
   db.query(sql, (err, results) => {
     if (err) {
-      console.error('Error executing SELECT statement:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error executing SELECT statement:", err);
+      res.status(500).json({ error: "Internal Server Error" });
       return;
     }
     res.json(results);
@@ -150,11 +148,11 @@ WHERE
 });
 
 // ลบหลักสูตร
-router.delete('/edu/delete_subjects/:years', (req, res) => {
+router.delete("/edu/delete_subjects/:years", (req, res) => {
   const OpenYear = req.params.years;
 
   if (!OpenYear) {
-    return res.status(400).json({ error: 'Subjects parameter is required' });
+    return res.status(400).json({ error: "Subjects parameter is required" });
   }
 
   const checkSubjectsRegister = `
@@ -165,47 +163,52 @@ router.delete('/edu/delete_subjects/:years', (req, res) => {
 
   db.query(checkSubjectsRegister, [OpenYear], (err, results) => {
     if (err) {
-      console.error('Error checking subjectsRegister:', err);
-      return res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error checking subjectsRegister:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
 
     const count = results[0].idSubject;
 
     if (count > 0) {
-      return res.status(400).json({ error: 'Cannot delete. Data exists in SubjectsRegister Table.' });
+      return res.status(400).json({
+        error: "Cannot delete. Data exists in SubjectsRegister Table.",
+      });
     } else {
-      const deleteSubjectsSQL = 'DELETE FROM subjects WHERE years=?';
-      const deleteFileSQL = 'DELETE FROM file WHERE years = ?';
+      const deleteSubjectsSQL = "DELETE FROM subjects WHERE years=?";
+      const deleteFileSQL = "DELETE FROM file WHERE years = ?";
 
       db.query(deleteSubjectsSQL, [OpenYear], (err, results) => {
         if (err) {
-          console.error('Error executing DELETE statement for subjects:', err);
-          return res.status(500).json({ error: 'Internal Server Error' });
+          console.error("Error executing DELETE statement for subjects:", err);
+          return res.status(500).json({ error: "Internal Server Error" });
         }
 
         if (results.affectedRows > 0) {
-          res.json({ message: 'Data delete successfully' });
+          res.json({ message: "Data delete successfully" });
         } else {
-          res.status(404).json({ error: 'ไม่พบหลักสูตรที่กำหนด' });
+          res.status(404).json({ error: "ไม่พบหลักสูตรที่กำหนด" });
         }
       });
 
       db.query(deleteFileSQL, [OpenYear], (err, results) => {
         try {
           fs.unlinkSync(`public/files/course_${OpenYear}.xlsx`);
-          console.log('File is deleted.', `public/files/course_${OpenYear}.xlsx`);
+          console.log(
+            "File is deleted.",
+            `public/files/course_${OpenYear}.xlsx`
+          );
         } catch (err) {
-          console.error('Error deleting file:', err);
+          console.error("Error deleting file:", err);
         }
       });
     }
   });
 });
 
-// teacher 
+// teacher
 
 //schedule page ทุกรายวิชา ที่ลงทะเบียนผ่านแล้ว
-router.get('/teacher/schedule', (req, res) => {
+router.get("/teacher/schedule", (req, res) => {
   const sql = `
   SELECT 
   subjects.id AS idSubject, 
@@ -221,7 +224,8 @@ router.get('/teacher/schedule', (req, res) => {
   subjectsRegister.st, 
   subjectsRegister.et,
   status.name AS status,
-  subject_category.name AS subject_category
+  subject_category.name AS subject_category,
+  subjectsRegister.id AS idre
 FROM 
   subjectsRegister
 JOIN 
@@ -241,21 +245,20 @@ WHERE
 
   db.query(sql, (err, results) => {
     if (err) {
-      console.error('Error executing SELECT statement:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error executing SELECT statement:", err);
+      res.status(500).json({ error: "Internal Server Error" });
       return;
     }
     res.json(results);
-  })
+  });
 });
 
-
 //schedule page(ทุกรายวิชาที่ลงทะเบียน แบบตารางสอนของ my schedule)
-// ดึงข้อมูลจากdatabase table วิชาที่ลงทะเบียน คัดกรองด้วย iduser 
-router.get('/teacher/schedule_single/:id', (req, res) => {
+// ดึงข้อมูลจากdatabase table วิชาที่ลงทะเบียน คัดกรองด้วย iduser
+router.get("/teacher/schedule_single/:id", (req, res) => {
   const idUser = req.params.id;
   if (!idUser || isNaN(idUser)) {
-    return res.status(400).json({ error: 'Invalid ID parameter' });
+    return res.status(400).json({ error: "Invalid ID parameter" });
   }
   const sql = `
   SELECT 
@@ -282,27 +285,25 @@ router.get('/teacher/schedule_single/:id', (req, res) => {
 
   db.query(sql, [parseInt(idUser)], (err, results) => {
     if (err) {
-      console.error('Error executing SELECT statement:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error executing SELECT statement:", err);
+      res.status(500).json({ error: "Internal Server Error" });
       return;
     }
 
     if (results.length === 0) {
       //db.query()
-      return res.status(404).json({ error: 'schedule not found' });
+      return res.status(404).json({ error: "schedule not found" });
     }
     res.json(results);
   });
 });
 
-
-
 //  teacher_subjectsregister (ลงทะเบียนรายวิชา)
-// ดึงข้อมูลจากdatabase table วิชาที่ลงทะเบียน คัดกรองด้วย email อันเดียวกับตารางสอน 
-router.get('/teacher/subjectsregister/:id', (req, res) => {
+// ดึงข้อมูลจากdatabase table วิชาที่ลงทะเบียน คัดกรองด้วย email อันเดียวกับตารางสอน
+router.get("/teacher/subjectsregister/:id", (req, res) => {
   const idUser = req.params.id;
   if (!idUser || isNaN(idUser)) {
-    return res.status(400).json({ error: 'Invalid ID parameter' });
+    return res.status(400).json({ error: "Invalid ID parameter" });
   }
   const sql = `
   SELECT
@@ -324,43 +325,41 @@ router.get('/teacher/subjectsregister/:id', (req, res) => {
 
   db.query(sql, [parseInt(idUser)], (err, results) => {
     if (err) {
-      console.error('Error executing SELECT statement:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error executing SELECT statement:", err);
+      res.status(500).json({ error: "Internal Server Error" });
       return;
     }
 
     if (results.length === 0) {
-
       //db.query()
-      return res.status(404).json({ error: 'subjectsregister not found' });
+      return res.status(404).json({ error: "subjectsregister not found" });
     }
     res.json(results);
   });
 });
 
 //ลบ วิชาที่ลงทะเบียน
-router.delete('/teacher/delete_subjectsregister/:id', (req, res) => {
+router.delete("/teacher/delete_subjectsregister/:id", (req, res) => {
   const idSubject = req.params.id;
 
   if (!idSubject) {
-    return res.status(400).json({ error: 'Subjects parameter is required' });
+    return res.status(400).json({ error: "Subjects parameter is required" });
   }
 
-  const sql = 'DELETE FROM subjectsRegister WHERE id = ? ;';
+  const sql = "DELETE FROM subjectsRegister WHERE id = ? ;";
 
   db.query(sql, [idSubject], (err, results) => {
     if (err) {
-      console.error('Error executing DELETE statement:', err);
-      return res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error executing DELETE statement:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
 
     if (results.affectedRows > 0) {
-      res.json({ message: 'Data deleted successfully' });
+      res.json({ message: "Data deleted successfully" });
     } else {
-      res.status(404).json({ error: 'Id not found' });
+      res.status(404).json({ error: "Id not found" });
     }
   });
 });
-
 
 module.exports = router;
