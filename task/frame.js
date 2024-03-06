@@ -145,7 +145,9 @@ const {userid} = req.params;
     }
 
     if (results.length > 0) {
+
       db.query('SELECT subjectsRegister.st,subjectsRegister.et,subjectsRegister.day_id,day.name AS day_name,user.name AS user_name,status.name AS status_name,subjectsRegister.category_id,subjects.name FROM  subjects,subjectsRegister INNER JOIN day ON subjectsRegister.day_id = day.id INNER JOIN status ON subjectsRegister.status_id = status.id INNER JOIN user ON subjectsRegister.User_id = user.id WHEREsubjects.id  = subjectsRegister.Subjects_id and subjectsRegister.status_id = 3 AND subjectsRegister.category_id = 1 OR subjectsRegister.category_id = 2  ;' ,(err,re)=>{
+
       res.json({ message: results,m:re });
 
 
