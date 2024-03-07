@@ -7,9 +7,6 @@ const readfiles = require("read-excel-file/node");
 //ตัวอย่าง
 const fs = require("fs");
 const exceljs = require("exceljs");
-const { TIMEOUT } = require("dns");
-const { Types } = require("mysql2");
-const { error } = require("console");
 
 router.post("/admin/System", (req, res) => {
   const { systemstatus, S_date, E_date, S_time, E_time } = req.body;
