@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
-
+//ดึง subject_category
 router.get("/setting/subject_category", (req, res) => {
     db.query("select * from subject_category", (err, results) => {
         if (err) {
@@ -11,7 +11,7 @@ router.get("/setting/subject_category", (req, res) => {
         }
     });
 });
-
+//ลบ
 router.post("/setting/deletesubject_category", (req, res) => {
     const { subject_category_id } = req.body;
     db.query("select subject_category_id from subjects where subject_category_id=?", [subject_category_id], (err, results) => {
@@ -26,7 +26,7 @@ router.post("/setting/deletesubject_category", (req, res) => {
         }
     });
 })
-
+//บังคับลบ subject_category
 router.delete("/setting/deleteforesubject_category/:id", (req, res) => {
     const { id } = req.params;
     db.query("select id,subject_category_id from subjects where subject_category_id=?", [id], (err, results) => {
@@ -48,4 +48,55 @@ router.delete("/setting/deleteforesubject_category/:id", (req, res) => {
     });
 })
 
+//ดึง focus_sub_cat
+router.get("/setting/focus_sub_cat", (req, res) => {
+    db.query("select f.id,s.name from focus_sub_cat f join subject_category s on s.id=f.subject_category_id", (err, results) => {
+        if (err) {
+            res.status(500).json({msg:"Error database",err})
+        } else {
+            res.status(200).json(results)
+        }
+    });
+});
+//ดึง status
+router.get("/setting/status", (req, res) => {
+    db.query("select * from status", (err, results) => {
+        if (err) {
+            res.status(500).json({msg:"Error database",err})
+        } else {
+            res.status(200).json(results)
+        }
+    });
+});
+//ดึง role
+router.get("/setting/role", (req, res) => {
+    db.query("select * from role", (err, results) => {
+        if (err) {
+            res.status(500).json({msg:"Error database",err})
+        } else {
+            res.status(200).json(results)
+        }
+    });
+});
+
+//ดึง category
+router.get("/setting/category", (req, res) => {
+    db.query("select * from category", (err, results) => {
+        if (err) {
+            res.status(500).json({msg:"Error database",err})
+        } else {
+            res.status(200).json(results)
+        }
+    });
+});
+//ดึง autoday
+router.get("/setting/autoday", (req, res) => {
+    db.query("select * from autoday", (err, results) => {
+        if (err) {
+            res.status(500).json({msg:"Error database",err})
+        } else {
+            res.status(200).json(results)
+        }
+    });
+});
 module.exports = router;
