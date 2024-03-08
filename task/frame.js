@@ -217,6 +217,7 @@ router.get('/statusRegister',(req,res)=>{
   day.name AS day,
   user.name AS NAME,
   status.name AS status_name,
+  status.id AS status_id,
   subjectsRegister.category_id 
   from subjects,subjectsRegister,day,user,status
   WHERE subjects.id = Subjects_id and day_id = day.id and User_id = user.id and status_id = status.id`
