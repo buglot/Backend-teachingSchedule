@@ -3,6 +3,7 @@ const cors = require('cors');
 const peterRoutes = require('./task/peter');
 const frameRoutes = require('./task/frame');
 const fahRoutes = require('./task/fah');
+const settingRoutes = require('./task/setting');
 const auto = require("./task/auto")
 const chalk = require('chalk');
 const path = require('path');
@@ -25,6 +26,7 @@ app.use((req, res, next) => {
 app.use('/api', peterRoutes);
 app.use('/api', frameRoutes);
 app.use('/api', fahRoutes);
+app.use('/api', settingRoutes);
 app.get('/download/:file', (req, res) => {
   const { file } = req.params;
   res.sendFile(path.join(__dirname, 'public/files/' + file));
