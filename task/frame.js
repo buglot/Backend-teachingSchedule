@@ -172,16 +172,18 @@ router.get('/statusRegistered/:userid', (req, res) => {
   const { userid } = req.params;
   const sql = `
     SELECT GROUP_CONCAT(subjectsRegister.st) AS st_values,
+    subjects.name AS SUBJECT,
     subjectsRegister.et,
     subjectsRegister.day_id,
     day.name AS day,
     user.name AS NAME,
     status.name AS status_name,
     subjectsRegister.category_id 
-    FROM subjectsRegister INNER JOIN day ON subjectsRegister.day_id = day.id 
+    FROM subjects,subjectsRegister INNER JOIN day ON subjectsRegister.day_id = day.id 
     INNER JOIN status ON subjectsRegister.status_id = status.id 
     INNER JOIN user ON subjectsRegister.User_id = user.id 
-    WHERE subjectsRegister.status_id = 3 AND 
+    WHERE subjects.id = Subjects_id AND 
+    subjectsRegister.status_id = 3 AND 
     subjectsRegister.category_id = 1 OR 
     subjectsRegister.category_id = 3 AND 
     (subjectsRegister.st,subjectsRegister.et,subjectsRegister.day_id) 
@@ -205,6 +207,31 @@ router.get('/statusRegistered/:userid', (req, res) => {
       res.status(401).json({ error: 'No data found for the provided user ID' });
     }
   });
+});
+
+router.get('/statusRegister',(req,res)=>{
+  const sql = `SELECT subjects.name AS SUBJECT,
+  subjectsRegister.et,
+  subjectsRegister.day_id,
+  day.name AS day,
+  user.name AS NAME,
+  status.name AS status_name,
+  subjectsRegister.category_id 
+  from subjects,subjectsRegister,day,user,status
+  WHERE subjects.id = Subjects_id and day_id = day.id and User_id = user.id and status_id = status.id`
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error executing SELECT statement:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
+
+    if (results.length > 0) {
+      res.json({ message: results });
+    } else {
+      res.status(401).json({ error: 'No data found for the provided user ID' });
+    }
+  })
 });
 
 //รับ ชื่อแล้วค้นหาคำ โดย เอาชื่อ มา
