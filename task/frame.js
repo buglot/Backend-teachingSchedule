@@ -138,7 +138,7 @@ router.get('/statusRegisteredpro1/:userid',(req,res)=>{
 const {userid} = req.params;
 
   const sql = `SELECT st,et,day_id,day.name AS day_name,status_id,status.name AS status_name,category_id,subjects.name from subjects,subjectsRegister,day,status,user where subjects.id  = subjectsRegister.Subjects_id and user.id = ${userid} and subjectsRegister.User_id = user.id and day.id = day_id and status_id = status.id`
-  ddb.query(sql, (err, results) => {
+  db.query(sql, (err, results) => {
     if (err) {
       console.error('Error executing SELECT statement:', err);
       res.status(500).json({ error: 'Internal Server Error' });
