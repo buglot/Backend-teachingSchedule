@@ -138,4 +138,17 @@ router.post("/setting/rename", (req, res) => {
     });
 });
 
+// add insert
+router.post("/setting/insert", (req, res) => {
+    const { name, table, id } = req.body;
+    const sql = `INSERT INTO ${table} (id, name) VALUES (?, ?)`
+    db.query(sql, [id,name], (err, results) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ msgerror: "Error database", err })
+        } else {
+            res.status(200).json({ msg: "เพื่มเข้าระบบสำเร็จแล้ว"})
+        }
+    });
+});
 module.exports = router;
