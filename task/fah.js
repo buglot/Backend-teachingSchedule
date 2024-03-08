@@ -363,68 +363,100 @@ router.delete("/teacher/delete_subjectsregister/:id", (req, res) => {
 });
 
 // update วัน-เวลา
+
+function checkOverlap(v, val) {
+  const vSt = new Date(`1970-01-01T${v.st}`).getTime(); // ใช้วันที่เดียวกันเพื่อความสะดวกในการคำนวณ
+  const vEt = new Date(`1970-01-01T${v.et}`).getTime();
+  const valSt = new Date(`1970-01-01T${val.st}`).getTime();
+  const valEt = new Date(`1970-01-01T${val.et}`).getTime();
+  
+  if (valSt >= vSt && valSt < vEt) {
+      return true; // มีการทับซ้อน
+  }
+  
+  if (valEt > vSt && valEt <= vEt) {
+      return true; // มีการทับซ้อน
+  }
+  
+  // ตรวจสอบว่าช่วงเวลาที่ต้องการตรวจสอบครอบคลุมช่วงเวลาหลักหรือไม่
+  if (valSt <= vSt && valEt >= vEt) {
+      return true; // มีการทับซ้อน
+  }
+  
+  return false; // ไม่มีการทับซ้อน
+}
+
 router.put("/teacher/update_time", (req, res) => {
   //const idSubject = req.params.id;
   const { idSubject, st, et, day } = req.body;
   if (!idSubject || !st || !et || !day) {
     return res.status(400).json({ error: "Missing required parameters" });
   }
-  
-  const checkCategorySql = "SELECT sr.category_id FROM subjectsRegister AS sr  JOIN focus_sub_cat AS fsc ON sr.category_id = fsc.subject_category_id WHERE sr.id = ?";
-  // อัปเดตข้อมูล st, et, และ day ใน subjectsregister
-  const updateSql = "UPDATE subjectsRegister SET st = ?, et = ?, day_id = ? WHERE id = ?";
 
-  db.query(checkCategorySql, [idSubject], (checkCategoryErr, checkCategoryResults) => {
-    if(checkCategoryErr){
-      console.error("Error excuting SELECT statement: ",checkCategoryErr);
-      return res.status(500).json({err: "Internal Server Error"});
+  // ตรวจสอบว่ามีการทับซ้อนกับเวลาที่กำลังจะอัปเดตหรือไม่
+  const checkOverlapSql = "SELECT id, st, et FROM subjectsRegister WHERE id <> ? AND day_id = ?";
+  db.query(checkOverlapSql, [idSubject, day], (checkOverlapErr, checkOverlapResults) => {
+    if (checkOverlapErr) {
+      console.error("Error executing SELECT statement:", checkOverlapErr);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
 
-    if(checkCategoryResults.length == 0){
-      //return res.status(404).json({err: "Category ID not found or does not match with focus_sub_cat"});
-      
-      db.query(updateSql, [ st, et, day,idSubject ], (updateErr, updateResults) =>{
-        if (updateErr) {
-          console.error("Error executing UPDATE statement:", updateErr);
-          return res.status(500).json({ error: "Internal Server Error" });
-        }
-        if (updateResults.affectedRows > 0) {
-          res.json({ message: "Data update successfully" });
-        } else {
-          res.status(404).json({ error: "Id not found" });
-        }
-      })
+    // ถ้ามีการทับซ้อนกับเวลาที่อัปเดต
+    if (checkOverlapResults.some(val => checkOverlap(val, { st, et }))) {
+      return res.status(400).json({ error: "Duplicate time and day" });
     }
-    if(checkCategoryResults.length > 0){
-      //return res.status(404).json({err: "Category ID not found or does not match with focus_sub_cat"});
-      // ตรวจสอบว่ามีข้อมูล st, et, และ day ที่ซ้ำกันใน subjectsregister หรือไม่
-      const checkDuplicationSql = "SELECT id FROM subjectsRegister WHERE id <> ? AND st = ? AND et = ? AND day_id = ?";
-      db.query(checkDuplicationSql, [idSubject, st, et, day], (checkDuplicationErr, checkDuplicationResults) => {
-      if (checkDuplicationErr) {
-        console.error("Error executing SELECT statement:", checkDuplicationErr);
-        return res.status(500).json({ error: "Internal Server Error" });
+
+    const checkCategorySql = "SELECT sr.category_id FROM subjectsRegister AS sr  JOIN focus_sub_cat AS fsc ON sr.category_id = fsc.subject_category_id WHERE sr.id = ?";
+    // อัปเดตข้อมูล st, et, และ day ใน subjectsregister
+    const updateSql = "UPDATE subjectsRegister SET st = ?, et = ?, day_id = ? WHERE id = ?";
+
+    db.query(checkCategorySql, [idSubject], (checkCategoryErr, checkCategoryResults) => {
+      if (checkCategoryErr) {
+        console.error("Error executing SELECT statement: ", checkCategoryErr);
+        return res.status(500).json({ err: "Internal Server Error" });
       }
-      if (checkDuplicationResults.length == 0) {
-        //return res.status(400).json({ error: "Duplicate st, et, and day found in subjectsregister" });
-        db.query(updateSql, [ st, et, day,idSubject ], (updateErr, updateResults) =>{
+
+      if (checkCategoryResults.length == 0) {
+        db.query(updateSql, [st, et, day, idSubject], (updateErr, updateResults) => {
           if (updateErr) {
             console.error("Error executing UPDATE statement:", updateErr);
             return res.status(500).json({ error: "Internal Server Error" });
           }
           if (updateResults.affectedRows > 0) {
-            res.json({ message: "Data update successfully" });
+            res.json({ message: "Data updated successfully" });
           } else {
             res.status(404).json({ error: "Id not found" });
           }
-        })
+        });
+      } else {
+        // ตรวจสอบว่ามีข้อมูล st, et, และ day ที่ซ้ำกันใน subjectsregister หรือไม่
+        const checkDuplicationSql = "SELECT id FROM subjectsRegister WHERE id <> ? AND st = ? AND et = ? AND day_id = ?";
+        db.query(checkDuplicationSql, [idSubject, st, et, day], (checkDuplicationErr, checkDuplicationResults) => {
+          if (checkDuplicationErr) {
+            console.error("Error executing SELECT statement:", checkDuplicationErr);
+            return res.status(500).json({ error: "Internal Server Error" });
+          }
+          if (checkDuplicationResults.length == 0) {
+            db.query(updateSql, [st, et, day, idSubject], (updateErr, updateResults) => {
+              if (updateErr) {
+                console.error("Error executing UPDATE statement:", updateErr);
+                return res.status(500).json({ error: "Internal Server Error" });
+              }
+              if (updateResults.affectedRows > 0) {
+                res.json({ message: "Data updated successfully" });
+              } else {
+                res.status(404).json({ error: "Id not found" });
+              }
+            });
+          } else {
+            return res.status(400).json({ error: "Duplicate time and day" });
+          }
+        });
       }
-      if (checkCategoryResults.length > 0){
-        return res.status(404).json({ error: "วัน-เวลาชน"})
-      }
-    })
-  };
+    });
+  });
 });
-});
+
 
 module.exports = router;
 
