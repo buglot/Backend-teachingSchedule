@@ -211,6 +211,7 @@ router.get('/statusRegistered/:userid', (req, res) => {
 
 router.get('/statusRegister',(req,res)=>{
   const sql = `SELECT subjects.name AS SUBJECT,
+  subjectsRegister.st,
   subjectsRegister.et,
   subjectsRegister.day_id,
   day.name AS day,
