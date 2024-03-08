@@ -209,7 +209,8 @@ router.get('/statusRegistered/:userid', (req, res) => {
   });
 });
 
-router.get('/statusRegister',(req,res)=>{
+router.get('/statusRegister/:userid',(req,res)=>{
+  const { userid } = req.params;
   const sql = `SELECT subjects.name AS SUBJECT,
   subjectsRegister.st,
   subjectsRegister.et,
@@ -220,7 +221,7 @@ router.get('/statusRegister',(req,res)=>{
   status.id AS status_id,
   subjectsRegister.category_id 
   from subjects,subjectsRegister,day,user,status
-  WHERE subjects.id = Subjects_id and day_id = day.id and User_id = user.id and status_id = status.id`
+  WHERE subjects.id = Subjects_id and day_id = day.id and User_id = user.id and status_id = status.id and User_id = ${userid}`
   db.query(sql, (err, results) => {
     if (err) {
       console.error('Error executing SELECT statement:', err);
