@@ -212,6 +212,7 @@ router.get('/statusRegistered/:userid', (req, res) => {
 router.get('/statusRegister/:userid',(req,res)=>{
   const { userid } = req.params;
   const sql = `SELECT subjects.name AS SUBJECT,
+  subjectsRegister.id,
   subjectsRegister.st,
   subjectsRegister.et,
   subjectsRegister.day_id,
