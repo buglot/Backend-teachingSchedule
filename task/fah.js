@@ -45,7 +45,7 @@ router.get("/admin/user/single/:email", (req, res) => {
   const email = req.params.email;
 
   const sql =
-    "SELECT user.id,role.id, user.name AS name, user.email, role.name AS role FROM user JOIN role ON user.role_id = role.id WHERE user.email = ?";
+    "SELECT user.id AS id ,role.id AS role_id , user.name AS name, user.email, role.name AS role FROM user JOIN role ON user.role_id = role.id WHERE user.email = ?";
   db.query(sql, [email], (err, results) => {
     if (err) {
       console.error("Error executing SELECT statement:", err);
@@ -362,4 +362,69 @@ router.delete("/teacher/delete_subjectsregister/:id", (req, res) => {
   });
 });
 
+// update วัน-เวลา
+router.put("/teacher/update_time", (req, res) => {
+  //const idSubject = req.params.id;
+  const { idSubject, st, et, day } = req.body;
+  if (!idSubject || !st || !et || !day) {
+    return res.status(400).json({ error: "Missing required parameters" });
+  }
+  
+  const checkCategorySql = "SELECT sr.category_id FROM subjectsRegister AS sr  JOIN focus_sub_cat AS fsc ON sr.category_id = fsc.subject_category_id WHERE sr.id = ?";
+  // อัปเดตข้อมูล st, et, และ day ใน subjectsregister
+  const updateSql = "UPDATE subjectsRegister SET st = ?, et = ?, day_id = ? WHERE id = ?";
+
+  db.query(checkCategorySql, [idSubject], (checkCategoryErr, checkCategoryResults) => {
+    if(checkCategoryErr){
+      console.error("Error excuting SELECT statement: ",checkCategoryErr);
+      return res.status(500).json({err: "Internal Server Error"});
+    }
+
+    if(checkCategoryResults.length == 0){
+      //return res.status(404).json({err: "Category ID not found or does not match with focus_sub_cat"});
+      
+      db.query(updateSql, [ st, et, day,idSubject ], (updateErr, updateResults) =>{
+        if (updateErr) {
+          console.error("Error executing UPDATE statement:", updateErr);
+          return res.status(500).json({ error: "Internal Server Error" });
+        }
+        if (updateResults.affectedRows > 0) {
+          res.json({ message: "Data update successfully" });
+        } else {
+          res.status(404).json({ error: "Id not found" });
+        }
+      })
+    }
+    if(checkCategoryResults.length > 0){
+      //return res.status(404).json({err: "Category ID not found or does not match with focus_sub_cat"});
+      // ตรวจสอบว่ามีข้อมูล st, et, และ day ที่ซ้ำกันใน subjectsregister หรือไม่
+      const checkDuplicationSql = "SELECT id FROM subjectsRegister WHERE id <> ? AND st = ? AND et = ? AND day_id = ?";
+      db.query(checkDuplicationSql, [idSubject, st, et, day], (checkDuplicationErr, checkDuplicationResults) => {
+      if (checkDuplicationErr) {
+        console.error("Error executing SELECT statement:", checkDuplicationErr);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+      if (checkDuplicationResults.length == 0) {
+        //return res.status(400).json({ error: "Duplicate st, et, and day found in subjectsregister" });
+        db.query(updateSql, [ st, et, day,idSubject ], (updateErr, updateResults) =>{
+          if (updateErr) {
+            console.error("Error executing UPDATE statement:", updateErr);
+            return res.status(500).json({ error: "Internal Server Error" });
+          }
+          if (updateResults.affectedRows > 0) {
+            res.json({ message: "Data update successfully" });
+          } else {
+            res.status(404).json({ error: "Id not found" });
+          }
+        })
+      }
+      if (checkCategoryResults.length > 0){
+        return res.status(404).json({ error: "วัน-เวลาชน"})
+      }
+    })
+  };
+});
+});
+
 module.exports = router;
+
