@@ -189,7 +189,7 @@ router.post(
     const uploadedFile = req.file;
     const filePath = uploadedFile.path;
 
-    readfiles(path.join(filePath)).then((rows) => {
+    readfiles(path.join(filePath)).then(async(rows) => {
       const list = []; // Create an empty array to store the dictionaries
 
       const idsubjectColumnIndex = rows[0].indexOf("รหัสวิชา");
@@ -198,6 +198,7 @@ router.post(
       const subject_categoryColumnIndex = rows[0].indexOf("หมวด");
       for (let i = 1; i < rows.length; i++) {
         try {
+          const categoryId = await assignSubjectCategoryId(rows[i][subject_categoryColumnIndex]);
           const data = {
             // Create a dictionary for each row
             idsubject: rows[i][idsubjectColumnIndex]
@@ -223,12 +224,12 @@ router.post(
               : null,
             years: y,
             exsub: 0,
-            subject_category_id: assignSubjectCategoryId(
-              rows[i][subject_categoryColumnIndex]
-            ), // Call a function to assign category ID
+            subject_category_id: categoryId
+            , // Call a function to assign category ID
           };
           list.push(data);
         } catch (error) {
+          const categoryId = await assignSubjectCategoryId(rows[i][subject_categoryColumnIndex]);
           const data = {
             // Create a dictionary for each row
             idsubject: rows[i][idsubjectColumnIndex]
@@ -243,9 +244,7 @@ router.post(
             mt: 0,
             years: y,
             exsub: 1,
-            subject_category_id: assignSubjectCategoryId(
-              rows[i][subject_categoryColumnIndex]
-            ), // Call a function to assign category ID
+            subject_category_id: categoryId,
           };
           list.push(data);
         }
@@ -285,19 +284,22 @@ router.post(
     });
   }
 );
-function assignSubjectCategoryId(name) {
-  db.query("select id from subject_category where name = ?", [name], (err, results) => {
-    if (err) {
-      return null;
-    } else {
-      if (results.length > 0) {
-        return results[0]
+async function assignSubjectCategoryId(name) {
+  return new Promise((resolve, reject) => {
+    db.query("select id from subject_category where name = ?", [name], (err, results2) => {
+      if (err) {
+        reject(err);
       } else {
-        return null;
+        if (results2.length > 0) {
+          resolve(results2[0].id);
+        } else {
+          resolve(null);
+        }
       }
-    }
-  })
+    });
+  });
 }
+
 function checkfile() {
   db.query(
     "select * from file f where not exists (select distinct years from subjects where f.years = years)",
@@ -367,7 +369,7 @@ function upDatefile() {
                   worksheet.getCell(i + 2, 4).value = "error database report admin to fix"
                 } else {
                   if (result1.length > 0) {
-                    workbook.getCell(i + 2, 4).value = result1[0]
+                    worksheet.getCell(i + 2, 4).value = result1[0].name
                   } else {
                     worksheet.getCell(i + 2, 4).value = "report admin to fix"
                   }

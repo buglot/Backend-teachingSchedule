@@ -170,6 +170,19 @@ router.post("/setting/insert", (req, res) => {
         }
     });
 });
+router.get("/setting/subject_categorywithout", (req, res) => {
+    db.query("select * from subject_category s where not Exists (select * from focus_sub_cat where subject_category_id=s.id) order by id", (err, results) => {
+        if (err) {
+            res.status(500).json({ msg: "Error database", err })
+        } else {
+            if (results.length > 0) {
+                res.status(200).json(results)
+           } else {
+               res.status(500).json({msg:"ไม่มีข้อมูลให้เพิ่มหมดแล้ว"})
+           }
+        }
+    });
+});
 router.get("/setting/day", (req, res) => {
     db.query("select * from day order by id", (err, results) => {
         if (err) {
@@ -179,5 +192,31 @@ router.get("/setting/day", (req, res) => {
         }
     });
 });
+router.get("/setting/daywithout", (req, res) => {
+    db.query("select * from day d where not Exists (select * from autoday where day_id=d.id) order by d.id", (err, results) => {
+        if (err) {
+            res.status(500).json({ msg: "Error database", err })
+        } else {
+            if (results.length > 0) {
+                 res.status(200).json(results)
+            } else {
+                res.status(500).json({msg:"ไม่มีข้อมูลให้เพิ่มหมดแล้ว"})
+            }
+           
+        }
+    });
+});
+router.post("/setting/insertid", (req, res) => {
+    const {table, id,col } = req.body;
+    const sql = `INSERT INTO ${table} (${col}) VALUES (?)`
+    db.query(sql, [id], (err, resuts) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ msg: "Error database" ,err})
+        } else {
+            res.status(200).json({msg:"เพื่มเข้าระบบสำเร็จแล้ว"})
+        }
+    })
+})
 
 module.exports = router;
