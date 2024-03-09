@@ -30,6 +30,8 @@ router.delete("/setting/deleteall", (req, res) => {
                     return res.status(404).json({ msgerror: "กรุณาแก้ไขผู้ใช้ที่มี role นี้ออกก่อนลบ", msgerrorsubmit: "รับทราบ" })
                 } else if (table === 'category'){
                     return res.status(404).json({ msgerror: `กรุณาลบวิชาที่ลงทะเบียนเกี่ยวหมวดเรียนนี้ก่อนลบ`, msgerrorsubmit: "รับทราบ" })
+                }else if (table === 'day'){
+                    return res.status(404).json({ msgerror: `กรุณาลบวิชาที่ลงทะเบียนเกี่ยวหมวดวันที่เรียนนี้ก่อนลบ`, msgerrorsubmit: "รับทราบ" })
                 }
             } else {
                 return res.status(500).json({ msgerrorDB: "Error database", error1 })
