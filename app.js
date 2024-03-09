@@ -29,7 +29,7 @@ app.use('/api', fahRoutes);
 app.use('/api', settingRoutes);
 app.get('/download/:file', (req, res) => {
   const { file } = req.params;
-  res.sendFile(path.join(__dirname, 'public/files/' + file));
+  res.sendFile(path.join(__dirname, 'public/savefiles/' + file));
 })
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, '/index.html'));
