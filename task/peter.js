@@ -286,15 +286,17 @@ router.post(
   }
 );
 function assignSubjectCategoryId(name) {
-  if (name === "วิชาเลือก") {
-    return 2;
-  } else if (name === "วิชาบังคับ") {
-    return 1;
-  } else if (name === "วิชาแกน") {
-    return 3;
-  } else {
-    return null;
-  }
+  db.query("select id from subject_category where name = ?", [name], (err, results) => {
+    if (err) {
+      return null;
+    } else {
+      if (results.length > 0) {
+        return results[0]
+      } else {
+        return null;
+      }
+    }
+  })
 }
 function checkfile() {
   db.query(
@@ -360,12 +362,18 @@ function upDatefile() {
               worksheet.getCell(i + 2, 3).value = `${results[i].credit}(${results[i].lecture_t
                 }-${results[i].practice_t ? results[i].practice_t : 0}-${results[i].m_t
                 })`;
-              worksheet.getCell(i + 2, 4).value =
-                results[i].subject_category_id === 1
-                  ? "วิชาบังคับ"
-                  : results[i].subject_category_id === 2
-                    ? "วิชาเลือก"
-                    : "วิชาแกน";
+              db.query("select name from subject_category where id = ?", [results[i].subject_category_id], (err, result1) => {
+                if (err) {
+                  worksheet.getCell(i + 2, 4).value = "error database report admin to fix"
+                } else {
+                  if (result1.length > 0) {
+                    workbook.getCell(i + 2, 4).value = result1[0]
+                  } else {
+                    worksheet.getCell(i + 2, 4).value = "report admin to fix"
+                  }
+                  
+                }
+              });
             }
             workbook.xlsx
               .writeFile("public/files/" + "course_" + v.years + ".xlsx")

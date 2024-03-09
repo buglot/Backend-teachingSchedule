@@ -13,15 +13,26 @@ router.get("/setting/subject_category", (req, res) => {
     });
 });
 //ลบ
-router.delete("/setting/deletesubject_category/:id", (req, res) => {
-    const { id } = req.params;
-    db.query("DELETE FROM subject_category WHERE (id = ?)", [id], (error1, results) => {
+router.delete("/setting/deleteall", (req, res) => {
+    const { id } = req.query;
+    const { table } = req.query;
+    let sql = `DELETE FROM ${table} WHERE (id = ?)`;
+    if (table === 'role' && id ==='2') {
+        return res.status(404).json({msgerrorDB:"ไม่สามารถลบ admin หรือ id 2 ได้"})
+    }
+    db.query(sql, [id], (error1, results) => {
         if (error1) {
             console.log("Error delete deleteforesubject_category", id, error1)
             if (error1.errno === 1451) {
-                return res.status(404).json({ msgerror: "ลบไม่ได้ต้องลบวิชาที่มีหมวดนี้การลบออกก่อน และ หมวดวิชาทับเวลากันลบออกก่อน", msgerrorsubmit: "ยืนยันที่ลบวิชาที่เกี่ยวข้องออก" })
+                if (table === 'subject_category') {
+                    return res.status(404).json({ msgerror: "ลบไม่ได้ต้องลบวิชาที่มีหมวดนี้การลบออกก่อน และ หมวดวิชาทับเวลากันลบออกก่อน", msgerrorsubmit: "ยืนยันที่ลบวิชาที่เกี่ยวข้องออก" })
+                } else if (table === 'role') {
+                    return res.status(404).json({ msgerror: "กรุณาแก้ไขผู้ใช้ที่มี role นี้ออกก่อนลบ", msgerrorsubmit: "รับทราบ" })
+                } else if (table === 'category'){
+                    return res.status(404).json({ msgerror: `กรุณาลบวิชาที่ลงทะเบียนเกี่ยวหมวดเรียนนี้ก่อนลบ`, msgerrorsubmit: "รับทราบ" })
+                }
             } else {
-                return res.status(500).json({ msgerrorDB: "Error database", err })
+                return res.status(500).json({ msgerrorDB: "Error database", error1 })
             }
         } else {
             res.status(200).json({ msg: "ลบออกแล้ว" })
@@ -35,13 +46,13 @@ router.delete("/setting/deleteforesubject_category/:id", (req, res) => {
         if (err) {
             return res.status(500).json({ msg: "Error database", err });
         }
-        
+
         if (results.length > 0) {
             results.forEach((v, i) => {
                 db.query("DELETE FROM subjectsRegister WHERE subjects_id = ?", [v.id], (err) => {
                     if (err) {
                         console.log("Error deleting from subjectsRegister:", v.id);
-                    }else{
+                    } else {
                         db.query("DELETE FROM subjects WHERE id = ?", [v.id], (err) => {
                             if (err) {
                                 console.log("Error deleting from subjects:", v.id);
@@ -50,7 +61,7 @@ router.delete("/setting/deleteforesubject_category/:id", (req, res) => {
                     }
                 });
 
-                
+
             });
         }
         db.query("DELETE FROM focus_sub_cat WHERE subject_category_id = ?", [id], (err) => {
@@ -58,13 +69,13 @@ router.delete("/setting/deleteforesubject_category/:id", (req, res) => {
                 console.log("Error deleting from focus_sub_cat:", id);
                 return res.status(500).json({ msgerrorDB: "ลบจากหมวดวิชาทับเวลากันออกไม่ได้" });
             }
-            
+
             db.query("DELETE FROM subject_category WHERE id = ?", [id], (err) => {
                 if (err) {
                     console.log("Error deleting from subject_category:", id);
                     return res.status(500).json({ msgerrorDB: "ลบออกไม่ได้" });
                 }
-                
+
                 res.status(200).json({ msg: "ลบออกแล้ว" });
             });
         });
@@ -131,7 +142,11 @@ router.post("/setting/rename", (req, res) => {
     db.query(sql, [newname, id], (err, results) => {
         if (err) {
             console.log(err);
+
+
             res.status(500).json({ msgerror: "Error database", err })
+
+
         } else {
             res.status(200).json({ msg: "แก้ไขชื่อแล้ว" })
         }
@@ -142,13 +157,27 @@ router.post("/setting/rename", (req, res) => {
 router.post("/setting/insert", (req, res) => {
     const { name, table, id } = req.body;
     const sql = `INSERT INTO ${table} (id, name) VALUES (?, ?)`
-    db.query(sql, [id,name], (err, results) => {
+    db.query(sql, [id, name], (err, results) => {
         if (err) {
             console.log(err);
-            res.status(500).json({ msgerror: "Error database", err })
+            if (err.errno === 1062) {
+                res.status(500).json({ msgerror: "id ซ้ำ เพิ่มไม่ได้", err })
+            } else {
+                res.status(500).json({ msgerror: "Error database", err })
+            }
         } else {
-            res.status(200).json({ msg: "เพื่มเข้าระบบสำเร็จแล้ว"})
+            res.status(200).json({ msg: "เพื่มเข้าระบบสำเร็จแล้ว" })
         }
     });
 });
+router.get("/setting/day", (req, res) => {
+    db.query("select * from day order by id", (err, results) => {
+        if (err) {
+            res.status(500).json({ msg: "Error database", err })
+        } else {
+            res.status(200).json(results)
+        }
+    });
+});
+
 module.exports = router;
