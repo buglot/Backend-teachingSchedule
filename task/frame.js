@@ -22,7 +22,7 @@ router.get('/login', (req, res) => {
 //เขียนเลย
 
 router.get('/user',(req,res)=>{
-  const sql = 'select user.id,user.email,user.name,user.role_id,role.name as rolename from user,role where user.role_id = role.id;'
+  const sql = 'select user.id,user.email,user.name,user.role_id,role.name as rolename from user,role where user.role_id = role.id order by id;'
   db.query(sql, (err, results) => {
     if (err) {
       console.error('Error executing SELECT statement:', err);
