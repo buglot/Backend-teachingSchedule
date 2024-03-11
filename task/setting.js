@@ -272,8 +272,8 @@ router.post("/setting/timeautoChange",(req,res)=>{
         }
     })
 })
-router.get("/setting/logopen/:id/:email",(req,res)=>{
-    const {id,email} = req.params;
+router.get("/setting/logopen/:id/",(req,res)=>{
+    const {id} = req.params;
     db.query("Select statuslog from historyautodetect where id=?",[id],(err,results)=>{
         if(err){
             res.status(500).json({msg:"Error server data! calling admin to fix",err})
@@ -297,5 +297,9 @@ router.post("/setting/setlogopen",(req,res)=>{
             res.status(200).json({msg:`ระบบได้${value===true?"เปิดบันทึก":"ยกเลิกบันทึก"}`})
         }
     })
+})
+
+router.get("/setting/tablesettingdb",(req,res)=>{
+
 })
 module.exports = router;
