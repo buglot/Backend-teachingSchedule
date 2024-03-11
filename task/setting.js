@@ -221,4 +221,44 @@ router.post("/setting/insertid", (req, res) => {
     })
 })
 
+router.get("/setting/timeauto",(req,res)=>{
+    db.query("Select Timer from historyautodetect where id=1",(err,results)=>{
+        if(err){
+            res.status(500).json({msg:"Error server data! calling admin to fix",err})
+        }else{
+            res.status(200).json(results[0])
+        }
+    })
+})
+
+router.post("/setting/timeautoChange",(req,res)=>{
+    const {timer}  =req.body;
+    db.query("update historyautodetect set Timer = ? where id=1",[timer],(err,results)=>{
+        if(err){
+            res.status(500).json({msg:"Error Server database! calling admin to fix",err})
+        }else{
+            res.status(200).json({msg:"ได้ทำการอัปเดทเวลาที่จะตรวจสอบเรียบร้อยแล้ว"})
+        }
+    })
+})
+router.get("/setting/logopen/:id",(req,res)=>{
+    const {id} = req.params;
+    db.query("Select statuslog from historyautodetect where id=?",[id],(err,results)=>{
+        if(err){
+            res.status(500).json({msg:"Error server data! calling admin to fix",err})
+        }else{
+            res.status(200).json(results[0])
+        }
+    })
+})
+router.post("/setting/setlogopen",(req,res)=>{
+    const {id,value} = req.body;
+    db.query("update historyautodetect set statuslog=? where id=?",[value,id],(err,results)=>{
+        if(err){
+            res.status(500).json({msg:"Error server data! calling admin to fix",err})
+        }else{
+            res.status(200).json({msg:`ระบบได้${value===true?"เปิดบันทึก":"ยกเลิกบันทึก"}`})
+        }
+    })
+})
 module.exports = router;

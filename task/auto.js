@@ -40,7 +40,7 @@ function logReport(msg) {
             console.log(err);
         } else {
             if (results[0].statuslog === 1) {
-                db.query("INSERT INTO log_auto_detect (`msg`, `datetime`) VALUES (?, ?)", [datetime, msg], (err, results) => {
+                db.query("INSERT INTO log_auto_detect ( `datetime`,`msg`) VALUES (?, ?)", [datetime, msg], (err, results) => {
                     if (err) {
                         console.log(err);
                     } else {
@@ -92,6 +92,7 @@ async function autocheck2() {//version 2
                             for (const val of day_results) {
                                 if (checkOverlap(v,val) && v.id!==val.id) {
                                     await updatesql(v.id, 3);
+                                    await logReport(`เปลี่ยนวิชา ${v.id} จาก user_id ${v.User_id} เป็น สถานะ ไม่ผ่าน`)
                                 }
                             }
                         }
@@ -110,7 +111,9 @@ async function autocheck2() {//version 2
 
             for (const v of pendingResults) {
                 await updatesql(v.id, 1);
+                await logReport(`เปลี่ยนวิชา ${v.id} จาก user_id ${v.User_id} เป็น สถานะผ่าน`)
             }
+            logReport("ได้ทำตรวจสอบแล้ว");
         } else {
             logReport("ไม่มีวิชาให้ตรวจสอบ");
         }
