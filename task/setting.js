@@ -315,4 +315,14 @@ router.get("/setting/tablesettingdb", (req, res) => {
         }
     })
 })
+
+router.get("/setting/allowlink",(req,res)=>{
+    db.query("Select * from allowlink",(err,results)=>{
+        if(err){
+            res.status(500).json({msg:"Error server data! calling admin to fix",err})
+        }else{
+            res.status(200).json(results)
+        }
+    })
+})
 module.exports = router;
