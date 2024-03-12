@@ -196,7 +196,7 @@ router.post("/setting/insert", (req, res) => {
                 res.status(500).json({ msgerror: "Error database", err })
             }
         } else {
-            reportlog(`${email} เพิ่มใน ${name} ใน${table}ที่ id=${id}`,2)
+            reportlog(`${email} เพิ่มใน "${name}" ใน table ${table}ที่ id=${id}`,2)
             res.status(200).json({ msg: "เพื่มเข้าระบบสำเร็จแล้ว" })
         }
     });
@@ -209,7 +209,7 @@ router.get("/setting/subject_categorywithout", (req, res) => {
             if (results.length > 0) {
                 res.status(200).json(results)
            } else {
-               res.status(500).json({msg:"ไม่มีข้อมูลให้เพิ่มหมดแล้ว"})
+               res.status(500).json({msg:"ไม่มีข้อมูลให้เพิ่ม ข้อมูลหมดแล้ว"})
            }
         }
     });
@@ -299,7 +299,20 @@ router.post("/setting/setlogopen",(req,res)=>{
     })
 })
 
-router.get("/setting/tablesettingdb",(req,res)=>{
-
+router.get("/setting/tablesettingdb", (req, res) => {
+    const { sd, ed,table } = req.query;
+    sql =`select * from ${table} where datetime>=? and datetime <=?`
+    db.query(sql,[sd,ed+" 23:59:59"], (err, results) => {
+        if(err){
+            res.status(500).json({msg:"Error server data! calling admin to fix",err})
+        } else {
+            if (results.length > 0) {
+                res.status(200).json(results)
+            } else {
+                res.status(404).json({msg:"ไม่มีข้อมูล"})
+            }
+            
+        }
+    })
 })
 module.exports = router;
