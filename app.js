@@ -38,7 +38,7 @@ app.get("/pidprocess",(req,res) => {
     res.status(200).send(process.pid.toString())
 })
 app.get('/restart-server', (req, res) => {
-  res.send('Server is restarting...');
+  res.send('Server is restarted');
   const { spawn } = require('child_process');
   const child = spawn('node', ['app.js'], {
     detached: true,

@@ -313,14 +313,14 @@ function checkfile() {
             [v.id],
             (err, results) => {
               fs.unlink(
-                "public/files/" + "course_" + v.years + ".xlsx",
+                "public/savefiles/" + "course_" + v.years + ".xlsx",
                 (err) => {
                   if (err) {
                     console.error(err);
                   } else {
                     console.log(
                       "File is deleted.",
-                      "public/files/" + "course_" + v.years + ".xlsx"
+                      "public/savefiles/" + "course_" + v.years + ".xlsx"
                     );
                   }
                 }
@@ -338,13 +338,13 @@ function upDatefile() {
       console.log("None file to before.");
     } else {
       results.map((v, i) => {
-        fs.unlink("public/files/" + "course_" + v.years + ".xlsx", (err) => {
+        fs.unlink("public/savefiles/" + "course_" + v.years + ".xlsx", (err) => {
           if (err) {
             console.error(err);
           } else {
             console.log(
               "File is deleted.",
-              "public/files/" + "course_" + v.years + ".xlsx"
+              "public/savefiles/" + "course_" + v.years + ".xlsx"
             );
           }
         });
@@ -378,10 +378,10 @@ function upDatefile() {
               });
             }
             workbook.xlsx
-              .writeFile("public/files/" + "course_" + v.years + ".xlsx")
+              .writeFile("public/savefiles/" + "course_" + v.years + ".xlsx")
               .then((data) =>
                 console.log(
-                  "save " + "public/files/" + "course_" + v.years + ".xlsx"
+                  "save " + "public/savefiles/" + "course_" + v.years + ".xlsx"
                 )
               );
             const currentDate = new Date()
