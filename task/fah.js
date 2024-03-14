@@ -420,7 +420,7 @@ router.put("/teacher/update_time", (req, res) => {
 
     const checkCategorySql = "SELECT sr.category_id FROM subjectsRegister AS sr  JOIN focus_sub_cat AS fsc ON sr.category_id = fsc.subject_category_id WHERE sr.id = ?";
     // อัปเดตข้อมูล st, et, และ day ใน subjectsregister
-    const updateSql = "UPDATE subjectsRegister SET st = ?, et = ?, day_id = ? WHERE id = ?";
+    const updateSql = "UPDATE subjectsRegister SET st = ?, et = ?, day_id = ?, status_id = 2 WHERE id = ?";
 
     db.query(checkCategorySql, [idSubject], (checkCategoryErr, checkCategoryResults) => {
       if (checkCategoryErr) {
