@@ -189,7 +189,7 @@ router.post(
     const uploadedFile = req.file;
     const filePath = uploadedFile.path;
 
-    readfiles(path.join(filePath)).then(async(rows) => {
+    readfiles(path.join(filePath)).then(async (rows) => {
       const list = []; // Create an empty array to store the dictionaries
 
       const idsubjectColumnIndex = rows[0].indexOf("รหัสวิชา");
@@ -373,7 +373,7 @@ function upDatefile() {
                   } else {
                     worksheet.getCell(i + 2, 4).value = "report admin to fix"
                   }
-                  
+
                 }
               });
             }
@@ -527,17 +527,32 @@ router.post("/teacher/registersubject", (req, res) => {
     if (!subjects) {
       return res.status(500).json({ msgerror: "error subjects null" });
     }
-    const InsertDatabase = subjects.map((v, i) => {
-      return new Promise((resolve, reject) => {
+    const InsertDatabase = new Promise((resolve, reject) => {
+      const errors = [];
+      const successindex = [];
+      subjects.map((v, i) => {
         db.query(
-          "INSERT INTO subjectsRegister (User_id, st, et, day_id, status_id, N_people, branch, category_id, Subjects_id, realcredit) VALUES (?,?,?,?,?,?,?,?,?)",
-          [v.user_id, v.st, v.et, v.day_id, v.n_people, v.branch, v.category_id, v.subjects_id, v.realcredit,], (err, results) => {
-            resolve(result[0]);
+          "INSERT INTO subjectsRegister (User_id, st, et, day_id, status_id, N_people, branch, category_id, Subjects_id, realcredit) VALUES (?,?,?,?,?,?,?,?,?,?)",
+          [v.uid, v.st, v.et, v.day_id, 2,v.N_people, JSON.stringify(v.branch), v.category_id, v.Subjects_id, v.realcredit], (err, results) => {
+            if (err) {
+              errors.push(`หมวดที่ ${i} ลงทะเบียนไม่สำเร็จ` + err.message)
+            }else{
+              successindex.push(i)
+            }
           }
         );
       });
+      Promise.allSettled(errors.map((error) => new Promise((resolve) => db.query(`ROLLBACK`, resolve)))
+        .concat([new Promise((resolve) => setTimeout(resolve, 1000))]))
+        .then(()=>{
+          if(errors.length===0){
+            resolve({success:successindex})
+          }else{
+            reject({error:errors,success:successindex})
+          }
+        })
     });
-    Promise.all(InsertDatabase).then((data) => res.status(200).send(data)).catch(() => res.status(500).send("error"));
+    InsertDatabase.then((data) => res.status(200).json(data)).catch((err) => res.status(500).json(err));
   });
 });
 
