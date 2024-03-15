@@ -267,14 +267,14 @@ router.get("/teacher/schedule_single/:id", (req, res) => {
     subjects.idsubject AS id_subject,
     subjects.years AS ySubject, 
     subjects.credit ,
-    category.name AS Moo,
+    subjectsRegister.category_id AS category_id,
     user.name AS NAME,
     subjectsRegister.N_people,
     subjectsRegister.branch,
-    day.name AS day , 
+    subjectsRegister.day_id AS day_id , 
     subjectsRegister.st, 
     subjectsRegister.et,
-    status.name AS status,
+    subjectsRegister.status_id AS status_id,
     subject_category.name AS subject_category,
     subjectsRegister.id AS idre
   FROM 
@@ -284,12 +284,6 @@ JOIN
   subjects ON subjectsRegister.Subjects_id = subjects.id
 JOIN 
   user ON subjectsRegister.user_id = user.id 
-JOIN 
-  day ON subjectsRegister.day_id = day.id 
-JOIN 
-  category ON subjectsRegister.category_id = category.id
-JOIN 
-  status ON subjectsRegister.status_id = status.id
 JOIN
   subject_category ON subjects.subject_category_id = subject_category.id
   WHERE
