@@ -213,6 +213,7 @@ router.get("/teacher/schedule", (req, res) => {
   SELECT 
   subjects.id AS idSubject, 
   subjects.name AS SUBJECT,
+  subjectsRegister.day_id AS day_id ,
   subjects.idsubject AS id_subject,
   subjects.years AS ySubject,
   subjects.credit,
