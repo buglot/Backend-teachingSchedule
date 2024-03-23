@@ -89,7 +89,7 @@ async function autocheck2() {//version 2
                     for (const v of day_results) {
                         if (v.status_id !== 1) {
                             for (const val of day_results) {
-                                if (checkOverlap(v,val) && v.id!==val.id) {
+                                if (checkOverlap(v, val) && v.id !== val.id) {
                                     await updatesql(v.id, 3);
                                     await logReport(`เปลี่ยนวิชา ${v.id} จาก user_id ${v.User_id} เป็น สถานะ ไม่ผ่าน`)
                                 }
@@ -129,17 +129,60 @@ function checkOverlap(v, val) {
     if (valSt >= vSt && valSt < vEt) {
         return true; // มีการทับซ้อน
     }
-    
+
     if (valEt > vSt && valEt <= vEt) {
         return true; // มีการทับซ้อน
     }
-    
+
     // ตรวจสอบว่าช่วงเวลาที่ต้องการตรวจสอบครอบคลุมช่วงเวลาหลักหรือไม่
     if (valSt <= vSt && valEt >= vEt) {
         return true; // มีการทับซ้อน
     }
-    
+
     return false; // ไม่มีการทับซ้อน
 }
-  
+
+function GenSec() {
+    db.query("SELECT DISTINCT s.idsubject, s.name FROM subjects s JOIN subjectsRegister sr ON sr.subjects_id = s.id", (err, results) => {
+        if (err) {
+            console.error(err);
+            logReport("Failed to add sec numbers.");
+            return;
+        }
+
+        results.forEach((subject) => {
+            db.query("SELECT * FROM subjectsRegister sr JOIN subjects s ON sr.subjects_id = s.id WHERE s.idsubject = ? AND s.name = ? AND sr.status_id = 1", [subject.idsubject, subject.name], (err2, results2) => {
+                if (err2) {
+                    console.error(err2);
+                    logReport("Failed to add sec numbers.");
+                    return;
+                }
+
+                let l = 800;
+                let p = 830;
+
+                results2.forEach((entry) => {
+                    let secNumber;
+                    if (entry.category_id === 1) {
+                        secNumber = l++;
+                    } else if (entry.category_id === 2) {
+                        secNumber = p++;
+                    } else if (entry.category_id === 3) {
+                        secNumber = `${l}/${p++}`;
+                        l++;
+                    }
+
+                    db.query("UPDATE subjectsRegister SET `sec` = ? WHERE `id` = ?", [secNumber, entry.id], (err3, results3) => {
+                        if (err3) {
+                            console.error(err3);
+                            logReport("Failed to add sec numbers.");
+                        }
+                    });
+                });
+            });
+        });
+    });
+}
+
+
 module.exports = s;

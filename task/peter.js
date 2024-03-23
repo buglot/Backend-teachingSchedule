@@ -822,7 +822,7 @@ router.get("/teacher/subject/:id", (req, res) => {
             }
           }
           db.query(
-            "select S.name,S.idsubject,S.credit,S.practice_t,S.lecture_t,S.years,Sr.name as subject_category ,S.exsub from subjects S join subject_category Sr on Sr.id=S.subject_category_id  where IsOpen=1 and S.id=?",
+            "select S.name,S.idsubject,S.credit,S.practice_t,S.lecture_t,S.years,Sr.name as subject_category,S.m_t  ,S.exsub from subjects S join subject_category Sr on Sr.id=S.subject_category_id  where IsOpen=1 and S.id=?",
             [id],
             (err, results) => {
               if (err) {
