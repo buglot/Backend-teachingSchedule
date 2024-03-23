@@ -1288,4 +1288,25 @@ router.get("/teacher/f/:id", (req, res) => {
     }
   })
 })
+
+router.get("/menuslider/:role_id", (req, res) => {
+  const {role_id} = req.params
+  db.query("SELECT a.linkpath as path,a.icon,a.pathname as label FROM allowlink_has_role join allowlink a on a.id=allowlink_id where role_id=? and a.icon is not null and pathname is not null",[role_id], (err, results) => {
+    if (err) {
+      res.status(500).json({ msgerror: "Error database", err })
+    } else { 
+      res.status(200).json(results)
+    }
+  })
+})
+router.get("/allowlink/:role_id", (req, res) => {
+  const {role_id} = req.params
+  db.query("SELECT a.linkpath as path,a.icon,a.pathname as label FROM allowlink_has_role join allowlink a on a.id=allowlink_id where role_id=? and a.icon is not null and pathname is not null",[role_id], (err, results) => {
+    if (err) {
+      res.status(500).json({ msgerror: "Error database", err })
+    } else { 
+      res.status(200).json(results)
+    }
+  })
+})
 module.exports = router;
