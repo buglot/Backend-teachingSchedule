@@ -227,6 +227,7 @@ router.get("/teacher/schedule", (req, res) => {
   subjectsRegister.et,
   status.name AS status,
   subject_category.name AS subject_category,
+  subject_category.id AS subject_category_id ,
   subjectsRegister.id AS idre
 FROM 
   subjectsRegister
