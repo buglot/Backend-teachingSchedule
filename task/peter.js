@@ -1315,61 +1315,53 @@ router.get("/export/file", (req, res) => {
   const worksheet = workbook.addWorksheet("Sheet1");
   worksheet.mergeCells('A1:A2');
   worksheet.getCell('A1').value = 'รหัสวิชา';
-
   worksheet.mergeCells('B1:B2');
   worksheet.getCell('B1').value = 'รหัสวิชา-พ.ศ.หลักสูตร';
-
   worksheet.mergeCells('C1:C2');
   worksheet.getCell('C1').value = 'ชื่อวิชา';
-
   worksheet.mergeCells('D1:N1');
   worksheet.getCell('D1').value = 'บรรยาย';
-
   const lectureColumns = ['หน่วยกิต', 'หน่วย', 'จำนวน ชม.', 'หมู่', 'วัน', 'เริ่ม', '-', 'สิ้นสุด', 'ห้อง', 'สาขา', 'จำนวน'];
   lectureColumns.forEach((value, index) => {
     const cell = worksheet.getCell(`${String.fromCharCode(68 + index)}2`);
     cell.value = value;
   });
-
   worksheet.mergeCells('O1:X1');
   worksheet.getCell('O1').value = 'ปฎิบัติ';
-
   lectureColumns.forEach((value, index) => {
     if (index >= 1) {
       const cell = worksheet.getCell(`${String.fromCharCode(79 + index - 1)}2`);
       cell.value = value;
     }
-
   });
-
   worksheet.mergeCells('Y1:Y2');
   worksheet.getCell('Y1').value = 'อาจารย์';
-
   worksheet.mergeCells('Z1:Z2');
   worksheet.getCell('Z1').value = 'หมายเหตุ';
-
-  
-
-
-
-
-
-  worksheet.eachRow({ includeEmpty: true }, function (row, rowNumber) {
-    row.eachCell({ includeEmpty: true }, function (cell, colNumber) {
-      cell.border = {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' }
-      };
+  let row = 4;
+  dogetexport(row, worksheet).then((data) => {
+    data.eachRow({ includeEmpty: true }, function (row, rowNumber) {
+      row.eachCell({ includeEmpty: true }, function (cell, colNumber) {
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+      });
     });
-  });
-  workbook.xlsx.writeFile("public/export/" + "ตาราง" + 6 + ".xlsx")
-    .then(() => {
-      console.log('Excel file created successfully');
-    })
-    .catch(err => {
-      console.error('Error creating Excel file:', err);
-    });
+    workbook.xlsx.writeFile("public/export/" + "ตาราง" + 9 + ".xlsx")
+      .then(() => {
+        console.log('Excel file created successfully');
+      })
+      .catch(err => {
+        console.error('Error creating Excel file:', err);
+      });
+  })
+
+
+ 
+
 });
+
 module.exports = router;
