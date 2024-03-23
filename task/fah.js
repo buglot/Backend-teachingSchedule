@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require("../db");
 
 const fs = require("fs");
+const { error } = require("console");
 
 //ตัวอย่าง
 router.get("/login", (req, res) => {
@@ -466,6 +467,20 @@ router.put("/teacher/update_time", (req, res) => {
   });
 });
 
+// update data (edit n_people , branch)
+router.put("/teacher/update_data", (req, res) => {
+  const { idSubject, N_people, branch } = req.body;
+  if (!idSubject || !N_people || !branch) {
+    return res.status(400).json({ error: "Missing required parameters" });
+  }
+  const update_data = "UPDATE subjectsRegister SET N_people = ?, branch = ? WHERE id = ?";
+  db.query(update_data, [N_people, JSON.stringify(branch), idSubject], (updateErr, updateResults) => {
+    if (updateErr) {
+      return res.status(500).json({ error: "Failed to update data" });
+    }
+    res.status(200).json({ message: "Data updated successfully" });
+  });
+});
 
 module.exports = router;
 
