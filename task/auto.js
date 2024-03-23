@@ -2,7 +2,6 @@ const db = require('../db');
 const cron = require('node-cron');
 const format = require('date-format');
 function getday() {
-    autocheck2();
     db.query("SELECT U.id, A.name, U.day_id FROM autoday U JOIN day A ON U.day_id = A.id", (err, results) => {
         if (err) {
             console.error('Error fetching day:', err);
