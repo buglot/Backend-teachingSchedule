@@ -1310,37 +1310,115 @@ router.get("/allowlink/:role_id", (req, res) => {
   })
 })
 
-router.get("/export/file", (req, res) => {
-  const workbook = new exceljs.Workbook();
-  const worksheet = workbook.addWorksheet("Sheet1");
-  worksheet.mergeCells('A1:A2');
-  worksheet.getCell('A1').value = 'รหัสวิชา';
-  worksheet.mergeCells('B1:B2');
-  worksheet.getCell('B1').value = 'รหัสวิชา-พ.ศ.หลักสูตร';
-  worksheet.mergeCells('C1:C2');
-  worksheet.getCell('C1').value = 'ชื่อวิชา';
-  worksheet.mergeCells('D1:N1');
-  worksheet.getCell('D1').value = 'บรรยาย';
-  const lectureColumns = ['หน่วยกิต', 'หน่วย', 'จำนวน ชม.', 'หมู่', 'วัน', 'เริ่ม', '-', 'สิ้นสุด', 'ห้อง', 'สาขา', 'จำนวน'];
-  lectureColumns.forEach((value, index) => {
-    const cell = worksheet.getCell(`${String.fromCharCode(68 + index)}2`);
-    cell.value = value;
-  });
-  worksheet.mergeCells('O1:X1');
-  worksheet.getCell('O1').value = 'ปฎิบัติ';
-  lectureColumns.forEach((value, index) => {
-    if (index >= 1) {
-      const cell = worksheet.getCell(`${String.fromCharCode(79 + index - 1)}2`);
+router.get("/export/file", async (req, res) => {
+  try {
+    const workbook = new exceljs.Workbook();
+    const worksheet = workbook.addWorksheet("Sheet1");
+    worksheet.mergeCells('A1:A2');
+    worksheet.getCell('A1').value = 'รหัสวิชา';
+    worksheet.mergeCells('B1:B2');
+    worksheet.getCell('B1').value = 'รหัสวิชา-พ.ศ.หลักสูตร';
+    worksheet.mergeCells('C1:C2');
+    worksheet.getCell('C1').value = 'ชื่อวิชา';
+    worksheet.mergeCells('D1:N1');
+    worksheet.getCell('I1').value = 'บรรยาย';
+    worksheet.getCell('I1').alignment = { horizontal: 'center', vertical: 'middle' };
+    const lectureColumns = ['หน่วยกิต', 'หน่วย', 'จำนวน ชม.', 'หมู่', 'วัน', 'เริ่ม', '-', 'สิ้นสุด', 'ห้อง', 'สาขา', 'จำนวน'];
+    lectureColumns.forEach((value, index) => {
+      const cell = worksheet.getCell(`${String.fromCharCode(68 + index)}2`);
       cell.value = value;
+    });
+    worksheet.mergeCells('O1:X1');
+    const cell = worksheet.getCell('O1');
+    cell.value = 'ปฎิบัติ';
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    lectureColumns.forEach((value, index) => {
+      if (index >= 1) {
+        const cell = worksheet.getCell(`${String.fromCharCode(79 + index - 1)}2`);
+        cell.value = value;
+      }
+    });
+    worksheet.mergeCells('Y1:Y2');
+    worksheet.getCell('Y1').value = 'อาจารย์';
+    worksheet.mergeCells('Z1:Z2');
+    worksheet.getCell('Z1').value = 'หมายเหตุ';
+    let row = 3;
+
+    const results = await new Promise((resolve, reject) => {
+      db.query("select distinct Subjects_id,s.idsubject,s.name,s.credit,s.practice_t,s.m_t,s.lecture_t,s.years from subjectsRegister join subjects s on s.id=Subjects_id order by Subjects_id", (err, results) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results);
+        }
+      });
+    });
+
+    for (const v of results) {
+      const results1 = await new Promise((resolve, reject) => {
+        db.query("select user_id from subjectsRegister where Subjects_id=?", [v.Subjects_id], (err, results1) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(results1);
+          }
+        });
+      });
+
+      for (const v1 of results1) {
+        const results2 = await new Promise((resolve, reject) => {
+          db.query("select *,(SELECT TIMEDIFF(et, st)) AS time_diff,d.name as dayname from subjectsRegister join day d on d.id=day_id where user_id=? and status_id=1 order by sec", [v1.user_id], (err, results2) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(results2);
+            }
+          });
+        });
+        worksheet.getCell("A" + row).value = v.idsubject;
+        worksheet.getCell("B" + row).value = v.idsubject + "-" + v.years;
+        worksheet.getCell("C" + row).value = v.name;
+        worksheet.getCell("D" + row).value = `${v.credit} (${v.practice_t}-${v.lecture_t}-${v.m_t})`;
+        worksheet.getCell("E" + row).value = v.practice_t === 0 ? "" : v.practice_t;
+        worksheet.getCell("O" + row).value = v.lecture_t === 0 ? "" : v.lecture_t;
+        if (results2.length >= 2) {
+          row++;
+        } else {
+          if (results2.length > 0) {
+            const data = results2[0];
+            if (data.category_id === 1) {
+              const h = Number(data.time_diff.split(":")[0]);
+              const m = Number(data.time_diff.split(":")[1]);
+              worksheet.getCell("F" + row).value = Number(`${h}` + (m >= 1 ? `.${m}` : ""));
+              worksheet.getCell("G" + row).value = data.sec;
+              worksheet.getCell("H" + row).value = data.dayname;
+              worksheet.getCell("I" + row).value = data.st;
+              worksheet.getCell("J" + row).value = "-";
+              worksheet.getCell("K" + row).value = data.et;
+              worksheet.getCell("M" + row).value = Object.keys(data.branch).map(key => `${key}/${data.branch[key].join(',')}`).join(', ');
+              worksheet.getCell("N" + row).value = data.N_people;
+            } else if (data.category_id === 2) {
+              const h = Number(data.time_diff.split(":")[0]);
+              const m = Number(data.time_diff.split(":")[1]);
+              worksheet.getCell("P" + row).value = Number(`${h}` + (m >= 1 ? `.${m}` : ""));
+              worksheet.getCell("Q" + row).value = data.sec;
+              worksheet.getCell("R" + row).value = data.dayname;
+              worksheet.getCell("S" + row).value = data.st;
+              worksheet.getCell("T" + row).value = "-";
+              worksheet.getCell("U" + row).value = data.et;
+              worksheet.getCell("W" + row).value = Object.keys(data.branch).map(key => `${key}/${data.branch[key].join(',')}`).join(', ');
+              worksheet.getCell("X" + row).value = data.N_people;
+            } else if (data.category_id === 3) {
+              
+            }
+          }
+
+          row++;
+        }
+      }
     }
-  });
-  worksheet.mergeCells('Y1:Y2');
-  worksheet.getCell('Y1').value = 'อาจารย์';
-  worksheet.mergeCells('Z1:Z2');
-  worksheet.getCell('Z1').value = 'หมายเหตุ';
-  let row = 4;
-  dogetexport(row, worksheet).then((data) => {
-    data.eachRow({ includeEmpty: true }, function (row, rowNumber) {
+
+    worksheet.eachRow({ includeEmpty: true }, function (row, rowNumber) {
       row.eachCell({ includeEmpty: true }, function (cell, colNumber) {
         cell.border = {
           top: { style: 'thin' },
@@ -1350,18 +1428,17 @@ router.get("/export/file", (req, res) => {
         };
       });
     });
-    workbook.xlsx.writeFile("public/export/" + "ตาราง" + 9 + ".xlsx")
-      .then(() => {
-        console.log('Excel file created successfully');
-      })
-      .catch(err => {
-        console.error('Error creating Excel file:', err);
-      });
-  })
 
+    await workbook.xlsx.writeFile("public/export/" + "ตาราง" + new Date().getTime() + ".xlsx");
 
- 
+    console.log('Excel file created successfully');
 
+    res.send('Excel file created successfully');
+  } catch (err) {
+    console.error('Error:', err);
+    res.status(500).send('Error creating Excel file');
+  }
 });
+
 
 module.exports = router;
