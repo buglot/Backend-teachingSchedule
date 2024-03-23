@@ -2,6 +2,7 @@ const db = require('../db');
 const cron = require('node-cron');
 const format = require('date-format');
 function getday() {
+    autocheck2();
     db.query("SELECT U.id, A.name, U.day_id FROM autoday U JOIN day A ON U.day_id = A.id", (err, results) => {
         if (err) {
             console.error('Error fetching day:', err);
@@ -112,6 +113,10 @@ async function autocheck2() {//version 2
                 await updatesql(v.id, 1);
                 await logReport(`เปลี่ยนวิชา ${v.id} จาก user_id ${v.User_id} เป็น สถานะผ่าน`)
             }
+            await new Promise((resolve, reject) => {
+                GenSec();
+                resolve("ok")
+            }) 
             logReport("ได้ทำตรวจสอบแล้ว");
         } else {
             logReport("ไม่มีวิชาให้ตรวจสอบ");
@@ -143,7 +148,7 @@ function checkOverlap(v, val) {
 }
 
 function GenSec() {
-    db.query("SELECT DISTINCT s.idsubject, s.name FROM subjects s JOIN subjectsRegister sr ON sr.subjects_id = s.id", (err, results) => {
+    db.query("SELECT distinct sr.subjects_id as id FROM subjectsRegister sr", (err, results) => {
         if (err) {
             console.error(err);
             logReport("Failed to add sec numbers.");
@@ -151,7 +156,7 @@ function GenSec() {
         }
 
         results.forEach((subject) => {
-            db.query("SELECT * FROM subjectsRegister sr JOIN subjects s ON sr.subjects_id = s.id WHERE s.idsubject = ? AND s.name = ? AND sr.status_id = 1", [subject.idsubject, subject.name], (err2, results2) => {
+            db.query("SELECT sr.id,sr.category_id FROM subjectsRegister sr JOIN subjects s ON sr.subjects_id = s.id WHERE sr.subjects_id =? AND sr.status_id = 1", [subject.id], (err2, results2) => {
                 if (err2) {
                     console.error(err2);
                     logReport("Failed to add sec numbers.");
