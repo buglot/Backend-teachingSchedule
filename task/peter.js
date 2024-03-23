@@ -220,9 +220,9 @@ router.post(
               : null,
             mt: rows[i][creditColumnIndex]
               ? rows[i][creditColumnIndex]
-                  .split("(")[1]
-                  .split("-")[2]
-                  .replace(")", "")
+                .split("(")[1]
+                .split("-")[2]
+                .replace(")", "")
               : null,
             years: y,
             exsub: 0,
@@ -374,11 +374,9 @@ function upDatefile() {
               for (let i = 0; i < results.length; i++) {
                 worksheet.getCell(i + 2, 1).value = results[i].idsubject;
                 worksheet.getCell(i + 2, 2).value = results[i].name;
-                worksheet.getCell(i + 2, 3).value = `${results[i].credit}(${
-                  results[i].lecture_t
-                }-${results[i].practice_t ? results[i].practice_t : 0}-${
-                  results[i].m_t
-                })`;
+                worksheet.getCell(i + 2, 3).value = `${results[i].credit}(${results[i].lecture_t
+                  }-${results[i].practice_t ? results[i].practice_t : 0}-${results[i].m_t
+                  })`;
                 db.query(
                   "select name from subject_category where id = ?",
                   [results[i].subject_category_id],
@@ -402,10 +400,10 @@ function upDatefile() {
                 .then((data) =>
                   console.log(
                     "save " +
-                      "public/savefiles/" +
-                      "course_" +
-                      v.years +
-                      ".xlsx"
+                    "public/savefiles/" +
+                    "course_" +
+                    v.years +
+                    ".xlsx"
                   )
                 );
               const currentDate = new Date()
@@ -1266,4 +1264,28 @@ router.get("/searchingnameteacher/:search", (req, res) => {
     }
   );
 });
+
+router.get("/teacher/f/:id", (req, res) => {
+  const { id } = req.params;
+  const sql = "SELECT DISTINCT u.name,sr.st,sr.et,s.name as subject_name " +
+    "FROM subjectsRegister AS sr" +
+    " JOIN subjectsRegister AS sr2 ON sr.User_id = sr2.User_id" +
+    " JOIN subjects s on s.id=sr.Subjects_id " +
+    " JOIN user u on u.id=sr.user_id" +
+    " WHERE sr.status_id = 3 " +
+    " AND sr.id != ? " +
+    " AND sr.st < (SELECT et FROM subjectsRegister WHERE id = ?) " +
+    " AND sr.et > (SELECT st FROM subjectsRegister WHERE id = ?)"
+  db.query(sql,[id,id,id],(err,results)=>{
+    if (err) {
+      res.status(500).json({ msg: "error databases", err });
+    } else {
+      if (results.length > 0) {
+        res.status(200).json({ data: results });
+      } else {
+        res.status(404).json({ msg:"ไม่พบ"});
+      }
+    }
+  })
+})
 module.exports = router;
