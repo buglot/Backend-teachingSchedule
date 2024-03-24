@@ -1493,7 +1493,7 @@ router.get("/export/file", async (req, res) => {
               const h = Number(data.time_diff.split(":")[0]);
               const m = Number(data.time_diff.split(":")[1]);
               worksheet.getCell("F" + row).value = h - v.practice_t >= 1 ? h - v.practice_t : "มีข้อผิดพลาดตอนเลือกเวลา";
-              worksheet.getCell("G" + row).value = data.sec;
+              worksheet.getCell("G" + row).value = data.sec.split("/")[0];
               worksheet.getCell("H" + row).value = data.dayname;
               worksheet.getCell("I" + row).value = data.st;
               worksheet.getCell("J" + row).value = "-";
@@ -1507,7 +1507,7 @@ router.get("/export/file", async (req, res) => {
               worksheet.getCell("M" + row).value = Object.keys(data.branch).map(key => `${key}/${data.branch[key].join(',')}`).join(', ');
               worksheet.getCell("N" + row).value = data.N_people;
               worksheet.getCell("P" + row).value = (v.practice_t + v.lecture_t) === data.h ? v.lecture_t : "มีข้อผิดพลาดตอนเลือกเวลา";
-              worksheet.getCell("Q" + row).value = data.sec;
+              worksheet.getCell("Q" + row).value = data.sec.split("/")[1];
               worksheet.getCell("R" + row).value = data.dayname;
               worksheet.getCell("S" + row).value = resultTime;
               worksheet.getCell("T" + row).value = "-";
