@@ -2,11 +2,11 @@
 ## easy run one command
 #### cmd windows
 ```cmd 
-docker pull ptii2x/teachingschedule-mysql-tastcase && docker container rm -f mysqltestcase && docker run -d --name mysqltestcase -p 6000:3306 ptii2x/teachingschedule-mysql-tastcase && git pull && npm i && timeout /t 10 && npm start
+docker pull ptii2x/teachingschedule-mysql-tastcase && docker container rm -f mysqltestcase && docker run -d --name mysqltestcase -p 6000:3306 ptii2x/teachingschedule-mysql-tastcase && git pull && npm i && timeout /t 60 && npm start
 ```
 #### powershell windows
 ```powershell 
-docker pull ptii2x/teachingschedule-mysql-tastcase; docker container rm -f mysqltestcase; docker run -d --name mysqltestcase -p 6000:3306 ptii2x/teachingschedule-mysql-tastcase; git pull; npm i; Start-Sleep -Seconds 20; npm start
+docker pull ptii2x/teachingschedule-mysql-tastcase; docker container rm -f mysqltestcase; docker run -d --name mysqltestcase -p 6000:3306 ptii2x/teachingschedule-mysql-tastcase; git pull; npm i; Start-Sleep -Seconds 60; npm start
 ```
 ## mysql แบบง่ายเข้า docker
 ### เลือก1อัน 
