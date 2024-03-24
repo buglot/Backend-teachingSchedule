@@ -1276,37 +1276,272 @@ router.get("/teacher/f/:id", (req, res) => {
     " AND sr.id != ? " +
     " AND sr.st < (SELECT et FROM subjectsRegister WHERE id = ?) " +
     " AND sr.et > (SELECT st FROM subjectsRegister WHERE id = ?)"
-  db.query(sql,[id,id,id],(err,results)=>{
+  db.query(sql, [id, id, id], (err, results) => {
     if (err) {
       res.status(500).json({ msg: "error databases", err });
     } else {
       if (results.length > 0) {
         res.status(200).json({ data: results });
       } else {
-        res.status(404).json({ msg:"ไม่พบ"});
+        res.status(404).json({ msg: "ไม่พบ" });
       }
     }
   })
 })
 
 router.get("/menuslider/:role_id", (req, res) => {
-  const {role_id} = req.params
-  db.query("SELECT a.linkpath as path,a.icon,a.pathname as label FROM allowlink_has_role join allowlink a on a.id=allowlink_id where role_id=? and a.icon is not null and pathname is not null",[role_id], (err, results) => {
+  const { role_id } = req.params
+  db.query("SELECT a.linkpath as path,a.icon,a.pathname as label FROM allowlink_has_role join allowlink a on a.id=allowlink_id where role_id=? and a.icon is not null and pathname is not null", [role_id], (err, results) => {
     if (err) {
       res.status(500).json({ msgerror: "Error database", err })
-    } else { 
+    } else {
       res.status(200).json(results)
     }
   })
 })
 router.get("/allowlink/:role_id", (req, res) => {
-  const {role_id} = req.params
-  db.query("SELECT a.linkpath as path,a.icon,a.pathname as label FROM allowlink_has_role join allowlink a on a.id=allowlink_id where role_id=? and a.icon is not null and pathname is not null",[role_id], (err, results) => {
+  const { role_id } = req.params
+  db.query("SELECT a.linkpath as path,a.icon,a.pathname as label FROM allowlink_has_role join allowlink a on a.id=allowlink_id where role_id=? and a.icon is not null and pathname is not null", [role_id], (err, results) => {
     if (err) {
       res.status(500).json({ msgerror: "Error database", err })
-    } else { 
+    } else {
       res.status(200).json(results)
     }
   })
 })
+
+router.get("/export/file", async (req, res) => {
+  try {
+    const workbook = new exceljs.Workbook();
+    const worksheet = workbook.addWorksheet("ตารางสอน");
+    worksheet.mergeCells('A1:A2');
+    worksheet.getCell('A1').value = 'รหัสวิชา';
+    worksheet.mergeCells('B1:B2');
+    worksheet.getCell('B1').value = 'รหัสวิชา-พ.ศ.หลักสูตร';
+    worksheet.mergeCells('C1:C2');
+    worksheet.getCell('C1').value = 'ชื่อวิชา';
+    worksheet.mergeCells('D1:N1');
+    worksheet.getCell('I1').value = 'บรรยาย';
+    worksheet.getCell('I1').alignment = { horizontal: 'center', vertical: 'middle' };
+    const lectureColumns = ['หน่วยกิต', 'หน่วย', 'จำนวน ชม.', 'หมู่', 'วัน', 'เริ่ม', '-', 'สิ้นสุด', 'ห้อง', 'สาขา', 'จำนวน'];
+    lectureColumns.forEach((value, index) => {
+      const cell = worksheet.getCell(`${String.fromCharCode(68 + index)}2`);
+      cell.value = value;
+    });
+    worksheet.mergeCells('O1:X1');
+    const cell = worksheet.getCell('O1');
+    cell.value = 'ปฎิบัติ';
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    lectureColumns.forEach((value, index) => {
+      if (index >= 1) {
+        const cell = worksheet.getCell(`${String.fromCharCode(79 + index - 1)}2`);
+        cell.value = value;
+      }
+    });
+    worksheet.mergeCells('Y1:Y2');
+    worksheet.getCell('Y1').value = 'อาจารย์';
+    worksheet.mergeCells('Z1:Z2');
+    worksheet.getCell('Z1').value = 'หมายเหตุ';
+    let row = 3;
+    const results12 = await new Promise((resolve, reject) => {
+      db.query("select count(status_id) as c from subjectsRegister where status_id=1;", (err, results) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results);
+        }
+      })
+    })
+    if (results12.length === 0) {
+      return res.status(404).json({ msgerror: "ไม่มีข้อมูลให้ export files" })
+    }
+    const results3 = await new Promise((resolve, reject) => {
+      db.query("select count(status_id) as c from subjectsRegister;", (err, results) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results);
+        }
+      })
+    })
+    if (results3.length === 0) {
+      return res.status(404).json({ msgerror: "ไม่มีข้อมูลให้ export files" })
+    } else {
+      if (results3[0].c !== results12[0].c) {
+        return res.status(404).json({ msgerror: "ข้อมูลยังไม่มีสถานะผ่านทั้งหมด" })
+      }
+    }
+    const results = await new Promise((resolve, reject) => {
+      db.query("select distinct Subjects_id,s.idsubject,s.name,s.credit,s.practice_t,s.m_t,s.lecture_t,s.years from subjectsRegister join subjects s on s.id=Subjects_id order by Subjects_id", (err, results) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results);
+        }
+      });
+    });
+
+    for (const v of results) {
+      const results1 = await new Promise((resolve, reject) => {
+        db.query("select distinct user_id,user.name from subjectsRegister join user on user_id=user.id where Subjects_id=?", [v.Subjects_id], (err, results1) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(results1);
+          }
+        });
+      });
+
+      for (const v1 of results1) {
+        const results2 = await new Promise((resolve, reject) => {
+          db.query("select *,(SELECT TIMEDIFF(et, st)) AS time_diff,d.name as dayname from subjectsRegister join day d on d.id=day_id where user_id=? and status_id=1 and Subjects_id=? order by sec", [v1.user_id,v.Subjects_id], (err, results2) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(results2);
+            }
+          });
+        });
+        worksheet.getCell("A" + row).value = v.idsubject;
+        worksheet.getCell("B" + row).value = v.idsubject + "-" + v.years;
+        worksheet.getCell("C" + row).value = v.name;
+        worksheet.getCell("D" + row).value = `${v.credit} (${v.lecture_t}-${v.practice_t}-${v.m_t})`;
+        worksheet.getCell("E" + row).value = v.lecture_t === 0 ? "" : v.lecture_t;
+        worksheet.getCell("O" + row).value = v.practice_t === 0 ? "" : v.practice_t;
+        console.log(v1.name,v.name );
+        if (results2.length >= 2) {
+         
+          results2.map((data) => {
+            worksheet.getCell("Y" + row).value = v1.name;
+            if (data.category_id === 1) {
+              const h = Number(data.time_diff.split(":")[0]);
+              const m = Number(data.time_diff.split(":")[1]);
+              worksheet.getCell("F" + row).value = Number(`${h}` + (m >= 1 ? `.${m}` : ""));
+              worksheet.getCell("G" + row).value = data.sec;
+              worksheet.getCell("H" + row).value = data.dayname;
+              worksheet.getCell("I" + row).value = data.st;
+              worksheet.getCell("J" + row).value = "-";
+              worksheet.getCell("K" + row).value = data.et;
+              worksheet.getCell("M" + row).value = Object.keys(data.branch).map(key => `${key}/${data.branch[key].join(',')}`).join(', ');
+              worksheet.getCell("N" + row).value = data.N_people;
+            } else if (data.category_id === 2) {
+              const h = Number(data.time_diff.split(":")[0]);
+              const m = Number(data.time_diff.split(":")[1]);
+              worksheet.getCell("P" + row).value = Number(`${h}` + (m >= 1 ? `.${m}` : ""));
+              worksheet.getCell("Q" + row).value = data.sec;
+              worksheet.getCell("R" + row).value = data.dayname;
+              worksheet.getCell("S" + row).value = data.st;
+              worksheet.getCell("T" + row).value = "-";
+              worksheet.getCell("U" + row).value = data.et;
+              worksheet.getCell("W" + row).value = Object.keys(data.branch).map(key => `${key}/${data.branch[key].join(',')}`).join(', ');
+              worksheet.getCell("X" + row).value = data.N_people;
+            } else if (data.category_id === 3) {
+              const h = Number(data.time_diff.split(":")[0]);
+              const m = Number(data.time_diff.split(":")[1]);
+              worksheet.getCell("F" + row).value = h - v.lecture_t >= 1 ? h - v.lecture_t : "มีข้อผิดพลาดตอนเลือกเวลา";
+              worksheet.getCell("G" + row).value = data.sec;
+              worksheet.getCell("H" + row).value = data.dayname;
+              worksheet.getCell("I" + row).value = data.st;
+              worksheet.getCell("J" + row).value = "-";
+              const dataEtParts = data.et.split(":").map(Number); // แปลงเวลาให้เป็นอาร์เรย์ของชั่วโมง นาที วินาที
+              const dataEtTotalMinutes = dataEtParts[0] * 60 + dataEtParts[1]; // คำนวณเวลาให้เป็นจำนวนนาทีทั้งหมด
+              const dataEtMinusPracticeTMinutes = dataEtTotalMinutes - v.lecture_t * 60; // ลบจำนวนชั่วโมงของ v.practice_t ออกจากเวลาของ data.et ในหน่วยนาที
+              const hours = Math.floor(dataEtMinusPracticeTMinutes / 60); // แยกจำนวนชั่วโมงจากจำนวนนาที
+              const minutes = dataEtMinusPracticeTMinutes % 60; // หาเศษของจำนวนนาทีที่เหลือ
+              const resultTime = `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""}${minutes}`;
+              worksheet.getCell("K" + row).value = resultTime;
+              worksheet.getCell("M" + row).value = Object.keys(data.branch).map(key => `${key}/${data.branch[key].join(',')}`).join(', ');
+              worksheet.getCell("N" + row).value = data.N_people;
+              worksheet.getCell("P" + row).value = (v.practice_t + v.lecture_t) === data.h ? v.practice_t : "มีข้อผิดพลาดตอนเลือกเวลา";
+              worksheet.getCell("Q" + row).value = data.sec;
+              worksheet.getCell("R" + row).value = data.dayname;
+              worksheet.getCell("S" + row).value = resultTime;
+              worksheet.getCell("T" + row).value = "-";
+              worksheet.getCell("U" + row).value = data.et;
+              worksheet.getCell("W" + row).value = Object.keys(data.branch).map(key => `${key}/${data.branch[key].join(',')}`).join(', ');
+              worksheet.getCell("X" + row).value = data.N_people;
+            }
+            row++;
+          })
+        } else {
+          if (results2.length > 0) {
+            worksheet.getCell("Y" + row).value = v1.name;
+            const data = results2[0];
+            if (data.category_id === 1) {
+              const h = Number(data.time_diff.split(":")[0]);
+              const m = Number(data.time_diff.split(":")[1]);
+              worksheet.getCell("F" + row).value = Number(`${h}` + (m >= 1 ? `.${m}` : ""));
+              worksheet.getCell("G" + row).value = data.sec;
+              worksheet.getCell("H" + row).value = data.dayname;
+              worksheet.getCell("I" + row).value = data.st;
+              worksheet.getCell("J" + row).value = "-";
+              worksheet.getCell("K" + row).value = data.et;
+              worksheet.getCell("M" + row).value = Object.keys(data.branch).map(key => `${key}/${data.branch[key].join(',')}`).join(', ');
+              worksheet.getCell("N" + row).value = data.N_people;
+            } else if (data.category_id === 2) {
+              const h = Number(data.time_diff.split(":")[0]);
+              const m = Number(data.time_diff.split(":")[1]);
+              worksheet.getCell("P" + row).value = Number(`${h}` + (m >= 1 ? `.${m}` : ""));
+              worksheet.getCell("Q" + row).value = data.sec;
+              worksheet.getCell("R" + row).value = data.dayname;
+              worksheet.getCell("S" + row).value = data.st;
+              worksheet.getCell("T" + row).value = "-";
+              worksheet.getCell("U" + row).value = data.et;
+              worksheet.getCell("W" + row).value = Object.keys(data.branch).map(key => `${key}/${data.branch[key].join(',')}`).join(', ');
+              worksheet.getCell("X" + row).value = data.N_people;
+            } else if (data.category_id === 3) {
+              const h = Number(data.time_diff.split(":")[0]);
+              const m = Number(data.time_diff.split(":")[1]);
+              worksheet.getCell("F" + row).value = h - v.practice_t >= 1 ? h - v.practice_t : "มีข้อผิดพลาดตอนเลือกเวลา";
+              worksheet.getCell("G" + row).value = data.sec;
+              worksheet.getCell("H" + row).value = data.dayname;
+              worksheet.getCell("I" + row).value = data.st;
+              worksheet.getCell("J" + row).value = "-";
+              const dataEtParts = data.et.split(":").map(Number); // แปลงเวลาให้เป็นอาร์เรย์ของชั่วโมง นาที วินาที
+              const dataEtTotalMinutes = dataEtParts[0] * 60 + dataEtParts[1]; // คำนวณเวลาให้เป็นจำนวนนาทีทั้งหมด
+              const dataEtMinusPracticeTMinutes = dataEtTotalMinutes - v.practice_t * 60; // ลบจำนวนชั่วโมงของ v.practice_t ออกจากเวลาของ data.et ในหน่วยนาที
+              const hours = Math.floor(dataEtMinusPracticeTMinutes / 60); // แยกจำนวนชั่วโมงจากจำนวนนาที
+              const minutes = dataEtMinusPracticeTMinutes % 60; // หาเศษของจำนวนนาทีที่เหลือ
+              const resultTime = `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""}${minutes}`;
+              worksheet.getCell("K" + row).value = resultTime;
+              worksheet.getCell("M" + row).value = Object.keys(data.branch).map(key => `${key}/${data.branch[key].join(',')}`).join(', ');
+              worksheet.getCell("N" + row).value = data.N_people;
+              worksheet.getCell("P" + row).value = (v.practice_t + v.lecture_t) === data.h ? v.lecture_t : "มีข้อผิดพลาดตอนเลือกเวลา";
+              worksheet.getCell("Q" + row).value = data.sec;
+              worksheet.getCell("R" + row).value = data.dayname;
+              worksheet.getCell("S" + row).value = resultTime;
+              worksheet.getCell("T" + row).value = "-";
+              worksheet.getCell("U" + row).value = data.et;
+              worksheet.getCell("W" + row).value = Object.keys(data.branch).map(key => `${key}/${data.branch[key].join(',')}`).join(', ');
+              worksheet.getCell("X" + row).value = data.N_people;
+            }
+          }
+          row++;
+        }
+      }
+    }
+
+    worksheet.eachRow({ includeEmpty: true }, function (row, rowNumber) {
+      row.eachCell({ includeEmpty: true }, function (cell, colNumber) {
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+      });
+    });
+    const filesname = "ตาราง" + new Date().getTime() + ".xlsx";
+    await workbook.xlsx.writeFile("public/export/" + filesname);
+
+    console.log('Excel file created successfully');
+
+    res.status(200).redirect("http://localhost:4133/export/"+filesname)
+  } catch (err) {
+    console.error('Error:', err);
+    res.status(500).send('Error creating Excel file');
+  }
+});
+
+
 module.exports = router;
