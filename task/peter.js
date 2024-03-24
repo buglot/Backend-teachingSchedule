@@ -525,22 +525,8 @@ router.post("/teacher/registersubject", (req, res) => {
           data1.setMinutes(minutes1);
           if (!(data <= time && data1 >= time)) {
             return res.status(500).json({
-              msgerror: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString(
-                "th-th",
-                {
-                  year: "numeric",
-                  day: "2-digit",
-                  month: "long",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }
-              )} ถึง ${data1.toLocaleString("th-th", {
-                year: "numeric",
-                day: "2-digit",
-                month: "long",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}`,
+              msgerror: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString("th-th", { year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit", }
+              )} ถึง ${data1.toLocaleString("th-th", { year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit", })}`,
             });
           }
         }
@@ -553,28 +539,28 @@ router.post("/teacher/registersubject", (req, res) => {
       const errors = [];
       const successindex = [];
       subjects.map((v, i) => {
-        db.query(
-          "INSERT INTO subjectsRegister (User_id, st, et, day_id, status_id, N_people, branch, category_id, Subjects_id, realcredit) VALUES (?,?,?,?,?,?,?,?,?,?)",
-          [
-            v.uid,
-            v.st,
-            v.et,
-            v.day_id,
-            2,
-            v.N_people,
-            JSON.stringify(v.branch),
-            v.category_id,
-            v.Subjects_id,
-            v.realcredit,
-          ],
-          (err, results) => {
-            if (err) {
-              errors.push(`หมวดที่ ${i} ลงทะเบียนไม่สำเร็จ` + err.message);
+        db.query("SELECT * FROM teachingschedule.subjectsRegister  WHERE ((st < ? AND et > ?) OR (st < ? AND et > ?) OR (st > ? AND et < ?)) AND User_id = 13 and day_id=?;",[v.et,v.st,v.st,v.et,v.st,v.et,v.day_id], (err, results5) => {
+          if (err) {
+            errors.push(`หมวดที่ ${i} ลงทะเบียนไม่สำเร็จ` + err.message);
+          } else {
+            if (results5.length === 0) {
+              db.query(
+                "INSERT INTO subjectsRegister (User_id, st, et, day_id, status_id, N_people, branch, category_id, Subjects_id, realcredit) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                [v.uid, v.st, v.et, v.day_id, 2, v.N_people, JSON.stringify(v.branch), v.category_id, v.Subjects_id, v.realcredit,],
+                (err, results) => {
+                  if (err) {
+                    errors.push(`หมวดที่ ${i} ลงทะเบียนไม่สำเร็จ` + err.message);
+                  } else {
+                    successindex.push(i);
+                  }
+                }
+              );
             } else {
-              successindex.push(i);
+              errors.push(`หมวดที่ ${i} ลงไม่ได้เพราะเวลานี้ลงไว้แล้ว`);
             }
           }
-        );
+        })
+
       });
       Promise.allSettled(
         errors
@@ -1394,7 +1380,7 @@ router.get("/export/file", async (req, res) => {
 
       for (const v1 of results1) {
         const results2 = await new Promise((resolve, reject) => {
-          db.query("select *,(SELECT TIMEDIFF(et, st)) AS time_diff,d.name as dayname from subjectsRegister join day d on d.id=day_id where user_id=? and status_id=1 and Subjects_id=? order by sec", [v1.user_id,v.Subjects_id], (err, results2) => {
+          db.query("select *,(SELECT TIMEDIFF(et, st)) AS time_diff,d.name as dayname from subjectsRegister join day d on d.id=day_id where user_id=? and status_id=1 and Subjects_id=? order by sec", [v1.user_id, v.Subjects_id], (err, results2) => {
             if (err) {
               reject(err);
             } else {
@@ -1408,9 +1394,9 @@ router.get("/export/file", async (req, res) => {
         worksheet.getCell("D" + row).value = `${v.credit} (${v.lecture_t}-${v.practice_t}-${v.m_t})`;
         worksheet.getCell("E" + row).value = v.lecture_t === 0 ? "" : v.lecture_t;
         worksheet.getCell("O" + row).value = v.practice_t === 0 ? "" : v.practice_t;
-        console.log(v1.name,v.name );
+        console.log(v1.name, v.name);
         if (results2.length >= 2) {
-         
+
           results2.map((data) => {
             worksheet.getCell("Y" + row).value = v1.name;
             if (data.category_id === 1) {
@@ -1536,7 +1522,7 @@ router.get("/export/file", async (req, res) => {
 
     console.log('Excel file created successfully');
 
-    res.status(200).redirect("http://localhost:4133/export/"+filesname)
+    res.status(200).redirect("http://localhost:4133/export/" + filesname)
   } catch (err) {
     console.error('Error:', err);
     res.status(500).send('Error creating Excel file');
