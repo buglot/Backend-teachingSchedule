@@ -401,27 +401,24 @@ function checkOverlap(v, val) {
 }
 
 router.put("/teacher/update_time", (req, res) => {
-  //const idSubject = req.params.id;
   const { idSubject, st, et, day } = req.body;
   if (!idSubject || !st || !et || !day) {
     return res.status(400).json({ error: "Missing required parameters" });
   }
 
-  // ตรวจสอบว่ามีการทับซ้อนกับเวลาที่กำลังจะอัปเดตหรือไม่
-  const checkOverlapSql = "SELECT id, st, et FROM subjectsRegister WHERE id <> ? AND day_id = ?";
+  const checkOverlapSql = "SELECT sr.id, sr.st, sr.et, s.name AS subjeSct_name FROM subjectsRegister AS sr JOIN subjects AS s ON sr.Subjects_id = s.id WHERE sr.id <> ? AND sr.day_id = ?";
   db.query(checkOverlapSql, [idSubject, day], (checkOverlapErr, checkOverlapResults) => {
     if (checkOverlapErr) {
       console.error("Error executing SELECT statement:", checkOverlapErr);
       return res.status(500).json({ error: "Internal Server Error" });
     }
 
-    // ถ้ามีการทับซ้อนกับเวลาที่อัปเดต
-    if (checkOverlapResults.some(val => checkOverlap(val, { st, et }))) {
-      return res.status(400).json({ error: "Duplicate time and day" });
+    if (checkOverlapResults.length > 0) {
+      const overlappingSubjects = checkOverlapResults.filter(val => checkOverlap(val, { st, et }));
+      return res.status(400).json({ error: "Duplicate time and day", overlappingSubjects });
     }
-
-    const checkCategorySql = "SELECT sr.category_id FROM subjectsRegister AS sr  JOIN focus_sub_cat AS fsc ON sr.category_id = fsc.subject_category_id WHERE sr.id = ?";
-    // อัปเดตข้อมูล st, et, และ day ใน subjectsregister
+    
+    const checkCategorySql = "SELECT sr.category_id FROM subjectsRegister AS sr JOIN focus_sub_cat AS fsc ON sr.category_id = fsc.subject_category_id WHERE sr.id = ?";
     const updateSql = "UPDATE subjectsRegister SET st = ?, et = ?, day_id = ?, status_id = 2 WHERE id = ?";
 
     db.query(checkCategorySql, [idSubject], (checkCategoryErr, checkCategoryResults) => {
@@ -442,8 +439,8 @@ router.put("/teacher/update_time", (req, res) => {
             res.status(404).json({ error: "Id not found" });
           }
         });
+        
       } else {
-        // ตรวจสอบว่ามีข้อมูล st, et, และ day ที่ซ้ำกันใน subjectsregister หรือไม่
         const checkDuplicationSql = "SELECT id FROM subjectsRegister WHERE id <> ? AND st = ? AND et = ? AND day_id = ?";
         db.query(checkDuplicationSql, [idSubject, st, et, day], (checkDuplicationErr, checkDuplicationResults) => {
           if (checkDuplicationErr) {
@@ -470,6 +467,8 @@ router.put("/teacher/update_time", (req, res) => {
     });
   });
 });
+
+
 
 // update data (edit n_people , branch)
 router.put("/teacher/update_data", (req, res) => {
