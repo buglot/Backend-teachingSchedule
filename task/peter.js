@@ -189,7 +189,8 @@ router.post(
     const uploadedFile = req.file;
     const filePath = uploadedFile.path;
 
-    readfiles(path.join(filePath)).then(async (rows) => {
+    readfiles(path.join(filePath))
+    .then(async (rows) => {
       const list = []; // Create an empty array to store the dictionaries
 
       const idsubjectColumnIndex = rows[0].indexOf("รหัสวิชา");
@@ -284,6 +285,8 @@ router.post(
             .status(500)
             .json({ msgerror: err.data, error: err.errors, warning: err.warn });
         });
+    }).catch(()=>{
+      res.status(404).json({msgerror:"ไม่สามารถอัปโหลด กรุณาตรวจสอบชนิดไฟล์ด้วยครับ .xlsx"})
     });
   }
 );
