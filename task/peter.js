@@ -541,7 +541,7 @@ router.post("/teacher/registersubject", (req, res) => {
       subjects.map((v, i) => {
         db.query("SELECT * FROM teachingschedule.subjectsRegister  WHERE ((st < ? AND et > ?) OR (st < ? AND et > ?) OR (st > ? AND et < ?)) AND User_id = 13 and day_id=?;",[v.et,v.st,v.st,v.et,v.st,v.et,v.day_id], (err, results5) => {
           if (err) {
-            errors.push(`หมวดที่ ${i} ลงทะเบียนไม่สำเร็จ` + err.message);
+            errors.push(`หมวดที่ ${i+1} ลงทะเบียนไม่สำเร็จ` + err.message);
           } else {
             if (results5.length === 0) {
               db.query(
@@ -549,14 +549,14 @@ router.post("/teacher/registersubject", (req, res) => {
                 [v.uid, v.st, v.et, v.day_id, 2, v.N_people, JSON.stringify(v.branch), v.category_id, v.Subjects_id, v.realcredit,],
                 (err, results) => {
                   if (err) {
-                    errors.push(`หมวดที่ ${i} ลงทะเบียนไม่สำเร็จ` + err.message);
+                    errors.push(`หมวดที่ ${i+1} ลงทะเบียนไม่สำเร็จ` + err.message);
                   } else {
                     successindex.push(i);
                   }
                 }
               );
             } else {
-              errors.push(`หมวดที่ ${i} ลงไม่ได้เพราะเวลานี้ลงไว้แล้ว`);
+              errors.push(`หมวดที่ ${i+1} ลงไม่ได้เพราะเวลานี้ลงไว้แล้ว`);
             }
           }
         })
