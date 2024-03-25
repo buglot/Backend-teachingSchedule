@@ -542,7 +542,7 @@ router.post("/teacher/registersubject", (req, res) => {
       const errors = [];
       const successindex = [];
       subjects.map((v, i) => {
-        db.query("SELECT * FROM teachingschedule.subjectsRegister  WHERE ((st < ? AND et > ?) OR (st < ? AND et > ?) OR (st > ? AND et < ?)) AND User_id = 13 and day_id=?;",[v.et,v.st,v.st,v.et,v.st,v.et,v.day_id], (err, results5) => {
+        db.query("SELECT * FROM teachingschedule.subjectsRegister  WHERE ((st < ? AND et > ?) OR (st < ? AND et > ?) OR (st > ? AND et < ?)) AND User_id = ? and day_id=?;",[v.et,v.st,v.st,v.et,v.st,v.et,v.uid,v.day_id], (err, results5) => {
           if (err) {
             errors.push(`หมวดที่ ${i+1} ลงทะเบียนไม่สำเร็จ` + err.message);
           } else {
