@@ -1528,6 +1528,20 @@ router.get("/export/file", async (req, res) => {
     res.status(500).send('Error creating Excel file');
   }
 });
+router.delete("/teacher/deleteReg/:id",(req,res)=>{
+  const {id} = req.params;
+  if(!id){
+    return res.status(404).json({msg:"กำหนดที่ละลบด้วยครับ"})
+  }
 
+  db.query("DELETE FROM subjectsRegister WHERE (`id` = ?);",[id],(err,results)=>{
+    if(err){
+      res.status(500).json({msgerror:"ไม่สามารถลบมีปัญหา database server กรุณาแจ้ง admin เพื่อแก้ไข"})
+    }else{
+      res.status(200).json({msg:"ลบการลงทะเบียนสำเร็จ"})
+    }
+  })
+
+})
 
 module.exports = router;
