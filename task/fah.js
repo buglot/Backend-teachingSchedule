@@ -377,7 +377,6 @@ router.delete("/teacher/delete_subjectsregister/:id", (req, res) => {
 });
 
 // update วัน-เวลา
-
 function checkOverlap(v, val) {
   const vSt = new Date(`1970-01-01T${v.st}`).getTime(); // ใช้วันที่เดียวกันเพื่อความสะดวกในการคำนวณ
   const vEt = new Date(`1970-01-01T${v.et}`).getTime();
@@ -406,7 +405,13 @@ router.put("/teacher/update_time", (req, res) => {
     return res.status(400).json({ error: "Missing required parameters" });
   }
 
-  const checkOverlapSql = "SELECT sr.id, sr.st, sr.et, s.name AS subjeSct_name FROM subjectsRegister AS sr JOIN subjects AS s ON sr.Subjects_id = s.id WHERE sr.id <> ? AND sr.day_id = ?";
+  const checkOverlapSql = `
+    SELECT sr.id, sr.st, sr.et, s.name AS subject_name, fc.subject_category_id
+    FROM subjectsRegister AS sr 
+    JOIN subjects AS s ON sr.Subjects_id = s.id 
+    JOIN focus_sub_cat AS fc ON fc.subject_category_id = s.subject_category_id 
+    WHERE sr.id <> ? AND sr.day_id = ?`;
+
   db.query(checkOverlapSql, [idSubject, day], (checkOverlapErr, checkOverlapResults) => {
     if (checkOverlapErr) {
       console.error("Error executing SELECT statement:", checkOverlapErr);
@@ -414,59 +419,31 @@ router.put("/teacher/update_time", (req, res) => {
     }
 
     if (checkOverlapResults.length > 0) {
-      const overlappingSubjects = checkOverlapResults.filter(val => checkOverlap(val, { st, et }));
-      return res.status(400).json({ error: "Duplicate time and day", overlappingSubjects });
-    }
-    
-    const checkCategorySql = "SELECT sr.category_id FROM subjectsRegister AS sr JOIN focus_sub_cat AS fsc ON sr.category_id = fsc.subject_category_id WHERE sr.id = ?";
-    const updateSql = "UPDATE subjectsRegister SET st = ?, et = ?, day_id = ?, status_id = 2 WHERE id = ?";
-
-    db.query(checkCategorySql, [idSubject], (checkCategoryErr, checkCategoryResults) => {
-      if (checkCategoryErr) {
-        console.error("Error executing SELECT statement: ", checkCategoryErr);
-        return res.status(500).json({ err: "Internal Server Error" });
+      const overlappingSubjects = checkOverlapResults.filter(val => {
+        return checkOverlap(val, { st, et });
+      });
+      
+      if (overlappingSubjects.length > 0) {
+        return res.status(400).json({ error: "Duplicate time and day", overlappingSubjects });
       }
+    }
 
-      if (checkCategoryResults.length == 0) {
-        db.query(updateSql, [st, et, day, idSubject], (updateErr, updateResults) => {
-          if (updateErr) {
-            console.error("Error executing UPDATE statement:", updateErr);
-            return res.status(500).json({ error: "Internal Server Error" });
-          }
-          if (updateResults.affectedRows > 0) {
-            res.json({ message: "Data updated successfully" });
-          } else {
-            res.status(404).json({ error: "Id not found" });
-          }
-        });
-        
+    // ไม่มีการทับซ้อน ดำเนินการอัปเดตตามปกติ
+    const updateSql = "UPDATE subjectsRegister SET st = ?, et = ?, day_id = ?, status_id = 2 WHERE id = ?";
+    db.query(updateSql, [st, et, day, idSubject], (updateErr, updateResults) => {
+      if (updateErr) {
+        console.error("Error executing UPDATE statement:", updateErr);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+      if (updateResults.affectedRows > 0) {
+        res.json({ message: "Data updated successfully" });
       } else {
-        const checkDuplicationSql = "SELECT id FROM subjectsRegister WHERE id <> ? AND st = ? AND et = ? AND day_id = ?";
-        db.query(checkDuplicationSql, [idSubject, st, et, day], (checkDuplicationErr, checkDuplicationResults) => {
-          if (checkDuplicationErr) {
-            console.error("Error executing SELECT statement:", checkDuplicationErr);
-            return res.status(500).json({ error: "Internal Server Error" });
-          }
-          if (checkDuplicationResults.length == 0) {
-            db.query(updateSql, [st, et, day, idSubject], (updateErr, updateResults) => {
-              if (updateErr) {
-                console.error("Error executing UPDATE statement:", updateErr);
-                return res.status(500).json({ error: "Internal Server Error" });
-              }
-              if (updateResults.affectedRows > 0) {
-                res.json({ message: "Data updated successfully" });
-              } else {
-                res.status(404).json({ error: "Id not found" });
-              }
-            });
-          } else {
-            return res.status(400).json({ error: "Duplicate time and day" });
-          }
-        });
+        res.status(404).json({ error: "Id not found" });
       }
     });
   });
 });
+
 
 
 
