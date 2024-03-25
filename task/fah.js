@@ -474,7 +474,7 @@ router.put("/teacher/update_time", (req, res) => {
 // update data (edit n_people , branch)
 router.put("/teacher/update_data", (req, res) => {
   const { idSubject, N_people, branch } = req.body;
-  if (!idSubject || !N_people || !branch) {
+  if (!idSubject || !N_people || Object.keys(JSON.stringify(branch)).length===0) {
     return res.status(400).json({ error: "Missing required parameters" });
   }
   const update_data = "UPDATE subjectsRegister SET N_people = ?, branch = ? WHERE id = ?";
