@@ -508,7 +508,7 @@ router.post("/education/subjectOpen", (req, res) => {
 });
 
 router.post("/teacher/registersubject", (req, res) => {
-  const { subjects } = req.body;
+  const { subjects,m } = req.body;
   db.query("select * from timeSystem", (err, result) => {
     if (err) {
       return res.status(500).json({ msgerror: "database error " + err });
@@ -559,7 +559,12 @@ router.post("/teacher/registersubject", (req, res) => {
                 }
               );
             } else {
-              errors.push(`หมวดที่ ${i+1} ลงไม่ได้เพราะเวลานี้ลงไว้แล้ว`);
+              if(!m){
+                errors.push(`หมวดที่ ${i+1} ลงไม่ได้เพราะเวลานี้ทับกับเวลาที่คุณลง`);
+              }else{
+                errors.push(`หมวดที่ ${i+1} ลงไม่ได้เพราะเวลานี้ทับกับเวลาที่ลงแล้ว`);
+              }
+              
             }
           }
         })
