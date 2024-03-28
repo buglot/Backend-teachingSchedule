@@ -7,6 +7,7 @@ const readfiles = require("read-excel-file/node");
 //ตัวอย่าง
 const fs = require("fs");
 const exceljs = require("exceljs");
+const { rejects } = require("assert");
 
 router.post("/admin/System", (req, res) => {
   const { systemstatus, S_date, E_date, S_time, E_time } = req.body;
@@ -1254,5 +1255,38 @@ router.delete("/teacher/deleteReg/:id", (req, res) => {
   })
 
 })
+
+router.delete("/subjectRegister/all", (req, res) => {
+  db.query("select * from subjectsRegister", async (err, results) => {
+    if (err) {
+      res.status(500).json({ msgerror: "ไม่สามารถเข้าถึงฐานข้อมูล กรุณาติดต่อผู้ดูแลระบบ" });
+    } else {
+      let errors = [];
+      let successes = [];
+
+      for (const record of results) {
+        await new Promise((resolve, reject) => {
+          db.query("DELETE FROM subjectsRegister where id=?", [record.id], (err, result) => {
+            if (err) {
+              errors.push({ id: record.id, msg: "เกิดข้อผิดพลาดในการลบข้อมูล" });
+              reject(err);
+            } else {
+              successes.push(record.id);
+              resolve(result);
+            }
+          });
+        });
+      }
+
+      if (errors.length > 0) {
+        res.status(500).json({ errors: errors });
+      } else {
+        res.status(200).json({ msg: "ลบข้อมูลทั้งหมดเสร็จสิ้น", deleted_ids: successes });
+      }
+    }
+  });
+});
+
+
 
 module.exports = router;
