@@ -140,9 +140,7 @@ router.post("/education/Course/uploadfile", upload.single("file"), (req, res) =>
       const subject_categoryColumnIndex = rows[0].indexOf("หมวด");
       for (let i = 1; i < rows.length; i++) {
         try {
-          const categoryId = await assignSubjectCategoryId(
-            rows[i][subject_categoryColumnIndex]
-          );
+          const categoryId = await assignSubjectCategoryId(rows[i][subject_categoryColumnIndex]);
           const data = {
             idsubject: rows[i][idsubjectColumnIndex] ? rows[i][idsubjectColumnIndex].length === 8 ? rows[i][idsubjectColumnIndex] : "0" + rows[i][idsubjectColumnIndex] : null,
             name: rows[i][nameColumnIndex],
