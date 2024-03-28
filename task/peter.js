@@ -700,22 +700,17 @@ router.get("/Searchsubject/:key", (req, res) => {
 });
 router.get("/Searchsubjectopen/:key", (req, res) => {
   const { key } = req.params;
-  db.query(
-    "select * from subjects where (name like ? or idsubject like ?) and IsOpen=1 ",
-    [`%${key}%`, `%${key}%`],
-    (err, results) => {
-      if (err) {
-        res.status(500).json({
-          msgerror: "Error Server database ! Please calling admin to fix",
-        });
+  db.query("select * from subjects where (name like ? or idsubject like ?) and IsOpen=1 ", [`%${key}%`, `%${key}%`], (err, results) => {
+    if (err) {
+      res.status(500).json({ msgerror: "Error Server database ! Please calling admin to fix", });
+    } else {
+      if (results.length > 0) {
+        res.status(200).json({ data: results });
       } else {
-        if (results.length > 0) {
-          res.status(200).json({ data: results });
-        } else {
-          res.status(404).json({ error: "ไม่พบเจอ " + key });
-        }
+        res.status(404).json({ error: "ไม่พบเจอ " + key });
       }
     }
+  }
   );
 });
 router.get("/searchingbar", (req, res) => {
@@ -735,8 +730,7 @@ router.get("/searchingbar", (req, res) => {
   }
 });
 function searchSubjects3(res, search, years, category_id) {
-  let query =
-    "SELECT S.id, idsubject, S.name, credit, years, subject_category.name AS subject_category FROM subjects S JOIN subject_category ON S.subject_category_id = subject_category.id WHERE Isopen = 1";
+  let query = "SELECT S.id, idsubject, S.name, credit, years, subject_category.name AS subject_category FROM subjects S JOIN subject_category ON S.subject_category_id = subject_category.id WHERE Isopen = 1";
   const queryParams = [];
   if (search) {
     query += " AND (S.name LIKE ? OR S.idsubject LIKE ?)";
@@ -752,9 +746,7 @@ function searchSubjects3(res, search, years, category_id) {
   }
   db.query(query, queryParams, (err, results) => {
     if (err) {
-      res
-        .status(500)
-        .json({ msgerror: "Error Server database! Please call admin to fix" });
+      res.status(500).json({ msgerror: "Error Server database! Please call admin to fix" });
     } else {
       if (results.length > 0) {
         res.status(200).json({ results });
@@ -765,8 +757,7 @@ function searchSubjects3(res, search, years, category_id) {
   });
 }
 function searchSubjects(res, search, years, category_id) {
-  let query =
-    "SELECT S.id, idsubject, S.name, credit, years, subject_category.name AS subject_category FROM subjects S JOIN subject_category ON S.subject_category_id = subject_category.id WHERE Isopen = 1";
+  let query = "SELECT S.id, idsubject, S.name, credit, years, subject_category.name AS subject_category FROM subjects S JOIN subject_category ON S.subject_category_id = subject_category.id WHERE Isopen = 1";
   const queryParams = [];
   if (search) {
     query += " AND (S.name LIKE ? OR S.idsubject LIKE ?)";
@@ -781,69 +772,21 @@ function searchSubjects(res, search, years, category_id) {
     query += " AND subject_category.id = ?";
     queryParams.push(category_id);
   }
-  db.query(
-    "select status,S_date,E_date,S_time,E_time,type from timeSystem where id =1",
-    (err, results) => {
-      const time = new Date();
-      if (results[0].status === 1) {
-        if (
-          results[0].type === 1 && results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time
-        ) {
-          const data = new Date(results[0].S_date);
-          const [hours, minutes] = results[0].S_time.split(":").map(Number);
-          data.setHours(hours);
-          data.setMinutes(minutes);
-          const data1 = new Date(results[0].E_date);
-          const [hours1, minutes1] = results[0].E_time.split(":").map(Number);
-          data1.setHours(hours1);
-          data1.setMinutes(minutes1);
-          if (!(data <= time)) {
-            db.query(query, queryParams, (err, results) => {
-              if (err) {
-                res.status(500).json({
-                  msgerr: "Error Server Databases! Please calling admin to fix",
-                });
-              } else {
-                if (results.length > 0) {
-                  res.status(200).json({
-                    results,
-                    msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString(
-                      "th-th",
-                      {
-                        year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
-                      }
-                    )} ถึง ${data1.toLocaleString("th-th", {
-                      year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
-                    })}`,
-                  });
-                } else {
-                  res.status(200).json({
-                    msg: "ไม่มีวิชาที่เปิดสอน",
-                    msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString(
-                      "th-th",
-                      {
-                        year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
-                      }
-                    )} ถึง ${data1.toLocaleString("th-th", {
-                      year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
-                    })}`,
-                  });
-                }
-              }
-            });
-            return;
-          } else if (!(data1 >= time)) {
-            return res.status(404).json({
-              msgerrortime: `ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้ เปิดล่าสุด ${data.toLocaleString(
-                "th-th", {
-                year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
-              }
-              )} ถึง ${data1.toLocaleString("th-th", {
-                year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
-              })}`,
-            });
-          }
-        } else {
+  db.query("select status,S_date,E_date,S_time,E_time,type from timeSystem where id =1", (err, results) => {
+    const time = new Date();
+    if (results[0].status === 1) {
+      if (
+        results[0].type === 1 && results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time
+      ) {
+        const data = new Date(results[0].S_date);
+        const [hours, minutes] = results[0].S_time.split(":").map(Number);
+        data.setHours(hours);
+        data.setMinutes(minutes);
+        const data1 = new Date(results[0].E_date);
+        const [hours1, minutes1] = results[0].E_time.split(":").map(Number);
+        data1.setHours(hours1);
+        data1.setMinutes(minutes1);
+        if (!(data <= time)) {
           db.query(query, queryParams, (err, results) => {
             if (err) {
               res.status(500).json({
@@ -851,25 +794,62 @@ function searchSubjects(res, search, years, category_id) {
               });
             } else {
               if (results.length > 0) {
-                res.status(200).json({ results });
+                res.status(200).json({
+                  results,
+                  msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString(
+                    "th-th",
+                    {
+                      year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
+                    }
+                  )} ถึง ${data1.toLocaleString("th-th", {
+                    year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
+                  })}`,
+                });
               } else {
-                res.status(200).json({ msg: "ไม่มีวิชาที่เปิดสอน" });
+                res.status(200).json({
+                  msg: "ไม่มีวิชาที่เปิดสอน",
+                  msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString(
+                    "th-th",
+                    {
+                      year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
+                    }
+                  )} ถึง ${data1.toLocaleString("th-th", {
+                    year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
+                  })}`,
+                });
               }
             }
           });
+          return;
+        } else if (!(data1 >= time)) {
+          return res.status(404).json({
+            msgerrortime: `ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้ เปิดล่าสุด ${data.toLocaleString("th-th", { year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit", })} ถึง ${data1.toLocaleString("th-th", { year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit", })}`,
+          });
         }
       } else {
-        res.status(200).json({ msg: "ค้นหาไม่ได้" });
+        db.query(query, queryParams, (err, results) => {
+          if (err) {
+            res.status(500).json({
+              msgerr: "Error Server Databases! Please calling admin to fix",
+            });
+          } else {
+            if (results.length > 0) {
+              res.status(200).json({ results });
+            } else {
+              res.status(200).json({ msg: "ไม่มีวิชาที่เปิดสอน" });
+            }
+          }
+        });
       }
+    } else {
+      res.status(200).json({ msg: "ค้นหาไม่ได้" });
     }
+  }
   );
 }
 function searchSubjectsNoIsOpen(res, search, years, category_id) {
-  let query =
-    "SELECT S.id, idsubject, S.name, credit, years, subject_category.name AS subject_category FROM subjects S JOIN subject_category ON S.subject_category_id = subject_category.id";
-
+  let query = "SELECT S.id, idsubject, S.name, credit, years, subject_category.name AS subject_category FROM subjects S JOIN subject_category ON S.subject_category_id = subject_category.id";
   const queryParams = [];
-
   if (search) {
     query += " WHERE (S.name LIKE ? OR S.idsubject LIKE ?)";
     queryParams.push(`%${search}%`, `%${search}%`);
@@ -888,9 +868,7 @@ function searchSubjectsNoIsOpen(res, search, years, category_id) {
 
   db.query(query, queryParams, (err, results) => {
     if (err) {
-      res
-        .status(500)
-        .json({ msgerror: "Error Server database! Please call admin to fix" });
+      res.status(500).json({ msgerror: "Error Server database! Please call admin to fix" });
     } else {
       if (results.length > 0) {
         res.status(200).json({ results });
@@ -903,23 +881,17 @@ function searchSubjectsNoIsOpen(res, search, years, category_id) {
 
 router.get("/teacher/schedule_edit", (req, res) => {
   const { user_id, idreg } = req.query;
-  db.query(
-    "select Sr.N_people ,Sr.branch,S.lecture_t,S.practice_t,S.name,S.idsubject,S.credit,Sr.st,Sr.et,C.name as category,Sc.name as subc from subjectsRegister Sr join subjects S on Sr.Subjects_id = S.id join category C on C.id =category_id join subject_category Sc on Sc.id = S.subject_category_id where Sr.User_id = ? and Sr.id = ?",
-    [user_id, idreg],
-    (err, ru) => {
-      if (err) {
-        console.log(err);
-        res.status(500).json({
-          msgerror: "Error Server database! Please call admin to fix",
-        });
+  db.query("select Sr.N_people ,Sr.branch,S.lecture_t,S.practice_t,S.name,S.idsubject,S.credit,Sr.st,Sr.et,C.name as category,Sc.name as subc from subjectsRegister Sr join subjects S on Sr.Subjects_id = S.id join category C on C.id =category_id join subject_category Sc on Sc.id = S.subject_category_id where Sr.User_id = ? and Sr.id = ?", [user_id, idreg], (err, ru) => {
+    if (err) {
+      res.status(500).json({ msgerror: "Error Server database! Please call admin to fix", });
+    } else {
+      if (ru.length > 0) {
+        res.status(200).json(ru[0]);
       } else {
-        if (ru.length > 0) {
-          res.status(200).json(ru[0]);
-        } else {
-          res.status(404).json({ msg: "ไม่พบข้อมูล" });
-        }
+        res.status(404).json({ msg: "ไม่พบข้อมูล" });
       }
     }
+  }
   );
 });
 
@@ -933,34 +905,30 @@ router.get("/category", (req, res) => {
   });
 });
 router.get("/countstatus1", (req, res) => {
-  db.query(
-    "select s.name,count(status_id) as counts,(select count(Isopen) from subjects where Isopen =1) as allopen from subjectsRegister Sr join status s on s.id = Sr.status_id group by status_id",
-    (err, results) => {
-      if (err) {
-        res.status(500).json({ msgerror: "Error database", err });
+  db.query("select s.name,count(status_id) as counts,(select count(Isopen) from subjects where Isopen =1) as allopen from subjectsRegister Sr join status s on s.id = Sr.status_id group by status_id", (err, results) => {
+    if (err) {
+      res.status(500).json({ msgerror: "Error database", err });
+    } else {
+      if (results.length > 0) {
+        res.status(200).json(results);
       } else {
-        if (results.length > 0) {
-          res.status(200).json(results);
-        } else {
-          db.query(
-            "select count(Isopen) as allopen from subjects where Isopen =1",
-            (err, results) => {
-              if (err) {
-                res.status(500).json({ msgerror: "Error database", err });
+        db.query(
+          "select count(Isopen) as allopen from subjects where Isopen =1",
+          (err, results) => {
+            if (err) {
+              res.status(500).json({ msgerror: "Error database", err });
+            } else {
+              if (results.length > 0) {
+                res.status(200).json({ allopen: results[0].allopen, counts: 0 });
               } else {
-                if (results.length > 0) {
-                  res
-                    .status(200)
-                    .json({ allopen: results[0].allopen, counts: 0 });
-                } else {
-                  res.status(200).json({ allopen: 0, counts: 0 });
-                }
+                res.status(200).json({ allopen: 0, counts: 0 });
               }
             }
-          );
-        }
+          }
+        );
       }
     }
+  }
   );
 });
 router.get("/subjecthasregiscount", (req, res) => {
@@ -1279,7 +1247,6 @@ router.delete("/teacher/deleteReg/:id", (req, res) => {
   if (!id) {
     return res.status(404).json({ msg: "กำหนดที่ละลบด้วยครับ" })
   }
-
   db.query("DELETE FROM subjectsRegister WHERE (`id` = ?);", [id], (err, results) => {
     if (err) {
       res.status(500).json({ msgerror: "ไม่สามารถลบมีปัญหา database server กรุณาแจ้ง admin เพื่อแก้ไข" })
