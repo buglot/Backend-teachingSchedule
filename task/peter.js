@@ -294,43 +294,27 @@ function upDatefile() {
               }
               );
             }
-            workbook.xlsx
-              .writeFile("public/savefiles/" + "course_" + v.years + ".xlsx")
-              .then((data) =>
-                console.log(
-                  "save " + "public/savefiles/" + "course_" + v.years + ".xlsx"
-                )
+            workbook.xlsx.writeFile("public/savefiles/" + "course_" + v.years + ".xlsx")
+              .then((data) => console.log("save " + "public/savefiles/" + "course_" + v.years + ".xlsx")
               );
-            const currentDate = new Date()
-              .toISOString().replace(/T/, " ").replace(/\..+/, ""); db.query(
-                "select * from file where filename=?",
-                ["course_" + v.years + ".xlsx"],
-                (err, results) => {
-                  if (results.length === 0) {
-                    db.query("INSERT INTO file (`date`, `filename`, `link`, `years`) VALUES (?, ?, ?, ?)",
-                      [currentDate, "course_" + v.years + ".xlsx",
-                        "/download/" + "course_" + v.years + ".xlsx",
-                        v.years,
-                      ],
-                      (err, results) => {
-                        if (err) {
-                          console.log(err);
-                        }
-                      }
-                    );
-                  } else {
-                    db.query(
-                      "UPDATE file SET date = ? WHERE (years = ?)",
-                      [currentDate, v.years],
-                      (err, results) => {
-                        if (err) {
-                          console.log(err);
-                        }
-                      }
-                    );
+            const currentDate = new Date().toISOString().replace(/T/, " ").replace(/\..+/, ""); db.query("select * from file where filename=?", ["course_" + v.years + ".xlsx"], (err, results) => {
+              if (results.length === 0) {
+                db.query("INSERT INTO file (`date`, `filename`, `link`, `years`) VALUES (?, ?, ?, ?)", [currentDate, "course_" + v.years + ".xlsx", "/download/" + "course_" + v.years + ".xlsx", v.years,], (err, results) => {
+                  if (err) {
+                    console.log(err);
                   }
                 }
-              );
+                );
+              } else {
+                db.query("UPDATE file SET date = ? WHERE (years = ?)", [currentDate, v.years], (err, results) => {
+                  if (err) {
+                    console.log(err);
+                  }
+                }
+                );
+              }
+            }
+            );
           }
         }
         );
@@ -486,33 +470,29 @@ router.get("/education/downloadlist", (req, res) => {
 });
 
 router.get("/education/getallsubjects", (req, res) => {
-  db.query(
-    "select subjects.id,idsubject,subjects.name,credit,practice_t,lecture_t,years,IsOpen,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 0 order by years DESC",
-    (err, results) => {
-      if (err) {
-        res.status(500).json({ msgerror: "Error Server database! Please report admin" });
+  db.query("select subjects.id,idsubject,subjects.name,credit,practice_t,lecture_t,years,IsOpen,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 0 order by years DESC", (err, results) => {
+    if (err) {
+      res.status(500).json({ msgerror: "Error Server database! Please report admin" });
+    } else {
+      if (results.length > 0) {
+        res.status(200).json({ results });
       } else {
-        if (results.length > 0) {
-          res.status(200).json({ results });
-        } else {
-          res.status(200).json({ msg: "ไม่มีวิชาที่อัปโหลดไว้" });
-        }
+        res.status(200).json({ msg: "ไม่มีวิชาที่อัปโหลดไว้" });
       }
     }
+  }
   );
 });
 
 router.get("/subjest", (req, res) => {
-  db.query(
-    "Select subjects.id,idsubject,subjects.name,credit,years,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 1",
-    (err, results) => {
-      if (err) {
-        res.status(500).json({ msgerr: "Error Server Databases! Please calling admin to fix", });
-      } else {
-        if (results.length > 0) res.status(200).json(results);
-        else res.status(200).json({ msg: "ไม่มีวิชาที่เปิดสอน" });
-      }
+  db.query("Select subjects.id,idsubject,subjects.name,credit,years,subject_category.name as subject_category from subjects join subject_category on subjects.subject_category_id = subject_category.id where Isopen = 1", (err, results) => {
+    if (err) {
+      res.status(500).json({ msgerr: "Error Server Databases! Please calling admin to fix", });
+    } else {
+      if (results.length > 0) res.status(200).json(results);
+      else res.status(200).json({ msg: "ไม่มีวิชาที่เปิดสอน" });
     }
+  }
   );
 });
 
@@ -1287,9 +1267,7 @@ router.get("/export/file", async (req, res) => {
     });
     const filesname = "ตาราง" + new Date().getTime() + ".xlsx";
     await workbook.xlsx.writeFile("public/export/" + filesname);
-
     console.log('Excel file created successfully');
-
     res.status(200).redirect("http://localhost:4133/export/" + filesname)
   } catch (err) {
     console.error('Error:', err);
