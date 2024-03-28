@@ -19,36 +19,19 @@ router.post("/admin/System", (req, res) => {
           if (err) {
             res.status(500).json({ msgerror: "Database Error :" + err });
           } else {
-            res.status(200).json({
-              msg:
-                "System is " +
-                systemstatus +
-                " วันเริ่ม" +
-                S_date +
-                " เวลา" +
-                S_time +
-                " วันสุดท้าย" +
-                E_date +
-                " เวลา" +
-                E_time,
-            });
+            res.status(200).json({ msg: "System is " + systemstatus + " วันเริ่ม" + S_date + " เวลา" + S_time + " วันสุดท้าย" + E_date + " เวลา" + E_time, });
           }
         }
       );
       return;
     } else {
-      db.query(
-        "update timeSystem set status=?,type=0 where id=1",
-        [systemstatus],
-        (err, results) => {
-          if (err) {
-            res.status(404).json({ msgerror: "Database Error: " + err });
-          } else {
-            res
-              .status(200)
-              .json({ msg: "System is " + systemstatus ? "เปิด" : "ปิด" });
-          }
+      db.query("update timeSystem set status=?,type=0 where id=1", [systemstatus], (err, results) => {
+        if (err) {
+          res.status(404).json({ msgerror: "Database Error: " + err });
+        } else {
+          res.status(200).json({ msg: "System is " + systemstatus ? "เปิด" : "ปิด" });
         }
+      }
       );
       return;
     }
@@ -111,19 +94,7 @@ function education_import(data) {
           if (results.length === 0) {
             const query =
               "INSERT INTO subjects (`idsubject`, `name`, `credit`, `practice_t`, `lecture_t`,`m_t`, `years`, `subject_category_id`, `term`, `IsOpen`,`exsub`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            const values = [
-              value.idsubject,
-              value.name,
-              value.credit,
-              value.practice_t,
-              value.lecture_t,
-              value.mt,
-              value.years,
-              value.subject_category_id,
-              value.term ? value.term : null,
-              0,
-              value.exsub,
-            ];
+            const values = [value.idsubject, value.name, value.credit, value.practice_t, value.lecture_t, value.mt, value.years, value.subject_category_id, value.term ? value.term : null, 0, value.exsub,];
 
             db.query(query, values, (err, results) => {
               if (err) {
@@ -131,11 +102,7 @@ function education_import(data) {
               }
             });
           } else {
-            warn.push({
-              index,
-              Message: "วิชานี้ถูกลงทะเบียนก่อนหน้าแล้ว",
-              value,
-            });
+            warn.push({ index, Message: "วิชานี้ถูกลงทะเบียนก่อนหน้าแล้ว", value, });
           }
         }
       );
@@ -152,11 +119,7 @@ function education_import(data) {
           resolve({
             data: "Data successfully imported",
             warn: {
-              data: warn,
-              warnmsg:
-                warn.length === 0
-                  ? null
-                  : `${warn.length} วิชาที่มีการลงทะเบียนก่อนหน้าแล้ว`,
+              data: warn, warnmsg: warn.length === 0 ? null : `${warn.length} วิชาที่มีการลงทะเบียนก่อนหน้าแล้ว`,
             },
           });
         } else {
@@ -165,11 +128,7 @@ function education_import(data) {
             data: `${errors.length} errors occurred during import`,
             errors: errors,
             warn: {
-              data: warn,
-              warnmsg:
-                warn.length === 0
-                  ? null
-                  : `${warn.length} วิชาที่มีการลงทะเบียนก่อนหน้าแล้ว`,
+              data: warn, warnmsg: warn.length === 0 ? null : `${warn.length} วิชาที่มีการลงทะเบียนก่อนหน้าแล้ว`,
             },
           });
         }
@@ -190,104 +149,99 @@ router.post(
     const filePath = uploadedFile.path;
 
     readfiles(path.join(filePath))
-    .then(async (rows) => {
-      const list = []; // Create an empty array to store the dictionaries
+      .then(async (rows) => {
+        const list = []; // Create an empty array to store the dictionaries
 
-      const idsubjectColumnIndex = rows[0].indexOf("รหัสวิชา");
-      const nameColumnIndex = rows[0].indexOf("ชื่อวิชา");
-      const creditColumnIndex = rows[0].indexOf("หน่วยกิต");
-      const subject_categoryColumnIndex = rows[0].indexOf("หมวด");
-      for (let i = 1; i < rows.length; i++) {
-        try {
-          const categoryId = await assignSubjectCategoryId(
-            rows[i][subject_categoryColumnIndex]
-          );
-          const data = {
-            // Create a dictionary for each row
-            idsubject: rows[i][idsubjectColumnIndex]
-              ? rows[i][idsubjectColumnIndex].length === 8
-                ? rows[i][idsubjectColumnIndex]
-                : "0" + rows[i][idsubjectColumnIndex]
-              : null,
-            name: rows[i][nameColumnIndex],
-            credit: rows[i][creditColumnIndex]
-              ? rows[i][creditColumnIndex].split("(")[0]
-              : null,
-            practice_t: rows[i][creditColumnIndex]
-              ? rows[i][creditColumnIndex].split("(")[1].split("-")[1]
-              : null,
-            lecture_t: rows[i][creditColumnIndex]
-              ? rows[i][creditColumnIndex].split("(")[1].split("-")[0]
-              : null,
-            mt: rows[i][creditColumnIndex]
-              ? rows[i][creditColumnIndex]
-                .split("(")[1]
-                .split("-")[2]
-                .replace(")", "")
-              : null,
-            years: y,
-            exsub: 0,
-            subject_category_id: categoryId, // Call a function to assign category ID
-          };
-          list.push(data);
-        } catch (error) {
-          const categoryId = await assignSubjectCategoryId(
-            rows[i][subject_categoryColumnIndex]
-          );
-          const data = {
-            // Create a dictionary for each row
-            idsubject: rows[i][idsubjectColumnIndex]
-              ? rows[i][idsubjectColumnIndex].length === 8
-                ? rows[i][idsubjectColumnIndex]
-                : "0" + rows[i][idsubjectColumnIndex]
-              : null,
-            name: rows[i][nameColumnIndex],
-            credit: rows[i][creditColumnIndex],
-            practice_t: 0,
-            lecture_t: 0,
-            mt: 0,
-            years: y,
-            exsub: 1,
-            subject_category_id: categoryId,
-          };
-          list.push(data);
+        const idsubjectColumnIndex = rows[0].indexOf("รหัสวิชา");
+        const nameColumnIndex = rows[0].indexOf("ชื่อวิชา");
+        const creditColumnIndex = rows[0].indexOf("หน่วยกิต");
+        const subject_categoryColumnIndex = rows[0].indexOf("หมวด");
+        for (let i = 1; i < rows.length; i++) {
+          try {
+            const categoryId = await assignSubjectCategoryId(
+              rows[i][subject_categoryColumnIndex]
+            );
+            const data = {
+              // Create a dictionary for each row
+              idsubject: rows[i][idsubjectColumnIndex]
+                ? rows[i][idsubjectColumnIndex].length === 8
+                  ? rows[i][idsubjectColumnIndex]
+                  : "0" + rows[i][idsubjectColumnIndex]
+                : null,
+              name: rows[i][nameColumnIndex],
+              credit: rows[i][creditColumnIndex]
+                ? rows[i][creditColumnIndex].split("(")[0]
+                : null,
+              practice_t: rows[i][creditColumnIndex]
+                ? rows[i][creditColumnIndex].split("(")[1].split("-")[1]
+                : null,
+              lecture_t: rows[i][creditColumnIndex]
+                ? rows[i][creditColumnIndex].split("(")[1].split("-")[0]
+                : null,
+              mt: rows[i][creditColumnIndex]
+                ? rows[i][creditColumnIndex]
+                  .split("(")[1]
+                  .split("-")[2]
+                  .replace(")", "")
+                : null,
+              years: y,
+              exsub: 0,
+              subject_category_id: categoryId, // Call a function to assign category ID
+            };
+            list.push(data);
+          } catch (error) {
+            const categoryId = await assignSubjectCategoryId(
+              rows[i][subject_categoryColumnIndex]
+            );
+            const data = {
+              // Create a dictionary for each row
+              idsubject: rows[i][idsubjectColumnIndex]
+                ? rows[i][idsubjectColumnIndex].length === 8 ? rows[i][idsubjectColumnIndex]
+                  : "0" + rows[i][idsubjectColumnIndex] : null,
+              name: rows[i][nameColumnIndex],
+              credit: rows[i][creditColumnIndex],
+              practice_t: 0,
+              lecture_t: 0,
+              mt: 0,
+              years: y,
+              exsub: 1,
+              subject_category_id: categoryId,
+            };
+            list.push(data);
+          }
+
+          // Add the dictionary to the list
         }
-
-        // Add the dictionary to the list
-      }
-      education_import(list)
-        .then((data) => {
-          fs.unlink(filePath, (err) => {
-            if (err) {
-              console.error(err);
-            } else {
-              console.log("File is deleted.", filePath);
-            }
+        education_import(list)
+          .then((data) => {
+            fs.unlink(filePath, (err) => {
+              if (err) {
+                console.error(err);
+              } else {
+                console.log("File is deleted.", filePath);
+              }
+            });
+            upDatefile();
+            checkfile();
+            res.status(200).json({
+              msg: "บันทึกไฟล์ สำเร็จ " + data.data, warning: data.warn,
+            });
+          })
+          .catch((err) => {
+            fs.unlink(filePath, (err) => {
+              if (err) {
+                console.error(err);
+              } else {
+                console.log("File is deleted.", filePath);
+              }
+            });
+            upDatefile();
+            checkfile();
+            res.status(500).json({ msgerror: err.data, error: err.errors, warning: err.warn });
           });
-          upDatefile();
-          checkfile();
-          res.status(200).json({
-            msg: "บันทึกไฟล์ สำเร็จ " + data.data,
-            warning: data.warn,
-          });
-        })
-        .catch((err) => {
-          fs.unlink(filePath, (err) => {
-            if (err) {
-              console.error(err);
-            } else {
-              console.log("File is deleted.", filePath);
-            }
-          });
-          upDatefile();
-          checkfile();
-          res
-            .status(500)
-            .json({ msgerror: err.data, error: err.errors, warning: err.warn });
-        });
-    }).catch(()=>{
-      res.status(404).json({msgerror:"ไม่สามารถอัปโหลด กรุณาตรวจสอบชนิดไฟล์ด้วยครับ .xlsx"})
-    });
+      }).catch(() => {
+        res.status(404).json({ msgerror: "ไม่สามารถอัปโหลด กรุณาตรวจสอบชนิดไฟล์ด้วยครับ .xlsx" })
+      });
   }
 );
 async function assignSubjectCategoryId(name) {
@@ -317,23 +271,16 @@ function checkfile() {
       console.log(results);
       if (results.length !== 0) {
         results.map((v, i) => {
-          console.log(v);
-          db.query(
-            "DELETE FROM file WHERE (id = ?)",
-            [v.id],
+          console.log(v); db.query("DELETE FROM file WHERE (id = ?)", [v.id],
             (err, results) => {
-              fs.unlink(
-                "public/savefiles/" + "course_" + v.years + ".xlsx",
-                (err) => {
-                  if (err) {
-                    console.error(err);
-                  } else {
-                    console.log(
-                      "File is deleted.",
-                      "public/savefiles/" + "course_" + v.years + ".xlsx"
-                    );
-                  }
+              fs.unlink("public/savefiles/" + "course_" + v.years + ".xlsx", (err) => {
+                if (err) {
+                  console.error(err);
+                } else {
+                  console.log("File is deleted.", "public/savefiles/" + "course_" + v.years + ".xlsx"
+                  );
                 }
+              }
               );
             }
           );
@@ -354,9 +301,7 @@ function upDatefile() {
             if (err) {
               console.error(err);
             } else {
-              console.log(
-                "File is deleted.",
-                "public/savefiles/" + "course_" + v.years + ".xlsx"
+              console.log("File is deleted.", "public/savefiles/" + "course_" + v.years + ".xlsx"
               );
             }
           }
@@ -402,49 +347,39 @@ function upDatefile() {
                 .writeFile("public/savefiles/" + "course_" + v.years + ".xlsx")
                 .then((data) =>
                   console.log(
-                    "save " +
-                    "public/savefiles/" +
-                    "course_" +
-                    v.years +
-                    ".xlsx"
+                    "save " + "public/savefiles/" + "course_" + v.years + ".xlsx"
                   )
                 );
               const currentDate = new Date()
-                .toISOString()
-                .replace(/T/, " ")
-                .replace(/\..+/, "");
-              db.query(
-                "select * from file where filename=?",
-                ["course_" + v.years + ".xlsx"],
-                (err, results) => {
-                  if (results.length === 0) {
-                    db.query(
-                      "INSERT INTO file (`date`, `filename`, `link`, `years`) VALUES (?, ?, ?, ?)",
-                      [
-                        currentDate,
-                        "course_" + v.years + ".xlsx",
-                        "/download/" + "course_" + v.years + ".xlsx",
-                        v.years,
-                      ],
-                      (err, results) => {
-                        if (err) {
-                          console.log(err);
+                .toISOString().replace(/T/, " ").replace(/\..+/, ""); db.query(
+                  "select * from file where filename=?",
+                  ["course_" + v.years + ".xlsx"],
+                  (err, results) => {
+                    if (results.length === 0) {
+                      db.query("INSERT INTO file (`date`, `filename`, `link`, `years`) VALUES (?, ?, ?, ?)",
+                        [currentDate, "course_" + v.years + ".xlsx",
+                          "/download/" + "course_" + v.years + ".xlsx",
+                          v.years,
+                        ],
+                        (err, results) => {
+                          if (err) {
+                            console.log(err);
+                          }
                         }
-                      }
-                    );
-                  } else {
-                    db.query(
-                      "UPDATE file SET date = ? WHERE (years = ?)",
-                      [currentDate, v.years],
-                      (err, results) => {
-                        if (err) {
-                          console.log(err);
+                      );
+                    } else {
+                      db.query(
+                        "UPDATE file SET date = ? WHERE (years = ?)",
+                        [currentDate, v.years],
+                        (err, results) => {
+                          if (err) {
+                            console.log(err);
+                          }
                         }
-                      }
-                    );
+                      );
+                    }
                   }
-                }
-              );
+                );
             }
           }
         );
@@ -455,15 +390,8 @@ function upDatefile() {
 router.post("/education/Course/add", (req, res) => {
   const { year, name, idsubject, credit, subject_category_id } = req.body;
   const data = {
-    // Create a dictionary for each row
-    idsubject: idsubject.length === 8 ? idsubject : "0" + idsubject,
-    name: name,
-    credit: credit,
-    practice_t: 0,
-    lecture_t: 0,
-    mt: 0,
-    years: year,
-    subject_category_id: subject_category_id, // Call a function to assign category ID
+    idsubject: idsubject.length === 8 ? idsubject : "0" + idsubject, name: name, credit: credit, practice_t: 0, lecture_t: 0, mt: 0,
+    years: year, subject_category_id: subject_category_id, // Call a function to assign category ID
   };
   education_import(data).then((data) => {
     upDatefile();
@@ -485,15 +413,12 @@ router.post("/education/subjectOpen", (req, res) => {
   let warn = [];
   const updatePromises = subjects.map((subject) => {
     return new Promise((resolve, reject) => {
-      db.query(
-        "UPDATE subjects SET IsOpen = '1' WHERE id = ?",
-        [subject.id],
-        (err, results) => {
-          if (results.changedRows === 0) {
-            warn.push(subject.id);
-          }
-          resolve(results);
+      db.query("UPDATE subjects SET IsOpen = '1' WHERE id = ?", [subject.id], (err, results) => {
+        if (results.changedRows === 0) {
+          warn.push(subject.id);
         }
+        resolve(results);
+      }
       );
     });
   });
@@ -508,7 +433,7 @@ router.post("/education/subjectOpen", (req, res) => {
 });
 
 router.post("/teacher/registersubject", (req, res) => {
-  const { subjects,m } = req.body;
+  const { subjects, m } = req.body;
   db.query("select * from timeSystem", (err, result) => {
     if (err) {
       return res.status(500).json({ msgerror: "database error " + err });
@@ -542,9 +467,9 @@ router.post("/teacher/registersubject", (req, res) => {
       const errors = [];
       const successindex = [];
       subjects.map((v, i) => {
-        db.query("SELECT * FROM teachingschedule.subjectsRegister  WHERE ((st < ? AND et > ?) OR (st < ? AND et > ?) OR (st > ? AND et < ?)) AND User_id = ? and day_id=?;",[v.et,v.st,v.st,v.et,v.st,v.et,v.uid,v.day_id], (err, results5) => {
+        db.query("SELECT * FROM teachingschedule.subjectsRegister  WHERE ((st < ? AND et > ?) OR (st < ? AND et > ?) OR (st > ? AND et < ?)) AND User_id = ? and day_id=?;", [v.et, v.st, v.st, v.et, v.st, v.et, v.uid, v.day_id], (err, results5) => {
           if (err) {
-            errors.push(`หมวดที่ ${i+1} ลงทะเบียนไม่สำเร็จ` + err.message);
+            errors.push(`หมวดที่ ${i + 1} ลงทะเบียนไม่สำเร็จ` + err.message);
           } else {
             if (results5.length === 0) {
               db.query(
@@ -552,19 +477,19 @@ router.post("/teacher/registersubject", (req, res) => {
                 [v.uid, v.st, v.et, v.day_id, 2, v.N_people, JSON.stringify(v.branch), v.category_id, v.Subjects_id, v.realcredit,],
                 (err, results) => {
                   if (err) {
-                    errors.push(`หมวดที่ ${i+1} ลงทะเบียนไม่สำเร็จ` + err.message);
+                    errors.push(`หมวดที่ ${i + 1} ลงทะเบียนไม่สำเร็จ` + err.message);
                   } else {
                     successindex.push(i);
                   }
                 }
               );
             } else {
-              if(!m){
-                errors.push(`หมวดที่ ${i+1} ลงไม่ได้เพราะเวลานี้ทับกับเวลาที่คุณลง`);
-              }else{
-                errors.push(`หมวดที่ ${i+1} ลงไม่ได้เพราะเวลานี้ทับกับเวลาที่ลงแล้ว`);
+              if (!m) {
+                errors.push(`หมวดที่ ${i + 1} ลงไม่ได้เพราะเวลานี้ทับกับเวลาที่คุณลง`);
+              } else {
+                errors.push(`หมวดที่ ${i + 1} ลงไม่ได้เพราะเวลานี้ทับกับเวลาที่ลงแล้ว`);
               }
-              
+
             }
           }
         })
@@ -661,17 +586,11 @@ router.get("/teacher/subjects", (req, res) => {
         });
       } else {
         if (results[0].status === 0) {
-          res.status(404).json({
-            msgerrortime: "ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้",
-          });
+          res.status(404).json({ msgerrortime: "ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้", });
         } else {
           const time = new Date();
           if (
-            results[0].type === 1 &&
-            results[0].S_date &&
-            results[0].E_date &&
-            results[0].S_time &&
-            results[0].E_time
+            results[0].type === 1 && results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time
           ) {
             const data = new Date(results[0].S_date);
             const [hours, minutes] = results[0].S_time.split(":").map(Number);
@@ -693,22 +612,11 @@ router.get("/teacher/subjects", (req, res) => {
                   } else {
                     if (results.length > 0) {
                       res.status(200).json({
-                        results,
-                        msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString(
-                          "th-th",
-                          {
-                            year: "numeric",
-                            day: "2-digit",
-                            month: "long",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }
+                        results, msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString("th-th", {
+                          year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
+                        }
                         )} ถึง ${data1.toLocaleString("th-th", {
-                          year: "numeric",
-                          day: "2-digit",
-                          month: "long",
-                          hour: "2-digit",
-                          minute: "2-digit",
+                          year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
                         })}`,
                       });
                     } else {
@@ -717,18 +625,10 @@ router.get("/teacher/subjects", (req, res) => {
                         msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString(
                           "th-th",
                           {
-                            year: "numeric",
-                            day: "2-digit",
-                            month: "long",
-                            hour: "2-digit",
-                            minute: "2-digit",
+                            year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
                           }
                         )} ถึง ${data1.toLocaleString("th-th", {
-                          year: "numeric",
-                          day: "2-digit",
-                          month: "long",
-                          hour: "2-digit",
-                          minute: "2-digit",
+                          year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
                         })}`,
                       });
                     }
@@ -741,18 +641,10 @@ router.get("/teacher/subjects", (req, res) => {
                 msgerrortime: `ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้ เปิดล่าสุด ${data.toLocaleString(
                   "th-th",
                   {
-                    year: "numeric",
-                    day: "2-digit",
-                    month: "long",
-                    hour: "2-digit",
-                    minute: "2-digit",
+                    year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
                   }
                 )} ถึง ${data1.toLocaleString("th-th", {
-                  year: "numeric",
-                  day: "2-digit",
-                  month: "long",
-                  hour: "2-digit",
-                  minute: "2-digit",
+                  year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
                 })}`,
               });
             }
@@ -794,11 +686,7 @@ router.get("/teacher/subject/:id", (req, res) => {
         } else {
           const time = new Date();
           if (
-            results.type === 1 &&
-            results[0].S_date &&
-            results[0].E_date &&
-            results[0].S_time &&
-            results[0].E_time
+            results.type === 1 && results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time
           ) {
             const data = new Date(results[0].S_date);
             const [hours, minutes] = results[0].S_time.split(":").map(Number);
@@ -809,9 +697,7 @@ router.get("/teacher/subject/:id", (req, res) => {
             data1.setHours(hours1);
             data1.setMinutes(minutes1);
             if (!(data <= time && data1 >= time)) {
-              res
-                .status(404)
-                .json({ msgerrortime: "ระบบไม่ได้เปิดในลงทะเบียน" });
+              res.status(404).json({ msgerrortime: "ระบบไม่ได้เปิดในลงทะเบียน" });
               return;
             }
           }
@@ -821,17 +707,12 @@ router.get("/teacher/subject/:id", (req, res) => {
             (err, results) => {
               if (err) {
                 console.log(err);
-                res.status(500).json({
-                  msgerror:
-                    "Error Server Database! Please calling admin to fix",
-                });
+                res.status(500).json({ msgerror: "Error Server Database! Please calling admin to fix", });
               } else {
                 if (results.length > 0) {
                   res.status(200).json(results);
                 } else {
-                  res
-                    .status(450)
-                    .json({ msgerror: `${results}วิชานี้ไม่ได้ให้ลงทะเบียน` });
+                  res.status(450).json({ msgerror: `${results}วิชานี้ไม่ได้ให้ลงทะเบียน` });
                 }
               }
             }
@@ -1018,11 +899,7 @@ function searchSubjects(res, search, years, category_id) {
       const time = new Date();
       if (results[0].status === 1) {
         if (
-          results[0].type === 1 &&
-          results[0].S_date &&
-          results[0].E_date &&
-          results[0].S_time &&
-          results[0].E_time
+          results[0].type === 1 && results[0].S_date && results[0].E_date && results[0].S_time && results[0].E_time
         ) {
           const data = new Date(results[0].S_date);
           const [hours, minutes] = results[0].S_time.split(":").map(Number);
@@ -1045,18 +922,10 @@ function searchSubjects(res, search, years, category_id) {
                     msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString(
                       "th-th",
                       {
-                        year: "numeric",
-                        day: "2-digit",
-                        month: "long",
-                        hour: "2-digit",
-                        minute: "2-digit",
+                        year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
                       }
                     )} ถึง ${data1.toLocaleString("th-th", {
-                      year: "numeric",
-                      day: "2-digit",
-                      month: "long",
-                      hour: "2-digit",
-                      minute: "2-digit",
+                      year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
                     })}`,
                   });
                 } else {
@@ -1065,18 +934,10 @@ function searchSubjects(res, search, years, category_id) {
                     msgtime: `ไม่ได้เปิดระบบให้ลงทะเบียน ระบบเปิด ${data.toLocaleString(
                       "th-th",
                       {
-                        year: "numeric",
-                        day: "2-digit",
-                        month: "long",
-                        hour: "2-digit",
-                        minute: "2-digit",
+                        year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
                       }
                     )} ถึง ${data1.toLocaleString("th-th", {
-                      year: "numeric",
-                      day: "2-digit",
-                      month: "long",
-                      hour: "2-digit",
-                      minute: "2-digit",
+                      year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
                     })}`,
                   });
                 }
@@ -1086,20 +947,11 @@ function searchSubjects(res, search, years, category_id) {
           } else if (!(data1 >= time)) {
             return res.status(404).json({
               msgerrortime: `ระบบการลงทะเบียนรายวิชาได้ปิดอยู่ในขณะนึ้ เปิดล่าสุด ${data.toLocaleString(
-                "th-th",
-                {
-                  year: "numeric",
-                  day: "2-digit",
-                  month: "long",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }
+                "th-th", {
+                year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
+              }
               )} ถึง ${data1.toLocaleString("th-th", {
-                year: "numeric",
-                day: "2-digit",
-                month: "long",
-                hour: "2-digit",
-                minute: "2-digit",
+                year: "numeric", day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
               })}`,
             });
           }
@@ -1536,17 +1388,17 @@ router.get("/export/file", async (req, res) => {
     res.status(500).send('Error creating Excel file');
   }
 });
-router.delete("/teacher/deleteReg/:id",(req,res)=>{
-  const {id} = req.params;
-  if(!id){
-    return res.status(404).json({msg:"กำหนดที่ละลบด้วยครับ"})
+router.delete("/teacher/deleteReg/:id", (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(404).json({ msg: "กำหนดที่ละลบด้วยครับ" })
   }
 
-  db.query("DELETE FROM subjectsRegister WHERE (`id` = ?);",[id],(err,results)=>{
-    if(err){
-      res.status(500).json({msgerror:"ไม่สามารถลบมีปัญหา database server กรุณาแจ้ง admin เพื่อแก้ไข"})
-    }else{
-      res.status(200).json({msg:"ลบการลงทะเบียนสำเร็จ"})
+  db.query("DELETE FROM subjectsRegister WHERE (`id` = ?);", [id], (err, results) => {
+    if (err) {
+      res.status(500).json({ msgerror: "ไม่สามารถลบมีปัญหา database server กรุณาแจ้ง admin เพื่อแก้ไข" })
+    } else {
+      res.status(200).json({ msg: "ลบการลงทะเบียนสำเร็จ" })
     }
   })
 
