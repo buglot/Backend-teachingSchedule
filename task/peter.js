@@ -105,41 +105,46 @@ function education_import(data) {
     const errors = []; // Array to store encountered errors
     const warn = [];
     data.forEach((value, index) => {
-      db.query(
-        "SELECT * FROM subjects where idsubject =? and years=?",
-        [value.idsubject, value.years],
-        (err, results) => {
-          if (results.length === 0) {
-            const query =
-              "INSERT INTO subjects (`idsubject`, `name`, `credit`, `practice_t`, `lecture_t`,`m_t`, `years`, `subject_category_id`, `term`, `IsOpen`,`exsub`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            const values = [
-              value.idsubject,
-              value.name,
-              value.credit,
-              value.practice_t,
-              value.lecture_t,
-              value.mt,
-              value.years,
-              value.subject_category_id,
-              value.term ? value.term : null,
-              0,
-              value.exsub,
-            ];
+      if (value.idsubject.length !== 8) {
+        errors.push({ index, value, errorMessage: "รหัสวิชาต้องมี 8 ตัว " })
+      } else {
+        db.query(
+          "SELECT * FROM subjects where idsubject =? and years=?",
+          [value.idsubject, value.years],
+          (err, results) => {
+            if (results.length === 0) {
+              const query =
+                "INSERT INTO subjects (`idsubject`, `name`, `credit`, `practice_t`, `lecture_t`,`m_t`, `years`, `subject_category_id`, `term`, `IsOpen`,`exsub`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+              const values = [
+                value.idsubject,
+                value.name,
+                value.credit,
+                value.practice_t,
+                value.lecture_t,
+                value.mt,
+                value.years,
+                value.subject_category_id,
+                value.term ? value.term : null,
+                0,
+                value.exsub,
+              ];
 
-            db.query(query, values, (err, results) => {
-              if (err) {
-                errors.push({ index, errorMessage: err.message, value });
-              }
-            });
-          } else {
-            warn.push({
-              index,
-              Message: "วิชานี้ถูกลงทะเบียนก่อนหน้าแล้ว",
-              value,
-            });
+              db.query(query, values, (err, results) => {
+                if (err) {
+                  errors.push({ index, errorMessage: err.message, value });
+                }
+              });
+            } else {
+              warn.push({
+                index,
+                Message: "วิชานี้ถูกลงทะเบียนก่อนหน้าแล้ว",
+                value,
+              });
+            }
           }
-        }
-      );
+        );
+      }
+
     });
 
     // Wait for all queries to finish and handle errors
@@ -197,22 +202,20 @@ router.post(
         const creditColumnIndex = rows[0].indexOf("หน่วยกิต");
         const subject_categoryColumnIndex = rows[0].indexOf("หมวด");
         for (let i = 1; i < rows.length; i++) {
-          if (
-            rows[i][idsubjectColumnIndex] &&
-            rows[i][idsubjectColumnIndex].length != 8
-          ) {
-            throw new Error("ID subject length must be 8 characters.");
-          }
           try {
             const categoryId = await assignSubjectCategoryId(
               rows[i][subject_categoryColumnIndex]
             );
+            let s="";
+            s.charAt
             const data = {
-              idsubject: rows[i][idsubjectColumnIndex],
-              name: rows[i][nameColumnIndex],
-              credit: rows[i][creditColumnIndex]
-                ? rows[i][creditColumnIndex].split("(")[0]
+              idsubject: rows[i][idsubjectColumnIndex]
+                ? rows[i][idsubjectColumnIndex].length === 8
+                  ? rows[i][idsubjectColumnIndex]
+                  : rows[i][idsubjectColumnIndex].charAt(0) ==='0'?rows[i][idsubjectColumnIndex]:"0"+rows[i][idsubjectColumnIndex]
                 : null,
+              name: rows[i][nameColumnIndex],
+              credit: rows[i][creditColumnIndex] ? rows[i][creditColumnIndex].split("(")[0] : null,
               practice_t: rows[i][creditColumnIndex]
                 ? rows[i][creditColumnIndex].split("(")[1].split("-")[1]
                 : null,
@@ -221,9 +224,9 @@ router.post(
                 : null,
               mt: rows[i][creditColumnIndex]
                 ? rows[i][creditColumnIndex]
-                    .split("(")[1]
-                    .split("-")[2]
-                    .replace(")", "")
+                  .split("(")[1]
+                  .split("-")[2]
+                  .replace(")", "")
                 : null,
               years: y,
               exsub: 0,
@@ -389,11 +392,9 @@ function upDatefile() {
               for (let i = 0; i < results.length; i++) {
                 worksheet.getCell(i + 2, 1).value = results[i].idsubject;
                 worksheet.getCell(i + 2, 2).value = results[i].name;
-                worksheet.getCell(i + 2, 3).value = `${results[i].credit}(${
-                  results[i].lecture_t
-                }-${results[i].practice_t ? results[i].practice_t : 0}-${
-                  results[i].m_t
-                })`;
+                worksheet.getCell(i + 2, 3).value = `${results[i].credit}(${results[i].lecture_t
+                  }-${results[i].practice_t ? results[i].practice_t : 0}-${results[i].m_t
+                  })`;
                 db.query(
                   "select name from subject_category where id = ?",
                   [results[i].subject_category_id],
@@ -417,10 +418,10 @@ function upDatefile() {
                 .then((data) =>
                   console.log(
                     "save " +
-                      "public/savefiles/" +
-                      "course_" +
-                      v.years +
-                      ".xlsx"
+                    "public/savefiles/" +
+                    "course_" +
+                    v.years +
+                    ".xlsx"
                   )
                 );
               const currentDate = new Date()
@@ -1545,9 +1546,8 @@ router.get("/export/file", async (req, res) => {
                 dataEtTotalMinutes - v.lecture_t * 60; // ลบจำนวนชั่วโมงของ v.practice_t ออกจากเวลาของ data.et ในหน่วยนาที
               const hours = Math.floor(dataEtMinusPracticeTMinutes / 60); // แยกจำนวนชั่วโมงจากจำนวนนาที
               const minutes = dataEtMinusPracticeTMinutes % 60; // หาเศษของจำนวนนาทีที่เหลือ
-              const resultTime = `${hours < 10 ? "0" : ""}${hours}:${
-                minutes < 10 ? "0" : ""
-              }${minutes}`;
+              const resultTime = `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""
+                }${minutes}`;
               worksheet.getCell("K" + row).value = resultTime;
               worksheet.getCell("M" + row).value = Object.keys(data.branch)
                 .map((key) => `${key}/${data.branch[key].join(",")}`)
@@ -1620,9 +1620,8 @@ router.get("/export/file", async (req, res) => {
                 dataEtTotalMinutes - v.practice_t * 60; // ลบจำนวนชั่วโมงของ v.practice_t ออกจากเวลาของ data.et ในหน่วยนาที
               const hours = Math.floor(dataEtMinusPracticeTMinutes / 60); // แยกจำนวนชั่วโมงจากจำนวนนาที
               const minutes = dataEtMinusPracticeTMinutes % 60; // หาเศษของจำนวนนาทีที่เหลือ
-              const resultTime = `${hours < 10 ? "0" : ""}${hours}:${
-                minutes < 10 ? "0" : ""
-              }${minutes}`;
+              const resultTime = `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""
+                }${minutes}`;
               worksheet.getCell("K" + row).value = resultTime;
               worksheet.getCell("M" + row).value = Object.keys(data.branch)
                 .map((key) => `${key}/${data.branch[key].join(",")}`)
