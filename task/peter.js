@@ -205,8 +205,6 @@ router.post(
             const categoryId = await assignSubjectCategoryId(
               rows[i][subject_categoryColumnIndex]
             );
-            let s = "";
-            s.charAt;
             const data = {
               idsubject: rows[i][idsubjectColumnIndex]
                 ? rows[i][idsubjectColumnIndex].length === 8
@@ -244,6 +242,8 @@ router.post(
               // Create a dictionary for each row
               idsubject: rows[i][idsubjectColumnIndex]
                 ? rows[i][idsubjectColumnIndex].length === 8
+                  ? rows[i][idsubjectColumnIndex]
+                  : rows[i][idsubjectColumnIndex].charAt(0) === "0"
                   ? rows[i][idsubjectColumnIndex]
                   : "0" + rows[i][idsubjectColumnIndex]
                 : null,
@@ -1689,7 +1689,7 @@ router.get("/export/file", async (req, res) => {
               worksheet.getCell("N" + row).value = data.N_people;
               worksheet.getCell("P" + row).value =
                 v.practice_t + v.lecture_t === h
-                  ? v.practice_t
+                  ? v.lecture_t
                   : hours;
               worksheet.getCell("Q" + row).value = data.sec.split("/")[1];
               worksheet.getCell("R" + row).value = data.dayname;
