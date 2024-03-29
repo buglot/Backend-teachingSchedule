@@ -522,7 +522,7 @@ router.post("/education/subjectOpen", (req, res) => {
 });
 
 router.post("/teacher/registersubject", (req, res) => {
-  const { subjects, m } = req.body;
+  const { subjects, m,status } = req.body;
   db.query("select * from timeSystem", (err, result) => {
     if (err) {
       return res.status(500).json({ msgerror: "database error " + err });
@@ -585,7 +585,7 @@ router.post("/teacher/registersubject", (req, res) => {
                     v.st,
                     v.et,
                     v.day_id,
-                    2,
+                    status?status:2,
                     v.N_people,
                     JSON.stringify(v.branch),
                     v.category_id,
