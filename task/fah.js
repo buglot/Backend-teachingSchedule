@@ -96,19 +96,30 @@ router.put("/edu/delete_subjectsIsopen/:id", (req, res) => {
   }
 
   const sql = "UPDATE subjects SET IsOpen = 0 WHERE id = ?";
-
-  db.query(sql, [idSubject], (err, results) => {
+  db.query("select  * FROM subjectsRegister where Subjects_id=?", [idSubject], (err, results2) => {
     if (err) {
       console.error("Error executing UPDATE statement:", err);
       return res.status(500).json({ error: "Internal Server Error" });
-    }
-
-    if (results.affectedRows > 0) {
-      res.json({ message: "Data update successfully" });
     } else {
-      res.status(404).json({ error: "Id not found" });
+      if (results2.length > 0) {
+        res.status(404).json({ error: "ลบไม่ได้มีอาจารย์ลงทะเบียนอยู่" });
+      } else {
+        db.query(sql, [idSubject], (err, results) => {
+          if (err) {
+            console.error("Error executing UPDATE statement:", err);
+            return res.status(500).json({ error: "Internal Server Error" });
+          }
+
+          if (results.affectedRows > 0) {
+            res.json({ message: "Data update successfully" });
+          } else {
+            res.status(404).json({ error: "Id not found" });
+          }
+        });
+      }
     }
-  });
+  })
+
 });
 
 // subjectReg (ผลการลงทะเบียน ที่ผ่านแล้ว)
@@ -383,26 +394,26 @@ function checkOverlap(v, val) {
   const vEt = new Date(`1970-01-01T${v.et}`).getTime();
   const valSt = new Date(`1970-01-01T${val.st}`).getTime();
   const valEt = new Date(`1970-01-01T${val.et}`).getTime();
-  
+
   if (valSt >= vSt && valSt < vEt) {
-      return true; // มีการทับซ้อน
+    return true; // มีการทับซ้อน
   }
-  
+
   if (valEt > vSt && valEt <= vEt) {
-      return true; // มีการทับซ้อน
+    return true; // มีการทับซ้อน
   }
-  
+
   // ตรวจสอบว่าช่วงเวลาที่ต้องการตรวจสอบครอบคลุมช่วงเวลาหลักหรือไม่
   if (valSt <= vSt && valEt >= vEt) {
-      return true; // มีการทับซ้อน
+    return true; // มีการทับซ้อน
   }
-  
+
   return false; // ไม่มีการทับซ้อน
 }
 
 router.put("/teacher/update_time", (req, res) => {
   const { idSubject, st, et, day, user_id } = req.body;
-  if (!idSubject || !st || !et || !day || !user_id ) {
+  if (!idSubject || !st || !et || !day || !user_id) {
     return res.status(400).json({ error: "Missing required parameters" });
   }
 
@@ -427,7 +438,7 @@ router.put("/teacher/update_time", (req, res) => {
         return res.status(400).json({ error: "Duplicate time and day", overlappingSubjects });
       }
     }
-    
+
     const checkOverlapSql = `
       SELECT sr.id, sr.st, sr.et, s.name AS subject_name, fc.subject_category_id
       FROM subjectsRegister AS sr 
@@ -445,7 +456,7 @@ router.put("/teacher/update_time", (req, res) => {
         const overlappingSubjects = checkOverlapResults.filter(val => {
           return checkOverlap(val, { st, et });
         });
-        
+
         if (overlappingSubjects.length > 0) {
           return res.status(400).json({ error: "Duplicate time and day", overlappingSubjects });
         }
@@ -474,7 +485,7 @@ router.put("/teacher/update_time", (req, res) => {
 // update data (edit n_people , branch)
 router.put("/teacher/update_data", (req, res) => {
   const { idSubject, N_people, branch } = req.body;
-  if (!idSubject || !N_people || Object.keys(JSON.stringify(branch)).length===0) {
+  if (!idSubject || !N_people || Object.keys(JSON.stringify(branch)).length === 0) {
     return res.status(400).json({ error: "Missing required parameters" });
   }
   const update_data = "UPDATE subjectsRegister SET N_people = ?, branch = ? WHERE id = ?";
