@@ -1502,7 +1502,7 @@ router.get("/export/file", async (req, res) => {
     }
     const results = await new Promise((resolve, reject) => {
       db.query(
-        "select distinct Subjects_id,s.idsubject,s.name,s.credit,s.practice_t,s.m_t,s.lecture_t,s.years from subjectsRegister join subjects s on s.id=Subjects_id order by Subjects_id",
+        "select distinct Subjects_id,s.idsubject,s.name,s.credit,s.practice_t,s.m_t,s.lecture_t,s.years,realcredit from subjectsRegister join subjects s on s.id=Subjects_id order by Subjects_id",
         (err, results) => {
           if (err) {
             reject(err);
@@ -1689,7 +1689,7 @@ router.get("/export/file", async (req, res) => {
               worksheet.getCell("N" + row).value = data.N_people;
               worksheet.getCell("P" + row).value =
                 v.practice_t + v.lecture_t === h
-                  ? v.lecture_t
+                  ? v.practice_t
                   : hours;
               worksheet.getCell("Q" + row).value = data.sec.split("/")[1];
               worksheet.getCell("R" + row).value = data.dayname;
