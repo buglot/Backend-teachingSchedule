@@ -950,7 +950,7 @@ router.get("/subjecthasregiscount", (req, res) => {
 router.get("/searchingnameteacher/:search", (req, res) => {
   const { search } = req.params;
   db.query(
-    "SELECT * FROM user where email like ?  or name like ?",
+    "SELECT * FROM user where (email like ?  or name like ?) and role_id = 1",
     [`%${search}%`, `%${search}%`],
     (err, results) => {
       if (err) {
