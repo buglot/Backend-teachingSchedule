@@ -1489,7 +1489,7 @@ router.get("/export/file", async (req, res) => {
         worksheet.getCell("C" + row).value = v.name;
         worksheet.getCell(
           "D" + row
-        ).value = `${v.credit} (${v.lecture_t}-${v.practice_t}-${v.m_t})`;
+        ).value = v.realcredit === 0?`${v.credit} (${v.lecture_t}-${v.practice_t}-${v.m_t})`:v.realcredit;
         worksheet.getCell("E" + row).value =
           v.lecture_t === 0 ? "" : v.lecture_t;
         worksheet.getCell("O" + row).value =
