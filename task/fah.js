@@ -118,6 +118,7 @@ router.get("/edu/subjectReg", (req, res) => {
 SELECT
   subjectsRegister.id AS id,
   subjects.idsubject AS idSubject,
+  subjects.years AS ySubject,
   subjects.name AS SUBJECT,
   subjects.credit ,
   category.name AS category ,
