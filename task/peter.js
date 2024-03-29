@@ -106,7 +106,7 @@ function education_import(data) {
     const warn = [];
     data.forEach((value, index) => {
       if (value.idsubject.length !== 8) {
-        errors.push({ index, value, errorMessage: "รหัสวิชาต้องมี 8 ตัว " })
+        errors.push({ index, value, errorMessage: "รหัสวิชาต้องมี 8 ตัว " });
       } else {
         db.query(
           "SELECT * FROM subjects where idsubject =? and years=?",
@@ -144,7 +144,6 @@ function education_import(data) {
           }
         );
       }
-
     });
 
     // Wait for all queries to finish and handle errors
@@ -206,16 +205,20 @@ router.post(
             const categoryId = await assignSubjectCategoryId(
               rows[i][subject_categoryColumnIndex]
             );
-            let s="";
-            s.charAt
+            let s = "";
+            s.charAt;
             const data = {
               idsubject: rows[i][idsubjectColumnIndex]
                 ? rows[i][idsubjectColumnIndex].length === 8
                   ? rows[i][idsubjectColumnIndex]
-                  : rows[i][idsubjectColumnIndex].charAt(0) ==='0'?rows[i][idsubjectColumnIndex]:"0"+rows[i][idsubjectColumnIndex]
+                  : rows[i][idsubjectColumnIndex].charAt(0) === "0"
+                  ? rows[i][idsubjectColumnIndex]
+                  : "0" + rows[i][idsubjectColumnIndex]
                 : null,
               name: rows[i][nameColumnIndex],
-              credit: rows[i][creditColumnIndex] ? rows[i][creditColumnIndex].split("(")[0] : null,
+              credit: rows[i][creditColumnIndex]
+                ? rows[i][creditColumnIndex].split("(")[0]
+                : null,
               practice_t: rows[i][creditColumnIndex]
                 ? rows[i][creditColumnIndex].split("(")[1].split("-")[1]
                 : null,
@@ -224,9 +227,9 @@ router.post(
                 : null,
               mt: rows[i][creditColumnIndex]
                 ? rows[i][creditColumnIndex]
-                  .split("(")[1]
-                  .split("-")[2]
-                  .replace(")", "")
+                    .split("(")[1]
+                    .split("-")[2]
+                    .replace(")", "")
                 : null,
               years: y,
               exsub: 0,
@@ -392,9 +395,11 @@ function upDatefile() {
               for (let i = 0; i < results.length; i++) {
                 worksheet.getCell(i + 2, 1).value = results[i].idsubject;
                 worksheet.getCell(i + 2, 2).value = results[i].name;
-                worksheet.getCell(i + 2, 3).value = `${results[i].credit}(${results[i].lecture_t
-                  }-${results[i].practice_t ? results[i].practice_t : 0}-${results[i].m_t
-                  })`;
+                worksheet.getCell(i + 2, 3).value = `${results[i].credit}(${
+                  results[i].lecture_t
+                }-${results[i].practice_t ? results[i].practice_t : 0}-${
+                  results[i].m_t
+                })`;
                 db.query(
                   "select name from subject_category where id = ?",
                   [results[i].subject_category_id],
@@ -418,10 +423,10 @@ function upDatefile() {
                 .then((data) =>
                   console.log(
                     "save " +
-                    "public/savefiles/" +
-                    "course_" +
-                    v.years +
-                    ".xlsx"
+                      "public/savefiles/" +
+                      "course_" +
+                      v.years +
+                      ".xlsx"
                   )
                 );
               const currentDate = new Date()
@@ -522,7 +527,7 @@ router.post("/education/subjectOpen", (req, res) => {
 });
 
 router.post("/teacher/registersubject", (req, res) => {
-  const { subjects, m,status } = req.body;
+  const { subjects, m, status } = req.body;
   db.query("select * from timeSystem", (err, result) => {
     if (err) {
       return res.status(500).json({ msgerror: "database error " + err });
@@ -585,7 +590,7 @@ router.post("/teacher/registersubject", (req, res) => {
                     v.st,
                     v.et,
                     v.day_id,
-                    status?status:2,
+                    status ? status : 2,
                     v.N_people,
                     JSON.stringify(v.branch),
                     v.category_id,
@@ -1357,45 +1362,56 @@ router.get("/allowlink/:role_id", (req, res) => {
   );
 });
 function GenSec() {
-  db.query("SELECT distinct sr.subjects_id as id FROM subjectsRegister sr", (err, results) => {
+  db.query(
+    "SELECT distinct sr.subjects_id as id FROM subjectsRegister sr",
+    (err, results) => {
       if (err) {
-          console.error(err);
-          logReport("Failed to add sec numbers.");
-          return;
+        console.error(err);
+        logReport("Failed to add sec numbers.");
+        return;
       }
 
       results.forEach((subject) => {
-          db.query("SELECT sr.id,sr.category_id FROM subjectsRegister sr JOIN subjects s ON sr.subjects_id = s.id WHERE sr.subjects_id =? AND sr.status_id = 1", [subject.id], (err2, results2) => {
-              if (err2) {
-                  console.error(err2);
-                  logReport("Failed to add sec numbers.");
-                  return;
+        db.query(
+          "SELECT sr.id,sr.category_id FROM subjectsRegister sr JOIN subjects s ON sr.subjects_id = s.id WHERE sr.subjects_id =? AND sr.status_id = 1",
+          [subject.id],
+          (err2, results2) => {
+            if (err2) {
+              console.error(err2);
+              logReport("Failed to add sec numbers.");
+              return;
+            }
+
+            let l = 800;
+            let p = 830;
+
+            results2.forEach((entry) => {
+              let secNumber;
+              if (entry.category_id === 1) {
+                secNumber = l++;
+              } else if (entry.category_id === 2) {
+                secNumber = p++;
+              } else if (entry.category_id === 3) {
+                secNumber = `${l}/${p++}`;
+                l++;
               }
 
-              let l = 800;
-              let p = 830;
-
-              results2.forEach((entry) => {
-                  let secNumber;
-                  if (entry.category_id === 1) {
-                      secNumber = l++;
-                  } else if (entry.category_id === 2) {
-                      secNumber = p++;
-                  } else if (entry.category_id === 3) {
-                      secNumber = `${l}/${p++}`;
-                      l++;
+              db.query(
+                "UPDATE subjectsRegister SET `sec` = ? WHERE `id` = ?",
+                [secNumber, entry.id],
+                (err3, results3) => {
+                  if (err3) {
+                    console.error(err3);
+                    logReport("Failed to add sec numbers.");
                   }
-
-                  db.query("UPDATE subjectsRegister SET `sec` = ? WHERE `id` = ?", [secNumber, entry.id], (err3, results3) => {
-                      if (err3) {
-                          console.error(err3);
-                          logReport("Failed to add sec numbers.");
-                      }
-                  });
-              });
-          });
+                }
+              );
+            });
+          }
+        );
       });
-  });
+    }
+  );
 }
 router.get("/export/file", async (req, res) => {
   try {
@@ -1529,9 +1545,10 @@ router.get("/export/file", async (req, res) => {
         worksheet.getCell("A" + row).value = v.idsubject;
         worksheet.getCell("B" + row).value = v.idsubject + "-" + v.years;
         worksheet.getCell("C" + row).value = v.name;
-        worksheet.getCell(
-          "D" + row
-        ).value = v.realcredit === 0?`${v.credit} (${v.lecture_t}-${v.practice_t}-${v.m_t})`:v.realcredit;
+        worksheet.getCell("D" + row).value =
+          v.realcredit === 0
+            ? `${v.credit} (${v.lecture_t}-${v.practice_t}-${v.m_t})`
+            : v.realcredit;
         worksheet.getCell("E" + row).value =
           v.lecture_t === 0 ? "" : v.lecture_t;
         worksheet.getCell("O" + row).value =
@@ -1587,8 +1604,9 @@ router.get("/export/file", async (req, res) => {
                 dataEtTotalMinutes - v.lecture_t * 60; // ลบจำนวนชั่วโมงของ v.practice_t ออกจากเวลาของ data.et ในหน่วยนาที
               const hours = Math.floor(dataEtMinusPracticeTMinutes / 60); // แยกจำนวนชั่วโมงจากจำนวนนาที
               const minutes = dataEtMinusPracticeTMinutes % 60; // หาเศษของจำนวนนาทีที่เหลือ
-              const resultTime = `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""
-                }${minutes}`;
+              const resultTime = `${hours < 10 ? "0" : ""}${hours}:${
+                minutes < 10 ? "0" : ""
+              }${minutes}`;
               worksheet.getCell("K" + row).value = resultTime;
               worksheet.getCell("M" + row).value = Object.keys(data.branch)
                 .map((key) => `${key}/${data.branch[key].join(",")}`)
@@ -1661,17 +1679,18 @@ router.get("/export/file", async (req, res) => {
                 dataEtTotalMinutes - v.practice_t * 60; // ลบจำนวนชั่วโมงของ v.practice_t ออกจากเวลาของ data.et ในหน่วยนาที
               const hours = Math.floor(dataEtMinusPracticeTMinutes / 60); // แยกจำนวนชั่วโมงจากจำนวนนาที
               const minutes = dataEtMinusPracticeTMinutes % 60; // หาเศษของจำนวนนาทีที่เหลือ
-              const resultTime = `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""
-                }${minutes}`;
+              const resultTime = `${hours < 10 ? "0" : ""}${hours}:${
+                minutes < 10 ? "0" : ""
+              }${minutes}`;
               worksheet.getCell("K" + row).value = resultTime;
               worksheet.getCell("M" + row).value = Object.keys(data.branch)
                 .map((key) => `${key}/${data.branch[key].join(",")}`)
                 .join(", ");
               worksheet.getCell("N" + row).value = data.N_people;
               worksheet.getCell("P" + row).value =
-                v.practice_t + v.lecture_t === data.h
-                  ? v.lecture_t
-                  : "มีข้อผิดพลาดตอนเลือกเวลา";
+                v.practice_t + v.lecture_t === h
+                  ? v.practice_t
+                  : hours;
               worksheet.getCell("Q" + row).value = data.sec.split("/")[1];
               worksheet.getCell("R" + row).value = data.dayname;
               worksheet.getCell("S" + row).value = resultTime;
