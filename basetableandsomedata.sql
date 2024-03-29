@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `teachingschedule` /*!40100 DEFAULT CHARACTER SET utf8mb3 */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `teachingschedule`;
 -- MySQL dump 10.13  Distrib 8.0.34, for Win64 (x86_64)
 --
 -- Host: 127.0.0.1    Database: teachingschedule
@@ -473,7 +471,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'yongkeat.s@ku.th','ยงเกียรติ หล่อ',1),(2,'jenny.yatika@gmail.com','gen',2),(3,'jakkapop80@gmail.com','mann โต',2),(4,'revoitz158@gmail.com','ใคร',2),(5,'nitharee2@gmail.com','ฟ้า',2),(6,'nattapon.ron@ku.th','เฟ้ม',1),(7,'gamertvgentleman@gmail.com ','กานต์2',2),(8,'choakthawee.n@ku.th ','กานต์1',1),(13,'ptii2x@gmail.com','ปีเตอร์',3),(14,'jakkapop.p@ku.th','โครตเย้ย',1),(15,'kasidit.chu@ku.th','Kasidit Chunthaisong',1),(16,'bihindshadow@gmail.com','Kasidit Chunthaisong',3),(17,'nitharee.p@ku.th','nitha___',1),(18,'yatika.p@ku.th','แดง',1),(19,'nthr.ph.pad@gmail.com','ffff',3);
+INSERT INTO `user` VALUES (1,'yongkeat.s@ku.th','ยงเกียรติ หล่อ',1),(2,'jenny.yatika@gmail.com','gen',2),(3,'jakkapop80@gmail.com','mann โต',2),(4,'revoitz158@gmail.com','ใคร',2),(5,'nitharee2@gmail.com','ฟ้า',2),(7,'gamertvgentleman@gmail.com ','กานต์2',2),(8,'choakthawee.n@ku.th ','กานต์1',1),(13,'ptii2x@gmail.com','ปีเตอร์',3),(14,'jakkapop.p@ku.th','โครตเย้ย',1),(15,'kasidit.chu@ku.th','Kasidit Chunthaisong',1),(17,'nitharee.p@ku.th','nitha___',1),(19,'nthr.ph.pad@gmail.com','ffff',3);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -486,4 +484,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-03-29 19:10:47
+-- Dump completed on 2024-03-29 20:52:01
