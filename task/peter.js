@@ -1356,9 +1356,50 @@ router.get("/allowlink/:role_id", (req, res) => {
     }
   );
 });
+function GenSec() {
+  db.query("SELECT distinct sr.subjects_id as id FROM subjectsRegister sr", (err, results) => {
+      if (err) {
+          console.error(err);
+          logReport("Failed to add sec numbers.");
+          return;
+      }
 
+      results.forEach((subject) => {
+          db.query("SELECT sr.id,sr.category_id FROM subjectsRegister sr JOIN subjects s ON sr.subjects_id = s.id WHERE sr.subjects_id =? AND sr.status_id = 1", [subject.id], (err2, results2) => {
+              if (err2) {
+                  console.error(err2);
+                  logReport("Failed to add sec numbers.");
+                  return;
+              }
+
+              let l = 800;
+              let p = 830;
+
+              results2.forEach((entry) => {
+                  let secNumber;
+                  if (entry.category_id === 1) {
+                      secNumber = l++;
+                  } else if (entry.category_id === 2) {
+                      secNumber = p++;
+                  } else if (entry.category_id === 3) {
+                      secNumber = `${l}/${p++}`;
+                      l++;
+                  }
+
+                  db.query("UPDATE subjectsRegister SET `sec` = ? WHERE `id` = ?", [secNumber, entry.id], (err3, results3) => {
+                      if (err3) {
+                          console.error(err3);
+                          logReport("Failed to add sec numbers.");
+                      }
+                  });
+              });
+          });
+      });
+  });
+}
 router.get("/export/file", async (req, res) => {
   try {
+    GenSec();
     const workbook = new exceljs.Workbook();
     const worksheet = workbook.addWorksheet("ตารางสอน");
     worksheet.mergeCells("A1:A2");
